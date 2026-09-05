@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; font-size: 12px; }
+        .header { text-align: center; border-bottom: 2px solid #1e40af; padding-bottom: 10px; margin-bottom: 20px; }
+        .header h1 { margin: 0; color: #1e40af; font-size: 20px; }
+        .header p { margin: 5px 0 0; color: #666; font-size: 11px; }
+        .section { margin-bottom: 15px; }
+        .section h2 { font-size: 14px; color: #1e40af; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-bottom: 10px; }
+        .row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .row .label { color: #666; width: 40%; }
+        .row .value { font-weight: bold; width: 60%; }
+        .total-box { background: #f0f7ff; padding: 10px; border-radius: 5px; margin: 15px 0; }
+        .footer { margin-top: 30px; border-top: 1px solid #ddd; padding-top: 10px; display: flex; justify-content: space-between; }
+        .signature { text-align: center; width: 200px; }
+        .signature .line { border-top: 1px solid #000; margin-top: 40px; padding-top: 5px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ company_name }}</h1>
+        <p>{{ company_address }}</p>
+        <p>Phone: {{ company_phone }} | Email: {{ company_email }}</p>
+    </div>
+
+    <h2 style="text-align: center; color: #1e40af;">CANDIDATE LEDGER</h2>
+
+    <div class="section">
+        <div class="row"><span class="label">Candidate:</span><span class="value">{{ candidate_name }}</span></div>
+        <div class="row"><span class="label">Code:</span><span class="value">{{ candidate_code }}</span></div>
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+        <thead>
+            <tr style="background: #f0f7ff;">
+                <th style="border: 1px solid #ddd; padding: 6px; text-align: left;">Date</th>
+                <th style="border: 1px solid #ddd; padding: 6px; text-align: left;">Description</th>
+                <th style="border: 1px solid #ddd; padding: 6px; text-align: right;">Debit</th>
+                <th style="border: 1px solid #ddd; padding: 6px; text-align: right;">Credit</th>
+                <th style="border: 1px solid #ddd; padding: 6px; text-align: right;">Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in entries %}
+            <tr>
+                <td style="border: 1px solid #ddd; padding: 6px;">{{ entry.date }}</td>
+                <td style="border: 1px solid #ddd; padding: 6px;">{{ entry.description }}</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: right;">{{ entry.debit }}</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: right;">{{ entry.credit }}</td>
+                <td style="border: 1px solid #ddd; padding: 6px; text-align: right; font-weight: bold;">{{ entry.balance }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="total-box">
+        <div class="row"><span class="label">Total Charges:</span><span class="value">{{ total_charges }}</span></div>
+        <div class="row"><span class="label">Total Payments:</span><span class="value">{{ total_payments }}</span></div>
+        <div class="row"><span class="label">Balance Due:</span><span class="value" style="color: #dc2626;">{{ balance }}</span></div>
+    </div>
+
+    <div class="footer">
+        <div class="signature">
+            <div class="line">Candidate Signature</div>
+        </div>
+        <div class="signature">
+            <div class="line">Accountant</div>
+        </div>
+    </div>
+
+    <p style="text-align: center; margin-top: 20px; color: #999; font-size: 10px;">Generated on {{ generated_date }}</p>
+</body>
+</html>

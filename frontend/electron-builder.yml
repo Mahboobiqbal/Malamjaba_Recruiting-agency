@@ -1,0 +1,13 @@
+appId: com.malamjaba.agency
+productName: Malamjaba Recruiting Agency
+directories:
+  output: release
+files:
+  - dist/**/*
+  - electron/**/*
+win:
+  target: nsis
+  icon: public/icon.ico
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true

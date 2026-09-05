@@ -1,0 +1,76 @@
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { useGetAgentsQuery, useDeleteAgentMutation } from "../../services/agent.service";
+import { AGENT_STATUSES } from "../../lib/constants";
+import { Plus, Search, Trash2, Eye, Edit } from "lucide-react";
+
+export default function AgentList() {
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const { data, isLoading } = useGetAgentsQuery({ page, per_page: 20, search });
+  const [deleteAgent] = useDeleteAgentMutation();
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-slate-800">Agents</h2>
+        <Link to="/agents/new" className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary/90">
+          <Plus className="h-4 w-4" /> Add Agent
+        </Link>
+      </div>
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+        <input type="text" placeholder="Search agents..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          className="w-full rounded-lg border border-slate-300 py-2 pl-10 pr-4 text-sm focus:border-primary focus:outline-none" />
+      </div>
+      <div className="overflow-hidden rounded-lg border bg-white shadow-sm">
+        <table className="w-full text-left text-sm">
+          <thead className="border-b bg-secondary">
+            <tr>
+              <th className="px-4 py-3 font-medium text-slate-600">Code</th>
+              <th className="px-4 py-3 font-medium text-slate-600">Name</th>
+              <th className="px-4 py-3 font-medium text-slate-600">CNIC</th>
+              <th className="px-4 py-3 font-medium text-slate-600">Mobile</th>
+              <th className="px-4 py-3 font-medium text-slate-600">City</th>
+              <th className="px-4 py-3 font-medium text-slate-600">Status</th>
+              <th className="px-4 py-3 font-medium text-slate-600">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {isLoading ? (
+              <tr><td colSpan={7} className="px-4 py-8 text-center text-slate-500">Loading...</td></tr>
+            ) : data?.items.length === 0 ? (
+              <tr><td colSpan={7} className="px-4 py-8 text-center text-slate-500">No agents found</td></tr>
+            ) : (
+              data?.items.map((a) => (
+                <tr key={a.id} className="border-b hover:bg-secondary">
+                  <td className="px-4 py-3 font-medium text-primary">{a.agent_code}</td>
+                  <td className="px-4 py-3">{a.name}</td>
+                  <td className="px-4 py-3">{a.cnic}</td>
+                  <td className="px-4 py-3">{a.mobile}</td>
+                  <td className="px-4 py-3">{a.city || "-"}</td>
+                  <td className="px-4 py-3">
+                    <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
+                      a.status === "active" ? "bg-emerald-50 text-emerald-700" :
+                      a.status === "blocked" ? "bg-red-50 text-warning" :
+                      "bg-slate-100 text-slate-700"
+                    }`}>
+                      {AGENT_STATUSES.find(s => s.value === a.status)?.label}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-2">
+                      <Link to={`/agents/${a.id}`} className="text-slate-400 hover:text-primary"><Eye className="h-4 w-4" /></Link>
+                      <Link to={`/agents/${a.id}/edit`} className="text-slate-400 hover:text-accent"><Edit className="h-4 w-4" /></Link>
+                      <button onClick={async () => { if (window.confirm("Delete?")) await deleteAgent(a.id); }} className="text-slate-400 hover:text-red-500"><Trash2 className="h-4 w-4" /></button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,77 @@
+2026-09-05 22:14:32,018 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-05 22:14:32,018 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("roles")
+2026-09-05 22:14:32,018 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-09-05 22:14:32,018 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("permissions")
+2026-09-05 22:14:32,018 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-09-05 22:14:32,034 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("users")
+2026-09-05 22:14:32,034 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-09-05 22:14:32,034 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("user_roles")
+2026-09-05 22:14:32,034 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-09-05 22:14:32,034 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("agents")
+2026-09-05 22:14:32,034 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-09-05 22:14:32,034 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("candidates")
+2026-09-05 22:14:32,034 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-09-05 22:14:32,034 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("medical_tokens")
+2026-09-05 22:14:32,034 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-09-05 22:14:32,034 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("visas")
+2026-09-05 22:14:32,034 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-09-05 22:14:32,034 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("tickets")
+2026-09-05 22:14:32,034 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-09-05 22:14:32,034 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("payments")
+2026-09-05 22:14:32,034 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-09-05 22:14:32,034 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("candidate_documents")
+2026-09-05 22:14:32,034 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-09-05 22:14:32,034 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("ledger_entries")
+2026-09-05 22:14:32,034 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-09-05 22:14:32,050 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("expenses")
+2026-09-05 22:14:32,050 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-09-05 22:14:32,050 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("audit_logs")
+2026-09-05 22:14:32,050 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-09-05 22:14:32,050 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("notifications")
+2026-09-05 22:14:32,050 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-09-05 22:14:32,050 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("company_settings")
+2026-09-05 22:14:32,050 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-09-05 22:14:32,050 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("system_settings")
+2026-09-05 22:14:32,050 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-09-05 22:14:32,050 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("backup_logs")
+2026-09-05 22:14:32,050 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-09-05 22:14:32,050 INFO sqlalchemy.engine.Engine COMMIT
+2026-09-05 22:14:36,402 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-05 22:14:36,446 INFO sqlalchemy.engine.Engine SELECT users.id, users.username, users.password_hash, users.full_name, users.email, users.phone, users.is_active, users.is_superadmin, users.last_login, users.created_at, users.updated_at 
+FROM users 
+WHERE users.username = ?
+2026-09-05 22:14:36,446 INFO sqlalchemy.engine.Engine [generated in 0.00062s] ('admin',)
+2026-09-05 22:14:36,660 INFO sqlalchemy.engine.Engine UPDATE users SET last_login=?, updated_at=CURRENT_TIMESTAMP WHERE users.id = ?
+2026-09-05 22:14:36,677 INFO sqlalchemy.engine.Engine [generated in 0.00892s] ('2026-09-05 17:14:36.660859', 1)
+2026-09-05 22:14:36,677 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     127.0.0.1:51543 - "POST /api/auth/login HTTP/1.1" 200 OK
+2026-09-05 22:14:36,724 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-05 22:14:36,724 INFO sqlalchemy.engine.Engine SELECT users.id, users.username, users.password_hash, users.full_name, users.email, users.phone, users.is_active, users.is_superadmin, users.last_login, users.created_at, users.updated_at 
+FROM users 
+WHERE users.id = ?
+2026-09-05 22:14:36,724 INFO sqlalchemy.engine.Engine [generated in 0.00037s] (1,)
+2026-09-05 22:14:36,724 INFO sqlalchemy.engine.Engine SELECT count(*) AS count_1 
+FROM medical_tokens
+2026-09-05 22:14:36,724 INFO sqlalchemy.engine.Engine [generated in 0.00026s] ()
+2026-09-05 22:14:36,739 INFO sqlalchemy.engine.Engine INSERT INTO medical_tokens (token_code, candidate_id, token_number, agent_id, medical_center, medical_date, appointment_date, medical_fee, payment_status, medical_status, remarks, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id, created_at, updated_at
+2026-09-05 22:14:36,739 INFO sqlalchemy.engine.Engine [generated in 0.00032s] ('MED-000007', 1, None, None, 'Al-Shifa Hospital', '2026-09-10', None, 5000.0, 'unpaid', 'pending', None, 1)
+2026-09-05 22:14:36,739 INFO sqlalchemy.engine.Engine COMMIT
+2026-09-05 22:14:36,739 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-05 22:14:36,739 INFO sqlalchemy.engine.Engine SELECT medical_tokens.id, medical_tokens.token_code, medical_tokens.candidate_id, medical_tokens.token_number, medical_tokens.agent_id, medical_tokens.medical_center, medical_tokens.medical_date, medical_tokens.appointment_date, medical_tokens.medical_fee, medical_tokens.payment_status, medical_tokens.medical_status, medical_tokens.remarks, medical_tokens.created_by, medical_tokens.created_at, medical_tokens.updated_at 
+FROM medical_tokens 
+WHERE medical_tokens.id = ?
+2026-09-05 22:14:36,739 INFO sqlalchemy.engine.Engine [generated in 0.00025s] (7,)
+2026-09-05 22:14:36,755 INFO sqlalchemy.engine.Engine SELECT medical_tokens.id, medical_tokens.token_code, medical_tokens.candidate_id, medical_tokens.token_number, medical_tokens.agent_id, medical_tokens.medical_center, medical_tokens.medical_date, medical_tokens.appointment_date, medical_tokens.medical_fee, medical_tokens.payment_status, medical_tokens.medical_status, medical_tokens.remarks, medical_tokens.created_by, medical_tokens.created_at, medical_tokens.updated_at 
+FROM medical_tokens 
+WHERE medical_tokens.id = ?
+2026-09-05 22:14:36,755 INFO sqlalchemy.engine.Engine [generated in 0.00041s] (7,)
+2026-09-05 22:14:36,755 INFO sqlalchemy.engine.Engine SELECT candidates.id AS candidates_id, candidates.candidate_code AS candidates_candidate_code, candidates.full_name AS candidates_full_name, candidates.father_name AS candidates_father_name, candidates.cnic AS candidates_cnic, candidates.passport_number AS candidates_passport_number, candidates.passport_issue_date AS candidates_passport_issue_date, candidates.passport_expiry_date AS candidates_passport_expiry_date, candidates.date_of_birth AS candidates_date_of_birth, candidates.gender AS candidates_gender, candidates.mobile AS candidates_mobile, candidates.alternate_mobile AS candidates_alternate_mobile, candidates.address AS candidates_address, candidates.city AS candidates_city, candidates.country AS candidates_country, candidates.profession AS candidates_profession, candidates.employer AS candidates_employer, candidates.job_visa_category AS candidates_job_visa_category, candidates.agent_id AS candidates_agent_id, candidates.reference AS candidates_reference, candidates.registration_date AS candidates_registration_date, candidates.status AS candidates_status, candidates.notes AS candidates_notes, candidates.created_by AS candidates_created_by, candidates.created_at AS candidates_created_at, candidates.updated_at AS candidates_updated_at 
+FROM candidates 
+WHERE candidates.id IN (?)
+2026-09-05 22:14:36,755 INFO sqlalchemy.engine.Engine [generated in 0.00029s] (1,)
+2026-09-05 22:14:36,755 INFO sqlalchemy.engine.Engine SELECT agents.id AS agents_id, agents.agent_code AS agents_agent_code, agents.name AS agents_name, agents.father_name AS agents_father_name, agents.cnic AS agents_cnic, agents.mobile AS agents_mobile, agents.whatsapp AS agents_whatsapp, agents.address AS agents_address, agents.city AS agents_city, agents.email AS agents_email, agents.commission_rate AS agents_commission_rate, agents.bank_info AS agents_bank_info, agents.status AS agents_status, agents.notes AS agents_notes, agents.created_at AS agents_created_at, agents.updated_at AS agents_updated_at 
+FROM agents 
+WHERE agents.id = ?
+2026-09-05 22:14:36,755 INFO sqlalchemy.engine.Engine [generated in 0.00045s] (1,)
+2026-09-05 22:14:36,755 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:51543 - "POST /api/medical-tokens HTTP/1.1" 500 Internal Server Error
