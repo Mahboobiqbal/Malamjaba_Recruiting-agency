@@ -62,6 +62,7 @@ export default function App() {
             <Route path="/payments/:id" element={<PaymentDetail />} />
             <Route path="/expenses" element={<ExpenseList />} />
             <Route path="/expenses/new" element={<ExpenseCreate />} />
+            <Route path="/ledger" element={<CandidateLedger />} />
             <Route path="/ledger/:id" element={<CandidateLedger />} />
             <Route path="/reports" element={<ReportDashboard />} />
             <Route path="/notifications" element={<Notifications />} />

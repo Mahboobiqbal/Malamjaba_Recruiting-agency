@@ -24,7 +24,7 @@ async def get_candidate_ledger(
     result = await db.execute(stmt)
     candidate = result.scalar_one_or_none()
     if not candidate:
-        return {"detail": "Candidate not found"}, 404
+        raise NotFoundException("Candidate not found")
 
     entries_stmt = (
         select(LedgerEntry)

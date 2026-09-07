@@ -2,8 +2,6 @@ from datetime import date, datetime
 
 from pydantic import BaseModel
 
-from app.schemas.agent import AgentResponse
-
 
 class CandidateBase(BaseModel):
     full_name: str
@@ -61,7 +59,6 @@ class CandidateResponse(CandidateBase):
     created_by: int | None
     created_at: datetime
     updated_at: datetime
-    agent: AgentResponse | None = None
 
     model_config = {"from_attributes": True}
 

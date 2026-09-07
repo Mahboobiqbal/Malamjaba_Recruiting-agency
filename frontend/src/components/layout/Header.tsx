@@ -1,14 +1,14 @@
 import React from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { LogOut, User } from "lucide-react";
-import { RootState } from "../../store";
 import { logout } from "../../store/authSlice";
+import { useGetMeQuery } from "../../services/auth.service";
 
 export default function Header() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const auth = useSelector((state: RootState) => state.auth);
+  const { data: me, isLoading } = useGetMeQuery();
 
   const handleLogout = () => {
     dispatch(logout());
@@ -25,7 +25,7 @@ export default function Header() {
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2 text-sm text-slate-500">
           <User className="h-4 w-4" />
-          <span>Admin</span>
+          <span>{me?.full_name || "Admin"}</span>
         </div>
         <button
           onClick={handleLogout}

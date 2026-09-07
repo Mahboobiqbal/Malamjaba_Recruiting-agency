@@ -14,6 +14,10 @@ export const dashboardApi = api.injectEndpoints({
       query: (params) => ({ url: "/payments", params }),
       providesTags: ["Payment"],
     }),
+    getPayment: builder.query<Payment, number>({
+      query: (id) => `/payments/${id}`,
+      providesTags: ["Payment"],
+    }),
     createPayment: builder.mutation<Payment, Partial<Payment>>({
       query: (data) => ({
         url: "/payments",
@@ -27,6 +31,10 @@ export const dashboardApi = api.injectEndpoints({
       { page?: number; per_page?: number; search?: string; category?: string }
     >({
       query: (params) => ({ url: "/expenses", params }),
+      providesTags: ["Expense"],
+    }),
+    getExpense: builder.query<Expense, number>({
+      query: (id) => `/expenses/${id}`,
       providesTags: ["Expense"],
     }),
     createExpense: builder.mutation<Expense, Partial<Expense>>({
@@ -44,6 +52,10 @@ export const dashboardApi = api.injectEndpoints({
       query: (params) => ({ url: "/medical-tokens", params }),
       providesTags: ["MedicalToken"],
     }),
+    getMedicalToken: builder.query<MedicalToken, number>({
+      query: (id) => `/medical-tokens/${id}`,
+      providesTags: ["MedicalToken"],
+    }),
     createMedicalToken: builder.mutation<MedicalToken, Partial<MedicalToken>>({
       query: (data) => ({
         url: "/medical-tokens",
@@ -59,6 +71,10 @@ export const dashboardApi = api.injectEndpoints({
       query: (params) => ({ url: "/visas", params }),
       providesTags: ["Visa"],
     }),
+    getVisa: builder.query<Visa, number>({
+      query: (id) => `/visas/${id}`,
+      providesTags: ["Visa"],
+    }),
     createVisa: builder.mutation<Visa, Partial<Visa>>({
       query: (data) => ({
         url: "/visas",
@@ -72,6 +88,10 @@ export const dashboardApi = api.injectEndpoints({
       { page?: number; per_page?: number; search?: string; status?: string }
     >({
       query: (params) => ({ url: "/tickets", params }),
+      providesTags: ["Ticket"],
+    }),
+    getTicket: builder.query<Ticket, number>({
+      query: (id) => `/tickets/${id}`,
       providesTags: ["Ticket"],
     }),
     createTicket: builder.mutation<Ticket, Partial<Ticket>>({
@@ -126,6 +146,11 @@ export const {
   useCreateVisaMutation,
   useGetTicketsQuery,
   useCreateTicketMutation,
+  useGetMedicalTokenQuery,
+  useGetVisaQuery,
+  useGetTicketQuery,
+  useGetPaymentQuery,
+  useGetExpenseQuery,
   useGetCandidateLedgerQuery,
   useGetNotificationsQuery,
   useGetFinancialReportQuery,

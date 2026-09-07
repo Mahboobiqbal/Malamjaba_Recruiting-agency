@@ -6,7 +6,8 @@ import { ArrowLeft } from "lucide-react";
 
 export default function CandidateLedger() {
   const { id } = useParams();
-  const { data, isLoading } = useGetCandidateLedgerQuery(Number(id));
+  const ledgerId = id ? Number(id) : 0;
+  const { data, isLoading } = useGetCandidateLedgerQuery(ledgerId);
 
   if (isLoading) return <div className="text-center py-8 text-slate-500">Loading...</div>;
   if (!data) return <div className="text-center py-8 text-slate-500">Ledger not found</div>;

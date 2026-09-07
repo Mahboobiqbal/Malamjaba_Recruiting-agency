@@ -25,6 +25,10 @@ class Payment(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     candidate: Mapped["Candidate | None"] = relationship(back_populates="payments")
+    agent: Mapped["Agent | None"] = relationship(foreign_keys=[agent_id], remote_side="Agent.id", lazy="select")
+    received_by_user: Mapped["User | None"] = relationship(foreign_keys=[received_by], remote_side="User.id", lazy="select")
 
 
 from app.models.candidate import Candidate
+from app.models.agent import Agent
+from app.models.user import User

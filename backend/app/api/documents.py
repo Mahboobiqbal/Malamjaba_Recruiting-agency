@@ -1,5 +1,7 @@
 import os
 import uuid
+import asyncio
+import aiofiles
 
 from fastapi import APIRouter, Depends, UploadFile, File
 from sqlalchemy import select
@@ -54,8 +56,8 @@ async def upload_document(
     filename = f"{candidate.candidate_code}_{document_type}_{uuid.uuid4().hex[:8]}.{ext}"
     filepath = os.path.join(UPLOAD_DIR, filename)
 
-    with open(filepath, "wb") as f:
-        f.write(content)
+    async with aiofiles.open(filepath, "wb") as f:
+        await f.write(content)
 
     doc = CandidateDocument(
         candidate_id=candidate_id,
@@ -101,7 +103,7 @@ async def delete_document(
         raise NotFoundException("Document not found")
 
     if os.path.exists(doc.file_path):
-        os.remove(doc.file_path)
+                await asyncio.to_thread(os.remove, doc.file_path)
 
     await db.delete(doc)
     await db.commit()

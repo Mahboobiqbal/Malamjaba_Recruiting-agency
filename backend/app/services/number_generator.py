@@ -11,10 +11,10 @@ from app.models.expense import Expense
 
 
 async def generate_number(db: AsyncSession, model, prefix: str) -> str:
-    count_stmt = select(func.count()).select_from(model)
-    result = await db.execute(count_stmt)
-    count = result.scalar() or 0
-    return f"{prefix}-{count + 1:06d}"
+    max_stmt = select(func.max(model.id)).select_from(model)
+    result = await db.execute(max_stmt)
+    max_id = result.scalar() or 0
+    return f"{prefix}-{max_id + 1:06d}"
 
 
 async def generate_agent_code(db: AsyncSession) -> str:

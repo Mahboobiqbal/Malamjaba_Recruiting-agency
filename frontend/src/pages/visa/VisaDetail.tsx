@@ -1,17 +1,18 @@
 import React from "react";
 import { useParams, Link } from "react-router-dom";
-import { useGetVisasQuery } from "../../services/dashboard.service";
+import { useGetVisaQuery } from "../../services/dashboard.service";
 import { VISA_STATUSES } from "../../lib/constants";
 import { formatDate, formatCurrency } from "../../lib/utils";
 import { ArrowLeft, Printer } from "lucide-react";
 
 export default function VisaDetail() {
   const { id } = useParams();
-  const { data, isLoading } = useGetVisasQuery({ per_page: 100 });
-  const visa = data?.items.find((v) => v.id === Number(id));
+  const { data, isLoading } = useGetVisaQuery(Number(id));
 
   if (isLoading) return <div className="text-center py-8 text-secondary">Loading...</div>;
-  if (!visa) return <div className="text-center py-8 text-secondary">Visa not found</div>;
+  if (!data) return <div className="text-center py-8 text-secondary">Visa not found</div>;
+
+  const visa = data;
 
   return (
     <div className="space-y-6">
@@ -39,11 +40,7 @@ export default function VisaDetail() {
             <div className="flex justify-between"><dt className="text-secondary">Issue Date</dt><dd className="font-medium">{visa.issue_date ? formatDate(visa.issue_date) : "-"}</dd></div>
             <div className="flex justify-between"><dt className="text-secondary">Expiry Date</dt><dd className="font-medium">{visa.expiry_date ? formatDate(visa.expiry_date) : "-"}</dd></div>
             <div className="flex justify-between"><dt className="text-secondary">Status</dt><dd className="font-medium">
-              <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
-                visa.status === "approved" ? "bg-success text-success" :
-                visa.status === "rejected" ? "bg-warning text-warning" :
-                "bg-secondary text-primary"
-              }`}>{VISA_STATUSES.find(s => s.value === visa.status)?.label}</span>
+              <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${visa.status === "approved" ? "bg-success text-success" : visa.status === "rejected" ? "bg-warning text-warning" : "bg-secondary text-primary"}`}>{VISA_STATUSES.find(s => s.value === visa.status)?.label}</span>
             </dd></div>
           </dl>
         </div>
@@ -52,10 +49,10 @@ export default function VisaDetail() {
           <dl className="space-y-3 text-sm">
             <div className="flex justify-between"><dt className="text-secondary">Visa Fee</dt><dd className="font-medium">{formatCurrency(visa.visa_fee)}</dd></div>
             <div className="flex justify-between"><dt className="text-secondary">Agent Fee</dt><dd className="font-medium">{formatCurrency(visa.agent_fee)}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Other Charges</dt><dd className="font-medium">{formatCurrency(visa.other_charges)}</dd></div>
-            <div className="flex justify-between border-t pt-3"><dt className="text-secondary">Total Cost</dt><dd className="font-bold">{formatCurrency(visa.total_cost)}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Paid Amount</dt><dd className="font-medium text-success">{formatCurrency(visa.paid_amount)}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Remaining</dt><dd className="font-medium text-warning">{formatCurrency(visa.remaining_amount)}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary">Other Charges</dt><dd className="font-medium">{formatCurrency(data.other_charges)}</dd></div>
+            <div className="flex justify-between border-t pt-3"><dt className="text-secondary">Total Cost</dt><dd className="font-bold">{formatCurrency(data.total_cost)}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary">Paid Amount</dt><dd className="font-medium text-success">{formatCurrency(data.paid_amount)}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary">Remaining</dt><dd className="font-medium text-warning">{formatCurrency(data.remaining_amount)}</dd></div>
           </dl>
         </div>
       </div>
