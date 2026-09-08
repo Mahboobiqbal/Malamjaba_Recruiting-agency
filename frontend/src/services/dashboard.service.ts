@@ -11,7 +11,6 @@ export const dashboardApi = api.injectEndpoints({
     getDashboard: builder.query<DashboardSummary, void>({
       query: () => "/dashboard",
       providesTags: ["Dashboard"],
-      refetchOnMountOrArgChange: true,
     }),
     getPayments: builder.query<
       PaginatedResponse<Payment>,
@@ -180,6 +179,44 @@ export const dashboardApi = api.injectEndpoints({
       }),
       invalidatesTags: ["Settings"],
     }),
+    createBackup: builder.mutation<any, void>({
+      query: () => ({
+        url: "/settings/backup",
+        method: "POST",
+      }),
+    }),
+    getBackups: builder.query<any[], void>({
+      query: () => "/settings/backups",
+    }),
+    downloadBackup: builder.mutation<Blob, number>({
+      query: (id) => ({
+        url: `/settings/backups/${id}/download`,
+        responseHandler: (response) => response.blob(),
+      }),
+    }),
+    restoreBackup: builder.mutation<any, number>({
+      query: (id) => ({
+        url: `/settings/restore/${id}`,
+        method: "POST",
+      }),
+    }),
+    restoreFromUpload: builder.mutation<any, File>({
+      query: (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        return {
+          url: "/settings/restore/upload",
+          method: "POST",
+          body: formData,
+        };
+      },
+    }),
+    resetAllData: builder.mutation<any, void>({
+      query: () => ({
+        url: "/settings/reset",
+        method: "POST",
+      }),
+    }),
   }),
 });
 
@@ -212,4 +249,10 @@ export const {
   useGetAgentPerformanceQuery,
   useGetCompanySettingsQuery,
   useUpdateCompanySettingsMutation,
+  useCreateBackupMutation,
+  useGetBackupsQuery,
+  useDownloadBackupMutation,
+  useRestoreBackupMutation,
+  useRestoreFromUploadMutation,
+  useResetAllDataMutation,
 } = dashboardApi;

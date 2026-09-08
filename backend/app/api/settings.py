@@ -1,14 +1,21 @@
-from fastapi import APIRouter, Depends
+import os
+import shutil
+from datetime import datetime
+
+from fastapi import APIRouter, Depends, UploadFile, File
+from fastapi.responses import FileResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import get_db
+from app.config import get_settings
+from app.database import get_db, Base, engine
 from app.dependencies import require_permission
 from app.models.user import User
-from app.models.settings import CompanySetting, SystemSetting
-from app.schemas.settings import CompanySettingResponse, CompanySettingUpdate, SystemSettingResponse, SystemSettingUpdate
+from app.models.backup_log import BackupLog
+from app.models.settings import CompanySetting
 
 router = APIRouter(prefix="/settings", tags=["Settings"])
+settings = get_settings()
 
 
 @router.get("/company")
@@ -18,54 +25,223 @@ async def get_company_settings(
 ):
     stmt = select(CompanySetting)
     result = await db.execute(stmt)
-    settings = result.scalars().all()
-    return {s.key: s.value for s in settings}
+    rows = result.scalars().all()
+    return {row.key: row.value for row in rows}
 
 
 @router.put("/company")
 async def update_company_settings(
-    data: CompanySettingUpdate,
+    data: dict,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_permission("settings.edit")),
+    current_user: User = Depends(require_permission("settings.manage")),
 ):
-    for key, value in data.settings.items():
+    for key, value in data.get("settings", data).items():
         stmt = select(CompanySetting).where(CompanySetting.key == key)
         result = await db.execute(stmt)
-        setting = result.scalar_one_or_none()
-        if setting:
-            setting.value = value
-            setting.updated_by = current_user.id
+        row = result.scalar_one_or_none()
+        if row:
+            row.value = value
         else:
-            db.add(CompanySetting(key=key, value=value, updated_by=current_user.id))
+            row = CompanySetting(key=key, value=value, updated_by=current_user.id)
+            db.add(row)
     await db.commit()
-    return {"message": "Company settings updated", "success": True}
+    return {"message": "Settings updated"}
 
 
-@router.get("/system")
-async def get_system_settings(
+@router.post("/backup")
+async def create_backup(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_permission("settings.view")),
+    current_user: User = Depends(require_permission("settings.manage")),
 ):
-    stmt = select(SystemSetting)
+    backup_dir = os.path.abspath(settings.backup_dir)
+    os.makedirs(backup_dir, exist_ok=True)
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"backup_{timestamp}.db"
+    backup_path = os.path.join(backup_dir, filename)
+
+    db_path = os.path.abspath("./dev.db")
+    if not os.path.exists(db_path):
+        return {"error": "Database file not found"}
+
+    shutil.copy2(db_path, backup_path)
+    file_size = os.path.getsize(backup_path)
+
+    log = BackupLog(
+        filename=filename,
+        file_path=backup_path,
+        file_size=file_size,
+        backup_type="manual",
+        created_by=current_user.id,
+    )
+    db.add(log)
+    await db.commit()
+
+    return {
+        "message": "Backup created successfully",
+        "filename": filename,
+        "file_size": file_size,
+        "created_at": datetime.now().isoformat(),
+    }
+
+
+@router.get("/backups")
+async def list_backups(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_permission("settings.manage")),
+):
+    stmt = select(BackupLog).order_by(BackupLog.created_at.desc())
     result = await db.execute(stmt)
-    settings = result.scalars().all()
-    return {s.key: s.value for s in settings}
+    backups = result.scalars().all()
+
+    return [
+        {
+            "id": b.id,
+            "filename": b.filename,
+            "file_size": b.file_size,
+            "backup_type": b.backup_type,
+            "created_at": b.created_at.isoformat() if b.created_at else None,
+        }
+        for b in backups
+    ]
 
 
-@router.put("/system")
-async def update_system_settings(
-    data: SystemSettingUpdate,
+@router.get("/backups/{backup_id}/download")
+async def download_backup(
+    backup_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_permission("settings.edit")),
+    current_user: User = Depends(require_permission("settings.manage")),
 ):
-    for key, value in data.settings.items():
-        stmt = select(SystemSetting).where(SystemSetting.key == key)
-        result = await db.execute(stmt)
-        setting = result.scalar_one_or_none()
-        if setting:
-            setting.value = value
-            setting.updated_by = current_user.id
-        else:
-            db.add(SystemSetting(key=key, value=value, updated_by=current_user.id))
+    stmt = select(BackupLog).where(BackupLog.id == backup_id)
+    result = await db.execute(stmt)
+    backup = result.scalar_one_or_none()
+
+    if not backup or not os.path.exists(backup.file_path):
+        return {"error": "Backup file not found"}
+
+    return FileResponse(
+        backup.file_path,
+        media_type="application/octet-stream",
+        filename=backup.filename,
+    )
+
+
+@router.post("/restore/{backup_id}")
+async def restore_backup(
+    backup_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_permission("settings.manage")),
+):
+    stmt = select(BackupLog).where(BackupLog.id == backup_id)
+    result = await db.execute(stmt)
+    backup = result.scalar_one_or_none()
+
+    if not backup or not os.path.exists(backup.file_path):
+        return {"error": "Backup file not found"}
+
+    db_path = os.path.abspath("./dev.db")
+    backup_dir = os.path.abspath(settings.backup_dir)
+    os.makedirs(backup_dir, exist_ok=True)
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    pre_restore_path = os.path.join(backup_dir, f"pre_restore_{timestamp}.db")
+    shutil.copy2(db_path, pre_restore_path)
+
+    shutil.copy2(backup.file_path, db_path)
+
+    return {
+        "message": "Database restored successfully. Please restart the application.",
+        "restored_from": backup.filename,
+    }
+
+
+@router.post("/restore/upload")
+async def restore_from_upload(
+    file: UploadFile = File(...),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_permission("settings.manage")),
+):
+    if not file.filename.endswith(".db"):
+        return {"error": "Invalid file type. Only .db files are allowed."}
+
+    backup_dir = os.path.abspath(settings.backup_dir)
+    os.makedirs(backup_dir, exist_ok=True)
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"uploaded_{timestamp}.db"
+    upload_path = os.path.join(backup_dir, filename)
+
+    content = await file.read()
+    with open(upload_path, "wb") as f:
+        f.write(content)
+
+    log = BackupLog(
+        filename=filename,
+        file_path=upload_path,
+        file_size=len(content),
+        backup_type="upload",
+        created_by=current_user.id,
+    )
+    db.add(log)
     await db.commit()
-    return {"message": "System settings updated", "success": True}
+
+    db_path = os.path.abspath("./dev.db")
+    pre_restore_path = os.path.join(backup_dir, f"pre_restore_{timestamp}.db")
+    shutil.copy2(db_path, pre_restore_path)
+
+    shutil.copy2(upload_path, db_path)
+
+    return {
+        "message": "Database restored from uploaded file. Please restart the application.",
+        "filename": filename,
+    }
+
+
+@router.post("/reset")
+async def reset_all_data(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_permission("settings.manage")),
+):
+    from app.models.candidate import Candidate
+    from app.models.agent import Agent
+    from app.models.medical_token import MedicalToken
+    from app.models.visa import Visa
+    from app.models.ticket import Ticket
+    from app.models.payment import Payment
+    from app.models.expense import Expense
+    from app.models.ledger import LedgerEntry
+    from app.models.document import CandidateDocument
+    from app.models.audit_log import AuditLog
+    from app.models.notification import Notification
+    from app.models.user import User as UserModel
+
+    tables_to_clear = [
+        LedgerEntry, CandidateDocument, Payment, Expense,
+        Ticket, Visa, MedicalToken, Candidate, Agent,
+        AuditLog, Notification, BackupLog, CompanySetting,
+    ]
+
+    for table in tables_to_clear:
+        stmt = table.__table__.delete()
+        await db.execute(stmt)
+
+    await db.execute(UserModel.__table__.delete())
+
+    await db.commit()
+
+    from app.services.auth_service import hash_password
+    from datetime import datetime, timezone
+
+    admin = UserModel(
+        username="admin",
+        password_hash=hash_password("admin123"),
+        full_name="Administrator",
+        is_active=True,
+        is_superadmin=True,
+    )
+    db.add(admin)
+    await db.commit()
+
+    return {
+        "message": "All data has been reset. Default admin user (admin/admin123) has been recreated. Please restart the application and login again.",
+    }

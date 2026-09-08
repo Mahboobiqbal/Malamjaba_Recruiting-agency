@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { Provider } from "react-redux";
+import { Provider, useSelector } from "react-redux";
 import { Toaster } from "react-hot-toast";
-import { store } from "./store";
+import { store, RootState } from "./store";
 import Layout from "./components/layout/Layout";
 import Login from "./pages/auth/Login";
 import Dashboard from "./pages/Dashboard";
@@ -35,48 +35,58 @@ import CandidateLedger from "./pages/ledger/CandidateLedger";
 import CompanySettings from "./pages/settings/CompanySettings";
 import Notifications from "./pages/notifications/Notifications";
 
+function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const theme = useSelector((state: RootState) => state.theme.mode);
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+  }, [theme]);
+  return <>{children}</>;
+}
+
 export default function App() {
   return (
     <Provider store={store}>
-      <BrowserRouter>
-        <Toaster position="top-right" />
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route element={<Layout />}>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/candidates" element={<CandidateList />} />
-            <Route path="/candidates/new" element={<CandidateCreate />} />
-            <Route path="/candidates/:id" element={<CandidateDetail />} />
-            <Route path="/candidates/:id/edit" element={<CandidateEdit />} />
-            <Route path="/agents" element={<AgentList />} />
-            <Route path="/agents/new" element={<AgentCreate />} />
-            <Route path="/agents/:id" element={<AgentDetail />} />
-            <Route path="/agents/:id/edit" element={<AgentEdit />} />
-            <Route path="/medical" element={<MedicalTokenList />} />
-            <Route path="/medical/new" element={<MedicalTokenCreate />} />
-            <Route path="/medical/:id" element={<MedicalTokenDetail />} />
-            <Route path="/visas" element={<VisaList />} />
-            <Route path="/visas/new" element={<VisaCreate />} />
-            <Route path="/visas/:id" element={<VisaDetail />} />
-            <Route path="/tickets" element={<TicketList />} />
-            <Route path="/tickets/new" element={<TicketCreate />} />
-            <Route path="/tickets/:id" element={<TicketDetail />} />
-            <Route path="/payments" element={<PaymentList />} />
-            <Route path="/payments/new" element={<PaymentCreate />} />
-            <Route path="/payments/:id" element={<PaymentDetail />} />
-            <Route path="/expenses" element={<ExpenseList />} />
-            <Route path="/expenses/new" element={<ExpenseCreate />} />
-            <Route path="/salaries" element={<SalaryList />} />
-            <Route path="/salaries/new" element={<SalaryCreate />} />
-            <Route path="/ledger" element={<CandidateLedger />} />
-            <Route path="/ledger/:id" element={<CandidateLedger />} />
-            <Route path="/reports" element={<ReportDashboard />} />
-            <Route path="/notifications" element={<Notifications />} />
-            <Route path="/settings" element={<CompanySettings />} />
-          </Route>
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
+      <ThemeProvider>
+        <BrowserRouter>
+          <Toaster position="top-right" />
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route element={<Layout />}>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/candidates" element={<CandidateList />} />
+              <Route path="/candidates/new" element={<CandidateCreate />} />
+              <Route path="/candidates/:id" element={<CandidateDetail />} />
+              <Route path="/candidates/:id/edit" element={<CandidateEdit />} />
+              <Route path="/agents" element={<AgentList />} />
+              <Route path="/agents/new" element={<AgentCreate />} />
+              <Route path="/agents/:id" element={<AgentDetail />} />
+              <Route path="/agents/:id/edit" element={<AgentEdit />} />
+              <Route path="/medical" element={<MedicalTokenList />} />
+              <Route path="/medical/new" element={<MedicalTokenCreate />} />
+              <Route path="/medical/:id" element={<MedicalTokenDetail />} />
+              <Route path="/visas" element={<VisaList />} />
+              <Route path="/visas/new" element={<VisaCreate />} />
+              <Route path="/visas/:id" element={<VisaDetail />} />
+              <Route path="/tickets" element={<TicketList />} />
+              <Route path="/tickets/new" element={<TicketCreate />} />
+              <Route path="/tickets/:id" element={<TicketDetail />} />
+              <Route path="/payments" element={<PaymentList />} />
+              <Route path="/payments/new" element={<PaymentCreate />} />
+              <Route path="/payments/:id" element={<PaymentDetail />} />
+              <Route path="/expenses" element={<ExpenseList />} />
+              <Route path="/expenses/new" element={<ExpenseCreate />} />
+              <Route path="/salaries" element={<SalaryList />} />
+              <Route path="/salaries/new" element={<SalaryCreate />} />
+              <Route path="/ledger" element={<CandidateLedger />} />
+              <Route path="/ledger/:id" element={<CandidateLedger />} />
+              <Route path="/reports" element={<ReportDashboard />} />
+              <Route path="/notifications" element={<Notifications />} />
+              <Route path="/settings" element={<CompanySettings />} />
+            </Route>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </ThemeProvider>
     </Provider>
   );
 }

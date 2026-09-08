@@ -20,8 +20,8 @@ export default function AgentDetail() {
   const [updateStatus] = useUpdateAgentStatusMutation();
   const [activeTab, setActiveTab] = useState("candidates");
 
-  if (isLoading) return <div className="text-center py-8 text-slate-500">Loading...</div>;
-  if (!agent) return <div className="text-center py-8 text-slate-500">Agent not found</div>;
+  if (isLoading) return <div className="text-center py-8 text-slate-500 dark:text-slate-400">Loading...</div>;
+  if (!agent) return <div className="text-center py-8 text-slate-500 dark:text-slate-400">Agent not found</div>;
 
   const stats = agent.stats || {};
 
@@ -29,53 +29,53 @@ export default function AgentDetail() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link to="/agents" className="text-slate-400 hover:text-slate-600"><ArrowLeft className="h-5 w-5" /></Link>
+          <Link to="/agents" className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-400"><ArrowLeft className="h-5 w-5" /></Link>
           <div>
-            <h2 className="text-2xl font-bold text-slate-800">{agent.name}</h2>
-            <p className="text-sm text-slate-500">{agent.agent_code}</p>
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-white">{agent.name}</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{agent.agent_code}</p>
           </div>
         </div>
         <div className="flex gap-3">
-          <Link to={`/agents/${agent.id}/edit`} className="flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-secondary">
+          <Link to={`/agents/${agent.id}/edit`} className="flex items-center gap-2 rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2 text-sm font-medium hover:bg-secondary">
             <Edit className="h-4 w-4" /> Edit
           </Link>
           <button onClick={async () => { if (window.confirm("Delete?")) { await deleteAgent(agent.id); } }}
-            className="flex items-center gap-2 rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-500 hover:bg-red-50">
+            className="flex items-center gap-2 rounded-lg border border-red-300 dark:border-red-500/30 px-4 py-2 text-sm font-medium text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10">
             <Trash2 className="h-4 w-4" /> Delete
           </button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-lg border bg-white p-6 shadow-sm">
-          <h3 className="mb-4 text-lg font-semibold text-slate-800">Personal Information</h3>
+        <div className="rounded-lg border bg-white dark:bg-slate-900 p-6 shadow-sm dark:shadow-none">
+          <h3 className="mb-4 text-lg font-semibold text-slate-800 dark:text-white">Personal Information</h3>
           <dl className="space-y-3 text-sm">
-            <div className="flex justify-between"><dt className="text-slate-500">Father Name</dt><dd className="font-medium">{agent.father_name || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500">CNIC</dt><dd className="font-medium">{agent.cnic}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500">Commission Rate</dt><dd className="font-medium">{agent.commission_rate}%</dd></div>
-            <div className="flex justify-between items-center"><dt className="text-slate-500">Status</dt><dd>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Father Name</dt><dd className="font-medium">{agent.father_name || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">CNIC</dt><dd className="font-medium">{agent.cnic}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Commission Rate</dt><dd className="font-medium">{agent.commission_rate}%</dd></div>
+            <div className="flex justify-between items-center"><dt className="text-slate-500 dark:text-slate-400">Status</dt><dd>
               <StatusDropdown value={agent.status} options={AGENT_STATUSES} onChange={(status) => updateStatus({ id: agent.id, status })} />
             </dd></div>
           </dl>
         </div>
-        <div className="rounded-lg border bg-white p-6 shadow-sm">
-          <h3 className="mb-4 text-lg font-semibold text-slate-800">Contact Information</h3>
+        <div className="rounded-lg border bg-white dark:bg-slate-900 p-6 shadow-sm dark:shadow-none">
+          <h3 className="mb-4 text-lg font-semibold text-slate-800 dark:text-white">Contact Information</h3>
           <dl className="space-y-3 text-sm">
-            <div className="flex justify-between"><dt className="text-slate-500">Mobile</dt><dd className="font-medium">{agent.mobile}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500">WhatsApp</dt><dd className="font-medium">{agent.whatsapp || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500">Email</dt><dd className="font-medium">{agent.email || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500">City</dt><dd className="font-medium">{agent.city || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500">Address</dt><dd className="font-medium">{agent.address || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Mobile</dt><dd className="font-medium">{agent.mobile}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">WhatsApp</dt><dd className="font-medium">{agent.whatsapp || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Email</dt><dd className="font-medium">{agent.email || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">City</dt><dd className="font-medium">{agent.city || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Address</dt><dd className="font-medium">{agent.address || "-"}</dd></div>
           </dl>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
         {[
-          { label: "Candidates", value: stats.total_candidates || 0, color: "bg-blue-50 text-blue-700" },
-          { label: "Medical", value: stats.total_medical || 0, color: "bg-purple-50 text-purple-700" },
+          { label: "Candidates", value: stats.total_candidates || 0, color: "bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400" },
+          { label: "Medical", value: stats.total_medical || 0, color: "bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400" },
           { label: "Visas", value: stats.total_visas || 0, color: "bg-emerald-50 text-emerald-700" },
-          { label: "Tickets", value: stats.total_tickets || 0, color: "bg-amber-50 text-amber-700" },
+          { label: "Tickets", value: stats.total_tickets || 0, color: "bg-amber-50 dark:bg-amber-500/10 text-amber-700" },
           { label: "Payments", value: stats.total_payments || 0, color: "bg-cyan-50 text-cyan-700" },
           { label: "Total Paid", value: `PKR ${(stats.total_paid || 0).toLocaleString()}`, color: "bg-rose-50 text-rose-700" },
         ].map((s) => (
@@ -86,8 +86,8 @@ export default function AgentDetail() {
         ))}
       </div>
 
-      <div className="rounded-lg border bg-white shadow-sm">
-        <div className="flex border-b border-slate-200">
+      <div className="rounded-lg border bg-white dark:bg-slate-900 shadow-sm dark:shadow-none">
+        <div className="flex border-b border-slate-200 dark:border-slate-700">
           {TABS.map(({ key, label, icon: Icon }) => (
             <button
               key={key}
@@ -95,12 +95,12 @@ export default function AgentDetail() {
               className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-colors ${
                 activeTab === key
                   ? "border-b-2 border-primary text-primary"
-                  : "text-slate-500 hover:text-slate-700"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
               }`}
             >
               <Icon className="h-4 w-4" />
               {label}
-              <span className="ml-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs">
+              <span className="ml-1 rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-xs">
                 {(agent as any)[key === "candidates" ? "candidates" : key === "medical" ? "medical_tokens" : key]?.length || 0}
               </span>
             </button>
@@ -127,9 +127,9 @@ export default function AgentDetail() {
       </div>
 
       {agent.notes && (
-        <div className="rounded-lg border bg-white p-6 shadow-sm">
-          <h3 className="mb-2 text-lg font-semibold text-slate-800">Notes</h3>
-          <p className="text-sm text-slate-600">{agent.notes}</p>
+        <div className="rounded-lg border bg-white dark:bg-slate-900 p-6 shadow-sm dark:shadow-none">
+          <h3 className="mb-2 text-lg font-semibold text-slate-800 dark:text-white">Notes</h3>
+          <p className="text-sm text-slate-600 dark:text-slate-300">{agent.notes}</p>
         </div>
       )}
     </div>
@@ -138,14 +138,14 @@ export default function AgentDetail() {
 
 function CandidatesTab({ candidates }: { candidates: any[] }) {
   if (!candidates.length) {
-    return <p className="py-8 text-center text-sm text-slate-400">No candidates found for this agent.</p>;
+    return <p className="py-8 text-center text-sm text-slate-400 dark:text-slate-500">No candidates found for this agent.</p>;
   }
 
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
         <thead>
-          <tr className="border-b border-slate-100 text-slate-500">
+          <tr className="border-b border-slate-100 text-slate-500 dark:text-slate-400">
             <th className="px-4 py-3 font-medium">Code</th>
             <th className="px-4 py-3 font-medium">Name</th>
             <th className="px-4 py-3 font-medium">Passport</th>
@@ -156,17 +156,17 @@ function CandidatesTab({ candidates }: { candidates: any[] }) {
         </thead>
         <tbody>
           {candidates.map((c) => (
-            <tr key={c.id} className="border-b border-slate-50 hover:bg-slate-50">
+            <tr key={c.id} className="border-b border-slate-50 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800">
               <td className="px-4 py-3 font-medium text-primary">
                 <Link to={`/candidates/${c.id}`}>{c.candidate_code}</Link>
               </td>
               <td className="px-4 py-3">{c.full_name}</td>
-              <td className="px-4 py-3 text-slate-500">{c.passport_number}</td>
-              <td className="px-4 py-3 text-slate-500">{c.mobile}</td>
+              <td className="px-4 py-3 text-slate-500 dark:text-slate-400">{c.passport_number}</td>
+              <td className="px-4 py-3 text-slate-500 dark:text-slate-400">{c.mobile}</td>
               <td className="px-4 py-3">
-                <span className="inline-flex rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700 capitalize">{c.status}</span>
+                <span className="inline-flex rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-1 text-xs font-medium text-slate-700 dark:text-slate-200 capitalize">{c.status}</span>
               </td>
-              <td className="px-4 py-3 text-slate-500">{c.registration_date}</td>
+              <td className="px-4 py-3 text-slate-500 dark:text-slate-400">{c.registration_date}</td>
             </tr>
           ))}
         </tbody>
@@ -177,14 +177,14 @@ function CandidatesTab({ candidates }: { candidates: any[] }) {
 
 function ModuleTab({ items, columns }: { items: any[]; columns: string[] }) {
   if (!items.length) {
-    return <p className="py-8 text-center text-sm text-slate-400">No records found.</p>;
+    return <p className="py-8 text-center text-sm text-slate-400 dark:text-slate-500">No records found.</p>;
   }
 
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
         <thead>
-          <tr className="border-b border-slate-100 text-slate-500">
+          <tr className="border-b border-slate-100 text-slate-500 dark:text-slate-400">
             {columns.map((col) => (
               <th key={col} className="px-4 py-3 font-medium">{col}</th>
             ))}
@@ -192,14 +192,14 @@ function ModuleTab({ items, columns }: { items: any[]; columns: string[] }) {
         </thead>
         <tbody>
           {items.map((item, i) => (
-            <tr key={i} className="border-b border-slate-50 hover:bg-slate-50">
+            <tr key={i} className="border-b border-slate-50 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800">
               <td className="px-4 py-3 font-medium text-primary">{item.code}</td>
               <td className="px-4 py-3">{item.candidate_name}</td>
               <td className="px-4 py-3">
-                <span className="inline-flex rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700 capitalize">{item.status}</span>
+                <span className="inline-flex rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-1 text-xs font-medium text-slate-700 dark:text-slate-200 capitalize">{item.status}</span>
               </td>
               <td className="px-4 py-3">PKR {(item.amount || 0).toLocaleString()}</td>
-              <td className="px-4 py-3 text-slate-500">{item.date || "-"}</td>
+              <td className="px-4 py-3 text-slate-500 dark:text-slate-400">{item.date || "-"}</td>
             </tr>
           ))}
         </tbody>

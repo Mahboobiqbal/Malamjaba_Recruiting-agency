@@ -24,20 +24,20 @@ export default function MedicalTokenDetail() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link to="/medical" className="text-slate-400 hover:text-slate-600"><ArrowLeft className="h-5 w-5" /></Link>
+          <Link to="/medical" className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-400"><ArrowLeft className="h-5 w-5" /></Link>
           <div>
-            <h2 className="text-2xl font-bold text-slate-800">Medical Token: {data.token_code}</h2>
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Medical Token: {data.token_code}</h2>
             <p className="text-sm text-secondary">{data.candidate?.full_name || "N/A"}</p>
           </div>
         </div>
-        <button onClick={() => window.print()} className="flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-secondary">
+        <button onClick={() => window.print()} className="flex items-center gap-2 rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2 text-sm font-medium hover:bg-secondary">
           <Printer className="h-4 w-4" /> Print
         </button>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-lg border bg-white p-6 shadow-sm">
-          <h3 className="mb-4 text-lg font-semibold text-slate-800">Token Details</h3>
+        <div className="rounded-lg border bg-white dark:bg-slate-900 p-6 shadow-sm dark:shadow-none">
+          <h3 className="mb-4 text-lg font-semibold text-slate-800 dark:text-white">Token Details</h3>
           <dl className="space-y-3 text-sm">
             <div className="flex justify-between"><dt className="text-secondary">Token Code</dt><dd className="font-medium">{data.token_code}</dd></div>
             <div className="flex justify-between"><dt className="text-secondary">Token Number</dt><dd className="font-medium">{data.token_number || "-"}</dd></div>
@@ -53,8 +53,8 @@ export default function MedicalTokenDetail() {
             </dd></div>
           </dl>
         </div>
-        <div className="rounded-lg border bg-white p-6 shadow-sm">
-          <h3 className="mb-4 text-lg font-semibold text-slate-800">Candidate Info</h3>
+        <div className="rounded-lg border bg-white dark:bg-slate-900 p-6 shadow-sm dark:shadow-none">
+          <h3 className="mb-4 text-lg font-semibold text-slate-800 dark:text-white">Candidate Info</h3>
           <dl className="space-y-3 text-sm">
             <div className="flex justify-between"><dt className="text-secondary">Name</dt><dd className="font-medium">{data.candidate?.full_name || "-"}</dd></div>
             <div className="flex justify-between"><dt className="text-secondary">Code</dt><dd className="font-medium">{data.candidate?.candidate_code || "-"}</dd></div>

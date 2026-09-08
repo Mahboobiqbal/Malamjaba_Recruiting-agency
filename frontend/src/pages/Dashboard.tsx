@@ -18,11 +18,11 @@ import {
 
 function StatCard({ title, value, icon: Icon, color }: { title: string; value: string | number; icon: any; color: string }) {
   return (
-    <div className="rounded-lg border bg-white p-5 shadow-sm">
+    <div className="rounded-lg border bg-white dark:bg-slate-900 p-5 shadow-sm dark:shadow-none">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-slate-500">{title}</p>
-          <p className="mt-1 text-2xl font-bold text-slate-800">{value}</p>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{title}</p>
+          <p className="mt-1 text-2xl font-bold text-slate-800 dark:text-white">{value}</p>
         </div>
         <div className={`rounded-lg p-3 ${color}`}>
           <Icon className="h-5 w-5 text-white" />
@@ -38,7 +38,7 @@ export default function Dashboard() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-slate-500">Loading dashboard...</div>
+        <div className="text-slate-500 dark:text-slate-400">Loading dashboard...</div>
       </div>
     );
   }
@@ -63,8 +63,8 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-slate-800">Dashboard</h2>
-        <p className="text-sm text-slate-500">Welcome to Malamjaba Recruiting Agency</p>
+        <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Dashboard</h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400">Welcome to Malamjaba Recruiting Agency</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -79,35 +79,35 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="rounded-lg border bg-white p-5 shadow-sm">
+        <div className="rounded-lg border bg-white dark:bg-slate-900 p-5 shadow-sm dark:shadow-none">
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-success/10 p-2">
               <TrendingUp className="h-5 w-5 text-success" />
             </div>
             <div>
-              <p className="text-sm text-slate-500">Total Received</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Total Received</p>
               <p className="text-xl font-bold text-success">{formatCurrency(stats.total_received)}</p>
             </div>
           </div>
         </div>
-        <div className="rounded-lg border bg-white p-5 shadow-sm">
+        <div className="rounded-lg border bg-white dark:bg-slate-900 p-5 shadow-sm dark:shadow-none">
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-warning/10 p-2">
               <TrendingDown className="h-5 w-5 text-warning" />
             </div>
             <div>
-              <p className="text-sm text-slate-500">Total Expenses</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Total Expenses</p>
               <p className="text-xl font-bold text-warning">{formatCurrency(stats.total_expenses)}</p>
             </div>
           </div>
         </div>
-        <div className="rounded-lg border bg-white p-5 shadow-sm">
+        <div className="rounded-lg border bg-white dark:bg-slate-900 p-5 shadow-sm dark:shadow-none">
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-primary/10 p-2">
               <AlertCircle className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="text-sm text-slate-500">Outstanding</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Outstanding</p>
               <p className="text-xl font-bold text-primary">{formatCurrency(stats.outstanding_balances)}</p>
             </div>
           </div>

@@ -102,6 +102,7 @@ export interface Visa {
   profession?: string;
   employer?: string;
   sponsor?: string;
+  sponsor_number?: string;
   wakala_reference?: string;
   visa_fee: number;
   agent_fee: number;

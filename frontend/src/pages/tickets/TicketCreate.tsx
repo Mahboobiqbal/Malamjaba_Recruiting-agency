@@ -24,19 +24,19 @@ export default function TicketCreate() {
       const payload = {
         ...form,
         candidate_id: Number(form.candidate_id),
-        departure_date: form.departure_date || null,
-        arrival_date: form.arrival_date || null,
-        departure_time: form.departure_time || null,
-        arrival_time: form.arrival_time || null,
-        airline: form.airline || null,
-        pnr: form.pnr || null,
-        ticket_number: form.ticket_number || null,
-        flight_number: form.flight_number || null,
-        departure_airport: form.departure_airport || null,
-        arrival_airport: form.arrival_airport || null,
-        baggage_allowance: form.baggage_allowance || null,
-        ticket_class: form.ticket_class || null,
-        remarks: form.remarks || null,
+        departure_date: form.departure_date || undefined,
+        arrival_date: form.arrival_date || undefined,
+        departure_time: form.departure_time || undefined,
+        arrival_time: form.arrival_time || undefined,
+        airline: form.airline || undefined,
+        pnr: form.pnr || undefined,
+        ticket_number: form.ticket_number || undefined,
+        flight_number: form.flight_number || undefined,
+        departure_airport: form.departure_airport || undefined,
+        arrival_airport: form.arrival_airport || undefined,
+        baggage_allowance: form.baggage_allowance || undefined,
+        ticket_class: form.ticket_class || undefined,
+        remarks: form.remarks || undefined,
       };
       await createTicket(payload).unwrap();
       navigate("/tickets");
@@ -47,83 +47,83 @@ export default function TicketCreate() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <h2 className="text-2xl font-bold text-slate-800">New Ticket</h2>
-      <form onSubmit={handleSubmit} className="rounded-lg border bg-white p-6 shadow-sm">
+      <h2 className="text-2xl font-bold text-slate-800 dark:text-white">New Ticket</h2>
+      <form onSubmit={handleSubmit} className="rounded-lg border bg-white dark:bg-slate-900 p-6 shadow-sm dark:shadow-none">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-slate-700">Candidate *</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Candidate *</label>
             <select value={form.candidate_id} onChange={(e) => setForm({ ...form, candidate_id: Number(e.target.value) })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" required>
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white" required>
               <option value={0}>Select Candidate</option>
               {candidatesData?.items.map((c) => <option key={c.id} value={c.id}>{c.candidate_code} - {c.full_name}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Airline</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Airline</label>
             <input type="text" value={form.airline} onChange={(e) => setForm({ ...form, airline: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">PNR</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">PNR</label>
             <input type="text" value={form.pnr} onChange={(e) => setForm({ ...form, pnr: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Ticket Number</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Ticket Number</label>
             <input type="text" value={form.ticket_number} onChange={(e) => setForm({ ...form, ticket_number: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Flight Number</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Flight Number</label>
             <input type="text" value={form.flight_number} onChange={(e) => setForm({ ...form, flight_number: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Departure Airport</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Departure Airport</label>
             <input type="text" value={form.departure_airport} onChange={(e) => setForm({ ...form, departure_airport: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Arrival Airport</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Arrival Airport</label>
             <input type="text" value={form.arrival_airport} onChange={(e) => setForm({ ...form, arrival_airport: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Departure Date</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Departure Date</label>
             <input type="date" value={form.departure_date} onChange={(e) => setForm({ ...form, departure_date: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Departure Time</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Departure Time</label>
             <input type="time" value={form.departure_time} onChange={(e) => setForm({ ...form, departure_time: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Status</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Status</label>
             <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white">
               {TICKET_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Ticket Price</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Ticket Price</label>
             <input type="number" value={form.ticket_price} onChange={(e) => setForm({ ...form, ticket_price: Number(e.target.value) })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Agent Commission</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Agent Commission</label>
             <input type="number" value={form.agent_commission} onChange={(e) => setForm({ ...form, agent_commission: Number(e.target.value) })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Other Charges</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Other Charges</label>
             <input type="number" value={form.other_charges} onChange={(e) => setForm({ ...form, other_charges: Number(e.target.value) })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white" />
           </div>
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-slate-700">Remarks</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Remarks</label>
             <textarea value={form.remarks} onChange={(e) => setForm({ ...form, remarks: e.target.value })} rows={2}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white" />
           </div>
         </div>
         <div className="mt-6 flex gap-3">
@@ -132,7 +132,7 @@ export default function TicketCreate() {
             {isLoading ? "Saving..." : "Create Ticket"}
           </button>
           <button type="button" onClick={() => navigate("/tickets")}
-            className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-secondary">
+            className="rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-secondary">
             Cancel
           </button>
         </div>

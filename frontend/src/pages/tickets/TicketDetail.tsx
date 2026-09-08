@@ -18,20 +18,20 @@ export default function TicketDetail() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link to="/tickets" className="text-slate-400 hover:text-slate-600"><ArrowLeft className="h-5 w-5" /></Link>
+          <Link to="/tickets" className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-400"><ArrowLeft className="h-5 w-5" /></Link>
           <div>
-            <h2 className="text-2xl font-bold text-slate-800">Ticket: {data.ticket_code}</h2>
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Ticket: {data.ticket_code}</h2>
             <p className="text-sm text-secondary">{data.candidate?.full_name || "N/A"}</p>
           </div>
         </div>
-        <button onClick={() => window.print()} className="flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-secondary">
+        <button onClick={() => window.print()} className="flex items-center gap-2 rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2 text-sm font-medium hover:bg-secondary">
           <Printer className="h-4 w-4" /> Print
         </button>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-lg border bg-white p-6 shadow-sm">
-          <h3 className="mb-4 text-lg font-semibold text-slate-800">Flight Details</h3>
+        <div className="rounded-lg border bg-white dark:bg-slate-900 p-6 shadow-sm dark:shadow-none">
+          <h3 className="mb-4 text-lg font-semibold text-slate-800 dark:text-white">Flight Details</h3>
           <dl className="space-y-3 text-sm">
             <div className="flex justify-between"><dt className="text-secondary">Airline</dt><dd className="font-medium">{data.airline || "-"}</dd></div>
             <div className="flex justify-between"><dt className="text-secondary">PNR</dt><dd className="font-medium">{data.pnr || "-"}</dd></div>
@@ -45,8 +45,8 @@ export default function TicketDetail() {
             </dd></div>
           </dl>
         </div>
-        <div className="rounded-lg border bg-white p-6 shadow-sm">
-          <h3 className="mb-4 text-lg font-semibold text-slate-800">Financial Details</h3>
+        <div className="rounded-lg border bg-white dark:bg-slate-900 p-6 shadow-sm dark:shadow-none">
+          <h3 className="mb-4 text-lg font-semibold text-slate-800 dark:text-white">Financial Details</h3>
           <dl className="space-y-3 text-sm">
             <div className="flex justify-between"><dt className="text-secondary">Ticket Price</dt><dd className="font-medium">{formatCurrency(data.ticket_price)}</dd></div>
             <div className="flex justify-between"><dt className="text-secondary">Agent Commission</dt><dd className="font-medium">{formatCurrency(data.agent_commission)}</dd></div>

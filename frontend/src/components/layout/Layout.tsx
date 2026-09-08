@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Outlet, Navigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
@@ -7,13 +7,18 @@ import { RootState } from "../../store";
 
 export default function Layout() {
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const theme = useSelector((state: RootState) => state.theme.mode);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+  }, [theme]);
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-slate-50 dark:bg-slate-950">
       <Sidebar />
       <div className="ml-64 flex flex-1 flex-col overflow-hidden">
         <Header />

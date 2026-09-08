@@ -45,56 +45,56 @@ export default function CandidateEdit() {
     }
   };
 
-  if (loadingCandidate) return <div className="text-center py-8 text-slate-500">Loading...</div>;
+  if (loadingCandidate) return <div className="text-center py-8 text-slate-500 dark:text-slate-400">Loading...</div>;
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <h2 className="text-2xl font-bold text-slate-800">Edit Candidate</h2>
-      <form onSubmit={handleSubmit} className="rounded-lg border bg-white p-6 shadow-sm">
+      <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Edit Candidate</h2>
+      <form onSubmit={handleSubmit} className="rounded-lg border bg-white dark:bg-slate-900 p-6 shadow-sm dark:shadow-none">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-slate-700">Full Name *</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Full Name *</label>
             <input type="text" value={form.full_name || ""} onChange={(e) => setForm({ ...form, full_name: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white focus:border-primary focus:outline-none" required />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Father Name</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Father Name</label>
             <input type="text" value={form.father_name || ""} onChange={(e) => setForm({ ...form, father_name: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white focus:border-primary focus:outline-none" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">CNIC</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">CNIC</label>
             <input type="text" value={form.cnic || ""} onChange={(e) => setForm({ ...form, cnic: formatCNIC(e.target.value) })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white focus:border-primary focus:outline-none" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Passport Number *</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Passport Number *</label>
             <input type="text" value={form.passport_number || ""} onChange={(e) => setForm({ ...form, passport_number: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white focus:border-primary focus:outline-none" required />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Mobile *</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Mobile *</label>
             <input type="text" value={form.mobile || ""} onChange={(e) => setForm({ ...form, mobile: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white focus:border-primary focus:outline-none" required />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Alternate Mobile</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Alternate Mobile</label>
             <input type="text" value={form.alternate_mobile || ""} onChange={(e) => setForm({ ...form, alternate_mobile: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white focus:border-primary focus:outline-none" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Gender</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Gender</label>
             <select value={form.gender || ""} onChange={(e) => setForm({ ...form, gender: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none">
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white focus:border-primary focus:outline-none">
               <option value="">Select</option>
               <option value="male">Male</option>
               <option value="female">Female</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Agent</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Agent</label>
             <select value={form.agent_id || 0} onChange={(e) => setForm({ ...form, agent_id: Number(e.target.value) })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none">
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white focus:border-primary focus:outline-none">
               <option value={0}>Select Agent</option>
               {agentsData?.items.map((a) => (
                 <option key={a.id} value={a.id}>{a.name}</option>
@@ -102,34 +102,34 @@ export default function CandidateEdit() {
             </select>
           </div>
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-slate-700">Address</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Address</label>
             <textarea value={form.address || ""} onChange={(e) => setForm({ ...form, address: e.target.value })} rows={2}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white focus:border-primary focus:outline-none" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">City</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">City</label>
             <input type="text" value={form.city || ""} onChange={(e) => setForm({ ...form, city: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white focus:border-primary focus:outline-none" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Country</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Country</label>
             <input type="text" value={form.country || ""} onChange={(e) => setForm({ ...form, country: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white focus:border-primary focus:outline-none" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Profession</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Profession</label>
             <input type="text" value={form.profession || ""} onChange={(e) => setForm({ ...form, profession: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white focus:border-primary focus:outline-none" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Employer</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Employer</label>
             <input type="text" value={form.employer || ""} onChange={(e) => setForm({ ...form, employer: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white focus:border-primary focus:outline-none" />
           </div>
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-slate-700">Notes</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Notes</label>
             <textarea value={form.notes || ""} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={3}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white focus:border-primary focus:outline-none" />
           </div>
         </div>
         <div className="mt-6 flex gap-3">
@@ -138,7 +138,7 @@ export default function CandidateEdit() {
             {isLoading ? "Saving..." : "Update Candidate"}
           </button>
           <button type="button" onClick={() => navigate(`/candidates/${id}`)}
-            className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-secondary">
+            className="rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-secondary">
             Cancel
           </button>
         </div>

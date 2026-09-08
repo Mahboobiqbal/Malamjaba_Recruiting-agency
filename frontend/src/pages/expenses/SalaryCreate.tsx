@@ -57,63 +57,63 @@ export default function SalaryCreate() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <h2 className="text-2xl font-bold text-slate-800">Add Salary</h2>
-      <form onSubmit={handleSubmit} className="rounded-lg border bg-white p-6 shadow-sm">
+      <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Add Salary</h2>
+      <form onSubmit={handleSubmit} className="rounded-lg border bg-white dark:bg-slate-900 p-6 shadow-sm dark:shadow-none">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-slate-700">Employee Name *</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Employee Name *</label>
             <input type="text" value={form.employee_name} onChange={(e) => setForm({ ...form, employee_name: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" required placeholder="Enter employee name" />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white" required placeholder="Enter employee name" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Month *</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Month *</label>
             <select value={form.month} onChange={(e) => setForm({ ...form, month: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" required>
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white" required>
               {MONTHS.map((m) => <option key={m} value={m}>{m}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Year *</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Year *</label>
             <input type="number" value={form.year} onChange={(e) => setForm({ ...form, year: Number(e.target.value) })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" required min="2020" max="2099" />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white" required min="2020" max="2099" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Basic Salary (PKR) *</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Basic Salary (PKR) *</label>
             <input type="number" value={form.basic_salary} onChange={(e) => setForm({ ...form, basic_salary: Number(e.target.value) })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" required min="0" />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white" required min="0" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Allowances (PKR)</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Allowances (PKR)</label>
             <input type="number" value={form.allowances} onChange={(e) => setForm({ ...form, allowances: Number(e.target.value) })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" min="0" />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white" min="0" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Deductions (PKR)</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Deductions (PKR)</label>
             <input type="number" value={form.deductions} onChange={(e) => setForm({ ...form, deductions: Number(e.target.value) })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" min="0" />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white" min="0" />
           </div>
           <div className="flex items-end">
-            <div className="rounded-lg bg-slate-100 p-4 w-full">
-              <p className="text-sm text-slate-500">Net Pay</p>
-              <p className="text-2xl font-bold text-slate-800">PKR {netPay.toLocaleString()}</p>
+            <div className="rounded-lg bg-slate-100 dark:bg-slate-800 p-4 w-full">
+              <p className="text-sm text-slate-500 dark:text-slate-400">Net Pay</p>
+              <p className="text-2xl font-bold text-slate-800 dark:text-white">PKR {netPay.toLocaleString()}</p>
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Payment Method *</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Payment Method *</label>
             <select value={form.payment_method} onChange={(e) => setForm({ ...form, payment_method: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white">
               {PAYMENT_METHODS.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Reference</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Reference</label>
             <input type="text" value={form.reference} onChange={(e) => setForm({ ...form, reference: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white" />
           </div>
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-slate-700">Remarks</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Remarks</label>
             <textarea value={form.remarks} onChange={(e) => setForm({ ...form, remarks: e.target.value })} rows={2}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white" />
           </div>
         </div>
         <div className="mt-6 flex gap-3">
@@ -122,7 +122,7 @@ export default function SalaryCreate() {
             {isLoading ? "Saving..." : "Record Salary"}
           </button>
           <button type="button" onClick={() => navigate("/salaries")}
-            className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-secondary">
+            className="rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-secondary">
             Cancel
           </button>
         </div>
