@@ -22,6 +22,17 @@ function formatFileSize(bytes: number | null): string {
   return `${size.toFixed(1)} ${units[i]}`;
 }
 
+function getErrorMessage(err: any, fallback: string): string {
+  if (!err?.data?.detail) return fallback;
+  const detail = err.data.detail;
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) {
+    return detail.map((e: any) => e.msg || e.message || String(e)).join(", ");
+  }
+  if (typeof detail === "object" && detail.msg) return detail.msg;
+  return fallback;
+}
+
 const TABS = [
   { key: "company", label: "Company", icon: Building2 },
   { key: "backup", label: "Backup & Restore", icon: HardDrive },
@@ -84,7 +95,7 @@ function CompanyTab() {
       toast.success("Settings saved successfully");
       setTimeout(() => setSaved(false), 2000);
     } catch (err: any) {
-      toast.error(err?.data?.detail || "Failed to save settings");
+      toast.error(getErrorMessage(err, "Failed to save settings"));
     }
   };
 
@@ -157,7 +168,7 @@ function BackupTab() {
       window.URL.revokeObjectURL(url);
       toast.success(`Downloaded ${filename}`);
     } catch (err: any) {
-      toast.error(err?.data?.detail || "Failed to download backup");
+      toast.error(getErrorMessage(err, "Failed to download backup"));
     }
   };
 
@@ -167,7 +178,7 @@ function BackupTab() {
       refetch();
       toast.success("Backup created successfully");
     } catch (err: any) {
-      toast.error(err?.data?.detail || "Failed to create backup");
+      toast.error(getErrorMessage(err, "Failed to create backup"));
     }
   };
 
@@ -178,7 +189,7 @@ function BackupTab() {
       toast.success("Database restored successfully. Please refresh the page.");
       setConfirmRestore(null);
     } catch (err: any) {
-      toast.error(err?.data?.detail || "Failed to restore database");
+      toast.error(getErrorMessage(err, "Failed to restore database"));
     }
   };
 
@@ -200,7 +211,7 @@ function BackupTab() {
       toast.success("Database restored successfully. Please refresh the page.");
       setConfirmUpload(null);
     } catch (err: any) {
-      toast.error(err?.data?.detail || "Failed to restore database");
+      toast.error(getErrorMessage(err, "Failed to restore database"));
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -393,7 +404,7 @@ function DangerTab() {
       setShowModal(false);
       setShowSuccess(true);
     } catch (err: any) {
-      toast.error(err?.data?.detail || "Failed to reset data");
+      toast.error(getErrorMessage(err, "Failed to reset data"));
       setResetting(false);
     }
   };
