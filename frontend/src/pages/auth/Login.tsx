@@ -26,29 +26,31 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#0a0f1e]">
+    <div className="flex min-h-screen bg-[#111318]">
       {/* Left Side - Visual */}
       <div className="relative hidden w-[55%] overflow-hidden lg:block">
-        {/* Gradient mesh background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#2a1f14] via-[#1a1510] to-[#0f0d0a]" />
+        {/* Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1612] via-[#151310] to-[#0e0c0a]" />
 
-        {/* Animated gradient orbs */}
-        <div className="absolute top-[10%] left-[20%] h-[400px] w-[400px] rounded-full bg-amber-700/10 blur-[120px] animate-pulse" />
-        <div className="absolute bottom-[15%] right-[10%] h-[350px] w-[350px] rounded-full bg-orange-700/10 blur-[120px] animate-pulse" style={{ animationDelay: "2s" }} />
-        <div className="absolute top-[50%] left-[50%] h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-yellow-700/5 blur-[100px] animate-pulse" style={{ animationDelay: "4s" }} />
+        {/* Subtle grid pattern */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "40px 40px" }} />
+
+        {/* Warm glow orbs */}
+        <div className="absolute top-[15%] left-[25%] h-[350px] w-[350px] rounded-full bg-[#c08a30]/8 blur-[100px]" />
+        <div className="absolute bottom-[20%] right-[15%] h-[300px] w-[300px] rounded-full bg-[#a06b20]/6 blur-[100px]" />
 
         {/* Content */}
         <div className="relative z-10 flex h-full flex-col justify-between p-12 xl:p-16">
           {/* Top - Logo */}
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/25">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#c08a30] shadow-lg shadow-[#c08a30]/20">
               <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
               </svg>
             </div>
             <div>
               <span className="text-lg font-bold text-white tracking-tight">Malamjaba</span>
-              <span className="block text-[11px] font-medium text-amber-400/80 tracking-widest uppercase">Recruiting Agency</span>
+              <span className="block text-[11px] font-medium text-[#c08a30]/70 tracking-widest uppercase">Recruiting Agency</span>
             </div>
           </div>
 
@@ -57,18 +59,16 @@ export default function Login() {
             <h1 className="text-5xl font-bold leading-[1.15] text-white tracking-tight">
               Manage Your
               <br />
-              <span className="bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 bg-clip-text text-transparent">
-                Global Workforce
-              </span>
+              <span className="text-[#c08a30]">Global Workforce</span>
             </h1>
-            <p className="mt-6 text-lg leading-relaxed text-slate-400">
+            <p className="mt-6 text-lg leading-relaxed text-[#8a8580]">
               End-to-end recruitment management — candidates, agents, visas, medicals, tickets, and finances — all in one place.
             </p>
 
             {/* Feature pills */}
             <div className="mt-8 flex flex-wrap gap-3">
               {["Candidate Tracking", "Visa Processing", "Agent Management", "Financial Reports"].map((f) => (
-                <span key={f} className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-300 backdrop-blur-sm">
+                <span key={f} className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-[#a0a0a0]">
                   {f}
                 </span>
               ))}
@@ -79,15 +79,15 @@ export default function Login() {
           <div className="flex gap-12">
             <div>
               <p className="text-3xl font-bold text-white">500+</p>
-              <p className="mt-1 text-sm text-slate-500">Active Candidates</p>
+              <p className="mt-1 text-sm text-[#6a6560]">Active Candidates</p>
             </div>
             <div>
               <p className="text-3xl font-bold text-white">50+</p>
-              <p className="mt-1 text-sm text-slate-500">Trusted Agents</p>
+              <p className="mt-1 text-sm text-[#6a6560]">Trusted Agents</p>
             </div>
             <div>
               <p className="text-3xl font-bold text-white">15+</p>
-              <p className="mt-1 text-sm text-slate-500">Countries Served</p>
+              <p className="mt-1 text-sm text-[#6a6560]">Countries Served</p>
             </div>
           </div>
         </div>
@@ -98,27 +98,27 @@ export default function Login() {
         <div className="w-full max-w-[380px]">
           {/* Mobile Logo */}
           <div className="mb-10 flex items-center gap-3 lg:hidden">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
-              <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#c08a30]">
+              <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
               </svg>
             </div>
             <div>
               <span className="text-lg font-bold text-white">Malamjaba</span>
-              <span className="block text-[10px] font-medium text-amber-400 tracking-wider uppercase">Recruiting Agency</span>
+              <span className="block text-[10px] font-medium text-[#c08a30]/70 tracking-wider uppercase">Recruiting Agency</span>
             </div>
           </div>
 
           {/* Heading */}
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white">Sign in to your account</h2>
-            <p className="mt-2 text-sm text-slate-400">Welcome back! Please enter your details.</p>
+            <h2 className="text-2xl font-bold text-white">Welcome back</h2>
+            <p className="mt-2 text-sm text-[#6a6560]">Sign in to your account to continue</p>
           </div>
 
           {/* Error */}
           {error && (
-            <div className="mb-6 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3.5 backdrop-blur-sm">
-              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500/20">
+            <div className="mb-6 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3.5">
+              <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-500/20">
                 <div className="h-2 w-2 rounded-full bg-red-500" />
               </div>
               <p className="text-sm font-medium text-red-400">{error}</p>
@@ -128,33 +128,33 @@ export default function Login() {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="mb-2.5 block text-sm font-medium text-slate-300">Username</label>
+              <label className="mb-2.5 block text-sm font-medium text-[#a0a0a0]">Username</label>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Enter your username"
-                className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-sm text-white placeholder:text-slate-600 outline-none transition-all focus:border-primary/50 focus:bg-white/[0.07] focus:ring-1 focus:ring-primary/30"
+                className="h-12 w-full rounded-xl border border-white/10 bg-[#1a1c22] px-4 text-sm text-white placeholder:text-[#4a4540] outline-none transition-all focus:border-[#c08a30]/50 focus:ring-1 focus:ring-[#c08a30]/20"
                 required
                 autoFocus
               />
             </div>
 
             <div>
-              <label className="mb-2.5 block text-sm font-medium text-slate-300">Password</label>
+              <label className="mb-2.5 block text-sm font-medium text-[#a0a0a0]">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
-                  className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 pr-12 text-sm text-white placeholder:text-slate-600 outline-none transition-all focus:border-primary/50 focus:bg-white/[0.07] focus:ring-1 focus:ring-primary/30"
+                  className="h-12 w-full rounded-xl border border-white/10 bg-[#1a1c22] px-4 pr-12 text-sm text-white placeholder:text-[#4a4540] outline-none transition-all focus:border-[#c08a30]/50 focus:ring-1 focus:ring-[#c08a30]/20"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 transition-colors hover:text-slate-300"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#5a5550] transition-colors hover:text-[#a0a0a0]"
                 >
                   {showPassword ? (
                     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -173,7 +173,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={isLoading}
-              className="h-12 w-full rounded-xl bg-primary text-sm font-semibold text-white shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30 hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg"
+              className="h-12 w-full rounded-xl bg-[#c08a30] text-sm font-semibold text-white shadow-lg shadow-[#c08a30]/20 transition-all hover:bg-[#d09535] hover:shadow-xl hover:shadow-[#c08a30]/30 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -190,7 +190,7 @@ export default function Login() {
           </form>
 
           {/* Footer */}
-          <p className="mt-8 text-center text-xs text-slate-600">
+          <p className="mt-8 text-center text-xs text-[#4a4540]">
             &copy; 2026 Malamjaba Recruiting Agency
           </p>
         </div>

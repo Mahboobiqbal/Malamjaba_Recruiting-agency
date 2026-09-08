@@ -33,7 +33,9 @@ import SalaryCreate from "./pages/expenses/SalaryCreate";
 import ReportDashboard from "./pages/reports/ReportDashboard";
 import CandidateLedger from "./pages/ledger/CandidateLedger";
 import CompanySettings from "./pages/settings/CompanySettings";
-import Notifications from "./pages/notifications/Notifications";
+import UserList from "./pages/users/UserList";
+import UserCreate from "./pages/users/UserCreate";
+import UserEdit from "./pages/users/UserEdit";
 
 function ThemeProvider({ children }: { children: React.ReactNode }) {
   const theme = useSelector((state: RootState) => state.theme.mode);
@@ -80,7 +82,9 @@ export default function App() {
               <Route path="/ledger" element={<CandidateLedger />} />
               <Route path="/ledger/:id" element={<CandidateLedger />} />
               <Route path="/reports" element={<ReportDashboard />} />
-              <Route path="/notifications" element={<Notifications />} />
+              <Route path="/users" element={<UserList />} />
+              <Route path="/users/new" element={<UserCreate />} />
+              <Route path="/users/:id/edit" element={<UserEdit />} />
               <Route path="/settings" element={<CompanySettings />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />

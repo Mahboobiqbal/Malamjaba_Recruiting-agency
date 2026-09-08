@@ -6,7 +6,7 @@ from sqlalchemy.orm import selectinload
 from app.database import get_db
 from app.dependencies import require_permission
 from app.models.user import User, UserRole, Role
-from app.schemas.user import UserCreate, UserUpdate, UserResponse
+from app.schemas.user import UserCreate, UserUpdate, UserResponse, RoleResponse
 from app.services.auth_service import create_user, get_user_roles
 from app.core.security import hash_password
 from app.core.exceptions import NotFoundException
@@ -127,3 +127,14 @@ async def delete_user(
     await db.delete(user)
     await db.commit()
     return {"message": "User deleted successfully", "success": True}
+
+
+@router.get("/roles/list", response_model=list[RoleResponse])
+async def list_roles(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_permission("users.view")),
+):
+    stmt = select(Role)
+    result = await db.execute(stmt)
+    roles = result.scalars().all()
+    return roles

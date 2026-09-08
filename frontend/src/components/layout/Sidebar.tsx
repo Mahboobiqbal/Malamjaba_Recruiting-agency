@@ -12,27 +12,44 @@ import {
   FileText,
   Settings,
   BarChart3,
-  Bell,
   Banknote,
+  Shield,
 } from "lucide-react";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store";
 
-const navItems = [
+interface NavItem {
+  to: string;
+  icon: React.ElementType;
+  label: string;
+  permission?: string;
+}
+
+const navItems: NavItem[] = [
   { to: "/", icon: LayoutDashboard, label: "Dashboard" },
-  { to: "/candidates", icon: Users, label: "Candidates" },
-  { to: "/agents", icon: UserCheck, label: "Agents" },
-  { to: "/medical", icon: Stethoscope, label: "Medical Tokens" },
-  { to: "/visas", icon: Stamp, label: "Visas" },
-  { to: "/tickets", icon: Plane, label: "Tickets" },
-  { to: "/payments", icon: CreditCard, label: "Payments" },
-  { to: "/expenses", icon: Receipt, label: "Expenses" },
-  { to: "/salaries", icon: Banknote, label: "Salary" },
-  { to: "/ledger", icon: FileText, label: "Ledger" },
-  { to: "/reports", icon: BarChart3, label: "Reports" },
-  { to: "/notifications", icon: Bell, label: "Notifications" },
-  { to: "/settings", icon: Settings, label: "Settings" },
+  { to: "/candidates", icon: Users, label: "Candidates", permission: "candidates.view" },
+  { to: "/agents", icon: UserCheck, label: "Agents", permission: "agents.view" },
+  { to: "/medical", icon: Stethoscope, label: "Medical Tokens", permission: "medical.view" },
+  { to: "/visas", icon: Stamp, label: "Visas", permission: "visa.view" },
+  { to: "/tickets", icon: Plane, label: "Tickets", permission: "tickets.view" },
+  { to: "/payments", icon: CreditCard, label: "Payments", permission: "payments.view" },
+  { to: "/expenses", icon: Receipt, label: "Expenses", permission: "expenses.view" },
+  { to: "/salaries", icon: Banknote, label: "Salary", permission: "expenses.view" },
+  { to: "/ledger", icon: FileText, label: "Ledger", permission: "candidates.view" },
+  { to: "/reports", icon: BarChart3, label: "Reports", permission: "reports.view" },
+  { to: "/users", icon: Shield, label: "Users", permission: "users.view" },
+  { to: "/settings", icon: Settings, label: "Settings", permission: "settings.view" },
 ];
 
 export default function Sidebar() {
+  const permissions = useSelector((state: RootState) => state.auth.permissions);
+  const isSuperAdmin = permissions.includes("super_admin");
+
+  const filteredItems = navItems.filter((item) => {
+    if (!item.permission) return true;
+    return isSuperAdmin || permissions.includes(item.permission);
+  });
+
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
       {/* Logo */}
@@ -52,7 +69,7 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav className="mt-4 space-y-1 px-3">
-        {navItems.map((item) => (
+        {filteredItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
