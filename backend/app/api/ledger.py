@@ -10,11 +10,47 @@ from app.models.ledger import LedgerEntry
 from app.models.user import User
 from app.schemas.ledger import LedgerEntryResponse, LedgerSummary, CandidateLedgerResponse
 from app.schemas.candidate import CandidateResponse
+from app.core.exceptions import NotFoundException
 
 router = APIRouter(prefix="/ledger", tags=["Ledger"])
 
 
-@router.get("/candidate/{candidate_id}")
+@router.get("/outstanding")
+async def get_outstanding_balances(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_permission("candidates.view")),
+):
+    balance_stmt = (
+        select(
+            LedgerEntry.candidate_id,
+            func.sum(LedgerEntry.debit - LedgerEntry.credit).label("balance"),
+        )
+        .group_by(LedgerEntry.candidate_id)
+        .having(func.sum(LedgerEntry.debit - LedgerEntry.credit) > 0)
+    )
+    balance_result = await db.execute(balance_stmt)
+    balances = {row.candidate_id: float(row.balance) for row in balance_result.all()}
+
+    if not balances:
+        return []
+
+    candidate_ids = list(balances.keys())
+    candidates_stmt = select(Candidate).where(Candidate.id.in_(candidate_ids)).options(
+        selectinload(Candidate.agent)
+    )
+    candidates_result = await db.execute(candidates_stmt)
+    candidates = {c.id: c for c in candidates_result.scalars().all()}
+
+    return [
+        {
+            "candidate": CandidateResponse.model_validate(candidates[cid]),
+            "balance": balances[cid],
+        }
+        for cid in candidate_ids if cid in candidates
+    ]
+
+
+@router.get("/candidate/{candidate_id}", response_model=CandidateLedgerResponse)
 async def get_candidate_ledger(
     candidate_id: int,
     db: AsyncSession = Depends(get_db),

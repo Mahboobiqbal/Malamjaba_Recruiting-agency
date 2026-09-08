@@ -13,6 +13,7 @@ from app.models.expense import Expense
 from app.models.medical_token import MedicalToken
 from app.models.visa import Visa
 from app.models.ticket import Ticket
+from app.models.ledger import LedgerEntry
 from app.models.user import User
 from app.schemas.report import DashboardSummary
 
@@ -51,7 +52,7 @@ async def get_dashboard(
     )).scalar() or 0
 
     outstanding = (await db.execute(
-        select(func.coalesce(func.sum(Payment.amount), 0))
+        select(func.coalesce(func.sum(LedgerEntry.debit - LedgerEntry.credit), 0))
     )).scalar() or 0
 
     today_start = datetime.combine(date.today(), datetime.min.time())

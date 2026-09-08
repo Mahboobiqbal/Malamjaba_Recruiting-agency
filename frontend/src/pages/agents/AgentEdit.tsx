@@ -28,17 +28,17 @@ export default function AgentEdit() {
       if (agent.data && !agent.error) {
         setForm({
           name: agent.data.name,
-          father_name: agent.data.father_name,
+          father_name: agent.data.father_name ?? "",
           cnic: agent.data.cnic,
           mobile: agent.data.mobile,
-          whatsapp: agent.data.whatsapp,
-          address: agent.data.address,
-          city: agent.data.city,
-          email: agent.data.email,
+          whatsapp: agent.data.whatsapp ?? "",
+          address: agent.data.address ?? "",
+          city: agent.data.city ?? "",
+          email: agent.data.email ?? "",
           commission_rate: agent.data.commission_rate,
-          bank_info: agent.data.bank_info,
+          bank_info: agent.data.bank_info ?? "",
           status: agent.data.status,
-          notes: agent.data.notes,
+          notes: agent.data.notes ?? "",
         });
       }
     }
@@ -126,6 +126,7 @@ export default function AgentEdit() {
             >
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
+              <option value="blocked">Blocked</option>
             </select>
           </div>
         </div>

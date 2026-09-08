@@ -6,8 +6,9 @@ from sqlalchemy.orm import selectinload
 from app.database import get_db
 from app.dependencies import require_permission
 from app.models.visa import Visa
+from app.models.candidate import Candidate
 from app.models.user import User
-from app.schemas.visa import VisaCreate, VisaUpdate, VisaResponse, VisaListResponse
+from app.schemas.visa import VisaCreate, VisaUpdate, VisaResponse, VisaListResponse, VisaStatusUpdate
 from app.services.number_generator import generate_visa_code
 from app.core.exceptions import NotFoundException
 
@@ -25,7 +26,7 @@ async def list_visas(
     current_user: User = Depends(require_permission("visa.view")),
 ):
     stmt = select(Visa).options(
-        selectinload(Visa.candidate),
+        selectinload(Visa.candidate).selectinload(Candidate.agent),
         selectinload(Visa.agent),
     )
     count_stmt = select(func.count()).select_from(Visa)
@@ -74,7 +75,7 @@ async def create_visa(
     await db.refresh(visa)
 
     stmt = select(Visa).where(Visa.id == visa.id).options(
-        selectinload(Visa.candidate), selectinload(Visa.agent)
+        selectinload(Visa.candidate).selectinload(Candidate.agent), selectinload(Visa.agent)
     )
     result = await db.execute(stmt)
     return result.scalar_one()
@@ -87,7 +88,7 @@ async def get_visa(
     current_user: User = Depends(require_permission("visa.view")),
 ):
     stmt = select(Visa).where(Visa.id == visa_id).options(
-        selectinload(Visa.candidate), selectinload(Visa.agent)
+        selectinload(Visa.candidate).selectinload(Candidate.agent), selectinload(Visa.agent)
     )
     result = await db.execute(stmt)
     visa = result.scalar_one_or_none()
@@ -120,7 +121,31 @@ async def update_visa(
     await db.refresh(visa)
 
     stmt = select(Visa).where(Visa.id == visa.id).options(
-        selectinload(Visa.candidate), selectinload(Visa.agent)
+        selectinload(Visa.candidate).selectinload(Candidate.agent), selectinload(Visa.agent)
+    )
+    result = await db.execute(stmt)
+    return result.scalar_one()
+
+
+@router.patch("/{visa_id}/status", response_model=VisaResponse)
+async def update_visa_status(
+    visa_id: int,
+    data: VisaStatusUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_permission("visa.edit")),
+):
+    stmt = select(Visa).where(Visa.id == visa_id)
+    result = await db.execute(stmt)
+    visa = result.scalar_one_or_none()
+    if not visa:
+        raise NotFoundException("Visa not found")
+
+    visa.status = data.status
+    await db.commit()
+    await db.refresh(visa)
+
+    stmt = select(Visa).where(Visa.id == visa.id).options(
+        selectinload(Visa.candidate).selectinload(Candidate.agent), selectinload(Visa.agent)
     )
     result = await db.execute(stmt)
     return result.scalar_one()

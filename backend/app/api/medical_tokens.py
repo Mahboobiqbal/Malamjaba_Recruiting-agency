@@ -6,8 +6,9 @@ from sqlalchemy.orm import selectinload
 from app.database import get_db
 from app.dependencies import require_permission
 from app.models.medical_token import MedicalToken
+from app.models.candidate import Candidate
 from app.models.user import User
-from app.schemas.medical_token import MedicalTokenCreate, MedicalTokenUpdate, MedicalTokenResponse, MedicalTokenListResponse
+from app.schemas.medical_token import MedicalTokenCreate, MedicalTokenUpdate, MedicalTokenResponse, MedicalTokenListResponse, MedicalTokenStatusUpdate
 from app.services.number_generator import generate_token_code
 from app.core.exceptions import NotFoundException
 
@@ -25,7 +26,7 @@ async def list_medical_tokens(
     current_user: User = Depends(require_permission("medical.view")),
 ):
     stmt = select(MedicalToken).options(
-        selectinload(MedicalToken.candidate),
+        selectinload(MedicalToken.candidate).selectinload(Candidate.agent),
         selectinload(MedicalToken.agent),
     )
     count_stmt = select(func.count()).select_from(MedicalToken)
@@ -67,7 +68,7 @@ async def create_medical_token(
     await db.refresh(token)
 
     stmt = select(MedicalToken).where(MedicalToken.id == token.id).options(
-        selectinload(MedicalToken.candidate), selectinload(MedicalToken.agent)
+        selectinload(MedicalToken.candidate).selectinload(Candidate.agent), selectinload(MedicalToken.agent)
     )
     result = await db.execute(stmt)
     return result.scalar_one()
@@ -80,7 +81,7 @@ async def get_medical_token(
     current_user: User = Depends(require_permission("medical.view")),
 ):
     stmt = select(MedicalToken).where(MedicalToken.id == token_id).options(
-        selectinload(MedicalToken.candidate), selectinload(MedicalToken.agent)
+        selectinload(MedicalToken.candidate).selectinload(Candidate.agent), selectinload(MedicalToken.agent)
     )
     result = await db.execute(stmt)
     token = result.scalar_one_or_none()
@@ -110,7 +111,34 @@ async def update_medical_token(
     await db.refresh(token)
 
     stmt = select(MedicalToken).where(MedicalToken.id == token.id).options(
-        selectinload(MedicalToken.candidate), selectinload(MedicalToken.agent)
+        selectinload(MedicalToken.candidate).selectinload(Candidate.agent), selectinload(MedicalToken.agent)
+    )
+    result = await db.execute(stmt)
+    return result.scalar_one()
+
+
+@router.patch("/{token_id}/status", response_model=MedicalTokenResponse)
+async def update_medical_token_status(
+    token_id: int,
+    data: MedicalTokenStatusUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_permission("medical.edit")),
+):
+    stmt = select(MedicalToken).where(MedicalToken.id == token_id)
+    result = await db.execute(stmt)
+    token = result.scalar_one_or_none()
+    if not token:
+        raise NotFoundException("Medical token not found")
+
+    if data.medical_status is not None:
+        token.medical_status = data.medical_status
+    if data.payment_status is not None:
+        token.payment_status = data.payment_status
+    await db.commit()
+    await db.refresh(token)
+
+    stmt = select(MedicalToken).where(MedicalToken.id == token.id).options(
+        selectinload(MedicalToken.candidate).selectinload(Candidate.agent), selectinload(MedicalToken.agent)
     )
     result = await db.execute(stmt)
     return result.scalar_one()

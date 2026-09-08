@@ -39,7 +39,7 @@ export const candidateApi = api.injectEndpoints({
         method: "PATCH",
         body: { status },
       }),
-      invalidatesTags: ["Candidate"],
+      invalidatesTags: ["Candidate", "Dashboard"],
     }),
     deleteCandidate: builder.mutation<void, number>({
       query: (id) => ({

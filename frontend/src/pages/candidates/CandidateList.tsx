@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { useGetCandidatesQuery, useDeleteCandidateMutation } from "../../services/candidate.service";
+import { useGetCandidatesQuery, useDeleteCandidateMutation, useUpdateCandidateStatusMutation } from "../../services/candidate.service";
 import { CANDIDATE_STATUSES } from "../../lib/constants";
 import { formatDate } from "../../lib/utils";
 import { Plus, Search, Trash2, Eye, Edit } from "lucide-react";
+import StatusDropdown from "../../components/common/StatusDropdown";
 
 export default function CandidateList() {
   const [page, setPage] = useState(1);
@@ -11,6 +12,7 @@ export default function CandidateList() {
   const [status, setStatus] = useState("");
   const { data, isLoading } = useGetCandidatesQuery({ page, per_page: 20, search, status });
   const [deleteCandidate] = useDeleteCandidateMutation();
+  const [updateStatus] = useUpdateCandidateStatusMutation();
 
   const handleDelete = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this candidate?")) {
@@ -80,13 +82,7 @@ export default function CandidateList() {
                   <td className="px-4 py-3">{c.passport_number}</td>
                   <td className="px-4 py-3">{c.mobile}</td>
                   <td className="px-4 py-3">
-                    <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
-                      c.status === "completed" ? "bg-emerald-50 text-emerald-700" :
-                      c.status === "cancelled" ? "bg-red-50 text-warning" :
-                      "bg-primary text-primary"
-                    }`}>
-                      {CANDIDATE_STATUSES.find(s => s.value === c.status)?.label || c.status}
-                    </span>
+                    <StatusDropdown value={c.status} options={CANDIDATE_STATUSES} onChange={(s) => updateStatus({ id: c.id, status: s })} />
                   </td>
                   <td className="px-4 py-3 text-slate-500">{formatDate(c.registration_date)}</td>
                   <td className="px-4 py-3">

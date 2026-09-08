@@ -1,13 +1,15 @@
 import React from "react";
 import { useParams, Link } from "react-router-dom";
-import { useGetTicketQuery } from "../../services/dashboard.service";
+import { useGetTicketQuery, useUpdateTicketStatusMutation } from "../../services/dashboard.service";
 import { TICKET_STATUSES } from "../../lib/constants";
 import { formatDate, formatCurrency } from "../../lib/utils";
 import { ArrowLeft, Printer } from "lucide-react";
+import StatusDropdown from "../../components/common/StatusDropdown";
 
 export default function TicketDetail() {
   const { id } = useParams();
   const { data, isLoading } = useGetTicketQuery(Number(id));
+  const [updateStatus] = useUpdateTicketStatusMutation();
 
   if (isLoading) return <div className="text-center py-8 text-secondary">Loading...</div>;
   if (!data) return <div className="text-center py-8 text-secondary">Ticket not found</div>;
@@ -35,11 +37,11 @@ export default function TicketDetail() {
             <div className="flex justify-between"><dt className="text-secondary">PNR</dt><dd className="font-medium">{data.pnr || "-"}</dd></div>
             <div className="flex justify-between"><dt className="text-secondary">Ticket Number</dt><dd className="font-medium">{data.ticket_number || "-"}</dd></div>
             <div className="flex justify-between"><dt className="text-secondary">Flight</dt><dd className="font-medium">{data.flight_number || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Route</dt><dd className="font-medium">{data.departure_airport || "?"} +' {data.arrival_airport || "?"}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Departure</dt><dd className="font-medium">{formatDate(data.departure_date || new Date())}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Arrival</dt><dd className="font-medium">{formatDate(data.arrival_date || new Date())}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Status</dt><dd className="font-medium">
-              <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${data.status === "issued" ? "bg-success text-success" : data.status === "cancelled" ? "bg-warning text-warning" : "bg-secondary text-primary"}`}>{TICKET_STATUSES.find(s => s.value === data.status)?.label}</span>
+            <div className="flex justify-between"><dt className="text-secondary">Route</dt><dd className="font-medium">{data.departure_airport || "?"} → {data.arrival_airport || "?"}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary">Departure</dt><dd className="font-medium">{data.departure_date ? formatDate(data.departure_date) : "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary">Arrival</dt><dd className="font-medium">{data.arrival_date ? formatDate(data.arrival_date) : "-"}</dd></div>
+            <div className="flex justify-between items-center"><dt className="text-secondary">Status</dt><dd>
+              <StatusDropdown value={data.status} options={TICKET_STATUSES} onChange={(status) => updateStatus({ id: data.id, status })} />
             </dd></div>
           </dl>
         </div>

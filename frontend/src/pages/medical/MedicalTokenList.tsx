@@ -1,15 +1,23 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { useGetMedicalTokensQuery } from "../../services/dashboard.service";
+import { useGetMedicalTokensQuery, useUpdateMedicalTokenStatusMutation } from "../../services/dashboard.service";
 import { MEDICAL_STATUSES } from "../../lib/constants";
 import { formatDate } from "../../lib/utils";
 import { Plus, Search, Eye } from "lucide-react";
+import StatusDropdown from "../../components/common/StatusDropdown";
+
+const PAYMENT_STATUSES = [
+  { value: "unpaid", label: "Unpaid" },
+  { value: "partial", label: "Partial" },
+  { value: "paid", label: "Paid" },
+];
 
 export default function MedicalTokenList() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const { data, isLoading } = useGetMedicalTokensQuery({ page, per_page: 20, search, medical_status: status });
+  const [updateStatus] = useUpdateMedicalTokenStatusMutation();
 
   return (
     <div className="space-y-4">
@@ -58,18 +66,10 @@ export default function MedicalTokenList() {
                   <td className="px-4 py-3">{t.medical_date ? formatDate(t.medical_date) : "-"}</td>
                   <td className="px-4 py-3">{t.medical_fee}</td>
                   <td className="px-4 py-3">
-                    <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
-                      t.medical_status === "completed" ? "bg-success text-success" :
-                      t.medical_status === "failed" ? "bg-warning text-warning" :
-                      "bg-primary text-primary"
-                    }`}>{MEDICAL_STATUSES.find(s => s.value === t.medical_status)?.label}</span>
+                    <StatusDropdown value={t.medical_status} options={MEDICAL_STATUSES} onChange={(s) => updateStatus({ id: t.id, medical_status: s })} />
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
-                      t.payment_status === "paid" ? "bg-success text-success" :
-                      t.payment_status === "partial" ? "bg-accent text-accent" :
-                      "bg-warning text-warning"
-                    }`}>{t.payment_status}</span>
+                    <StatusDropdown value={t.payment_status} options={PAYMENT_STATUSES} onChange={(s) => updateStatus({ id: t.id, payment_status: s })} />
                   </td>
                 </tr>
               ))

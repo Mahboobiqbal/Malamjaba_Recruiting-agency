@@ -165,6 +165,7 @@ export interface Payment {
   remarks?: string;
   created_at: string;
   candidate?: Candidate;
+  agent?: Agent;
 }
 
 export interface Expense {

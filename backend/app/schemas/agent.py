@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
 
 from pydantic import BaseModel
@@ -52,3 +52,37 @@ class AgentListResponse(BaseModel):
     total: int
     page: int
     per_page: int
+
+
+class AgentStatusUpdate(BaseModel):
+    status: str
+
+
+class AgentCandidateSummary(BaseModel):
+    id: int
+    candidate_code: str
+    full_name: str
+    passport_number: str
+    mobile: str
+    status: str
+    registration_date: date
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class AgentModuleSummary(BaseModel):
+    code: str
+    candidate_name: str
+    status: str
+    amount: float
+    date: str | None = None
+
+
+class AgentDetailsResponse(AgentResponse):
+    candidates: list[AgentCandidateSummary] = []
+    medical_tokens: list[AgentModuleSummary] = []
+    visas: list[AgentModuleSummary] = []
+    tickets: list[AgentModuleSummary] = []
+    payments: list[AgentModuleSummary] = []
+    stats: dict = {}

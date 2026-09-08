@@ -13,7 +13,7 @@ from app.models.visa import Visa
 from app.models.ticket import Ticket
 from app.models.ledger import LedgerEntry
 from app.models.user import User
-from app.schemas.payment import PaymentCreate, PaymentResponse, PaymentListResponse
+from app.schemas.payment import PaymentCreate, PaymentUpdate, PaymentResponse, PaymentListResponse
 from app.services.number_generator import generate_payment_code, generate_receipt_number
 from app.core.exceptions import NotFoundException, ValidationException
 
@@ -32,7 +32,8 @@ async def list_payments(
     current_user: User = Depends(require_permission("payments.view")),
 ):
     stmt = select(Payment).options(
-        selectinload(Payment.candidate),
+        selectinload(Payment.candidate).selectinload(Candidate.agent),
+        selectinload(Payment.agent),
     )
     count_stmt = select(func.count()).select_from(Payment)
 
@@ -111,7 +112,8 @@ async def create_payment(
     await db.refresh(payment)
 
     stmt = select(Payment).where(Payment.id == payment.id).options(
-        selectinload(Payment.candidate)
+        selectinload(Payment.candidate).selectinload(Candidate.agent),
+        selectinload(Payment.agent),
     )
     result = await db.execute(stmt)
     return result.scalar_one()
@@ -124,10 +126,55 @@ async def get_payment(
     current_user: User = Depends(require_permission("payments.view")),
 ):
     stmt = select(Payment).where(Payment.id == payment_id).options(
-        selectinload(Payment.candidate)
+        selectinload(Payment.candidate).selectinload(Candidate.agent),
+        selectinload(Payment.agent),
     )
     result = await db.execute(stmt)
     payment = result.scalar_one_or_none()
     if not payment:
         raise NotFoundException("Payment not found")
     return payment
+
+
+@router.put("/{payment_id}", response_model=PaymentResponse)
+async def update_payment(
+    payment_id: int,
+    data: PaymentUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_permission("payments.edit")),
+):
+    stmt = select(Payment).where(Payment.id == payment_id)
+    result = await db.execute(stmt)
+    payment = result.scalar_one_or_none()
+    if not payment:
+        raise NotFoundException("Payment not found")
+
+    update_data = data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(payment, key, value)
+
+    await db.commit()
+    await db.refresh(payment)
+
+    stmt = select(Payment).where(Payment.id == payment.id).options(
+        selectinload(Payment.candidate).selectinload(Candidate.agent),
+        selectinload(Payment.agent),
+    )
+    result = await db.execute(stmt)
+    return result.scalar_one()
+
+
+@router.delete("/{payment_id}")
+async def delete_payment(
+    payment_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_permission("payments.delete")),
+):
+    stmt = select(Payment).where(Payment.id == payment_id)
+    result = await db.execute(stmt)
+    payment = result.scalar_one_or_none()
+    if not payment:
+        raise NotFoundException("Payment not found")
+    await db.delete(payment)
+    await db.commit()
+    return {"message": "Payment deleted successfully", "success": True}

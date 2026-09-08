@@ -73,3 +73,7 @@ class TicketListResponse(BaseModel):
     total: int
     page: int
     per_page: int
+
+
+class TicketStatusUpdate(BaseModel):
+    status: str

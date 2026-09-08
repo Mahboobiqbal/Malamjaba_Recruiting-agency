@@ -6,8 +6,9 @@ from sqlalchemy.orm import selectinload
 from app.database import get_db
 from app.dependencies import require_permission
 from app.models.ticket import Ticket
+from app.models.candidate import Candidate
 from app.models.user import User
-from app.schemas.ticket import TicketCreate, TicketUpdate, TicketResponse, TicketListResponse
+from app.schemas.ticket import TicketCreate, TicketUpdate, TicketResponse, TicketListResponse, TicketStatusUpdate
 from app.services.number_generator import generate_ticket_code
 from app.core.exceptions import NotFoundException
 
@@ -24,7 +25,7 @@ async def list_tickets(
     current_user: User = Depends(require_permission("tickets.view")),
 ):
     stmt = select(Ticket).options(
-        selectinload(Ticket.candidate),
+        selectinload(Ticket.candidate).selectinload(Candidate.agent),
         selectinload(Ticket.agent),
     )
     count_stmt = select(func.count()).select_from(Ticket)
@@ -69,7 +70,7 @@ async def create_ticket(
     await db.refresh(ticket)
 
     stmt = select(Ticket).where(Ticket.id == ticket.id).options(
-        selectinload(Ticket.candidate), selectinload(Ticket.agent)
+        selectinload(Ticket.candidate).selectinload(Candidate.agent), selectinload(Ticket.agent)
     )
     result = await db.execute(stmt)
     return result.scalar_one()
@@ -82,7 +83,7 @@ async def get_ticket(
     current_user: User = Depends(require_permission("tickets.view")),
 ):
     stmt = select(Ticket).where(Ticket.id == ticket_id).options(
-        selectinload(Ticket.candidate), selectinload(Ticket.agent)
+        selectinload(Ticket.candidate).selectinload(Candidate.agent), selectinload(Ticket.agent)
     )
     result = await db.execute(stmt)
     ticket = result.scalar_one_or_none()
@@ -115,7 +116,31 @@ async def update_ticket(
     await db.refresh(ticket)
 
     stmt = select(Ticket).where(Ticket.id == ticket.id).options(
-        selectinload(Ticket.candidate), selectinload(Ticket.agent)
+        selectinload(Ticket.candidate).selectinload(Candidate.agent), selectinload(Ticket.agent)
+    )
+    result = await db.execute(stmt)
+    return result.scalar_one()
+
+
+@router.patch("/{ticket_id}/status", response_model=TicketResponse)
+async def update_ticket_status(
+    ticket_id: int,
+    data: TicketStatusUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_permission("tickets.edit")),
+):
+    stmt = select(Ticket).where(Ticket.id == ticket_id)
+    result = await db.execute(stmt)
+    ticket = result.scalar_one_or_none()
+    if not ticket:
+        raise NotFoundException("Ticket not found")
+
+    ticket.status = data.status
+    await db.commit()
+    await db.refresh(ticket)
+
+    stmt = select(Ticket).where(Ticket.id == ticket.id).options(
+        selectinload(Ticket.candidate).selectinload(Candidate.agent), selectinload(Ticket.agent)
     )
     result = await db.execute(stmt)
     return result.scalar_one()

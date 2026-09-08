@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { useGetVisasQuery } from "../../services/dashboard.service";
+import { useGetVisasQuery, useUpdateVisaStatusMutation } from "../../services/dashboard.service";
 import { VISA_STATUSES } from "../../lib/constants";
 import { formatDate, formatCurrency } from "../../lib/utils";
 import { Plus, Search } from "lucide-react";
+import StatusDropdown from "../../components/common/StatusDropdown";
 
 export default function VisaList() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const { data, isLoading } = useGetVisasQuery({ page, per_page: 20, search, status });
+  const [updateStatus] = useUpdateVisaStatusMutation();
 
   return (
     <div className="space-y-4">
@@ -59,11 +61,7 @@ export default function VisaList() {
                   <td className="px-4 py-3">{formatCurrency(v.total_cost)}</td>
                   <td className="px-4 py-3">{formatCurrency(v.remaining_amount)}</td>
                   <td className="px-4 py-3">
-                    <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
-                      v.status === "approved" ? "bg-success text-success" :
-                      v.status === "rejected" ? "bg-warning text-warning" :
-                      "bg-secondary text-primary"
-                    }`}>{VISA_STATUSES.find(s => s.value === v.status)?.label}</span>
+                    <StatusDropdown value={v.status} options={VISA_STATUSES} onChange={(s) => updateStatus({ id: v.id, status: s })} />
                   </td>
                 </tr>
               ))

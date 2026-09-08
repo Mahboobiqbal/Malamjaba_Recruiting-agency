@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { useGetTicketsQuery } from "../../services/dashboard.service";
+import { useGetTicketsQuery, useUpdateTicketStatusMutation } from "../../services/dashboard.service";
 import { TICKET_STATUSES } from "../../lib/constants";
 import { formatDate, formatCurrency } from "../../lib/utils";
 import { Plus, Search } from "lucide-react";
+import StatusDropdown from "../../components/common/StatusDropdown";
 
 export default function TicketList() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const { data, isLoading } = useGetTicketsQuery({ page, per_page: 20, search, status });
+  const [updateStatus] = useUpdateTicketStatusMutation();
 
   return (
     <div className="space-y-4">
@@ -61,11 +63,7 @@ export default function TicketList() {
                   <td className="px-4 py-3">{t.departure_date ? formatDate(t.departure_date) : "-"}</td>
                   <td className="px-4 py-3">{formatCurrency(t.total)}</td>
                   <td className="px-4 py-3">
-                    <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
-                      t.status === "issued" ? "bg-success text-success" :
-                      t.status === "cancelled" ? "bg-warning text-warning" :
-                      "bg-secondary text-primary"
-                    }`}>{TICKET_STATUSES.find(s => s.value === t.status)?.label}</span>
+                    <StatusDropdown value={t.status} options={TICKET_STATUSES} onChange={(s) => updateStatus({ id: t.id, status: s })} />
                   </td>
                 </tr>
               ))

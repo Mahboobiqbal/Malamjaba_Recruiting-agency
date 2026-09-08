@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useCreatePaymentMutation } from "../../services/dashboard.service";
 import { useGetCandidatesQuery } from "../../services/candidate.service";
+import { useGetAgentsQuery } from "../../services/agent.service";
 import { PAYMENT_METHODS, PAYMENT_TYPES } from "../../lib/constants";
 
 export default function PaymentCreate() {
@@ -10,8 +11,10 @@ export default function PaymentCreate() {
   const candidateId = searchParams.get("candidate_id");
   const [createPayment, { isLoading }] = useCreatePaymentMutation();
   const { data: candidatesData } = useGetCandidatesQuery({ per_page: 100 });
+  const { data: agentsData } = useGetAgentsQuery({ per_page: 100 });
   const [form, setForm] = useState({
     candidate_id: candidateId ? Number(candidateId) : 0,
+    agent_id: 0,
     payment_date: new Date().toISOString().slice(0, 16),
     payment_type: "partial",
     amount: 0,
@@ -27,6 +30,7 @@ export default function PaymentCreate() {
       await createPayment({
         ...form,
         candidate_id: form.candidate_id || undefined,
+        agent_id: form.agent_id || undefined,
         payment_date: new Date(form.payment_date).toISOString(),
       }).unwrap();
       navigate("/payments");
@@ -40,12 +44,20 @@ export default function PaymentCreate() {
       <h2 className="text-2xl font-bold text-slate-800">Record Payment</h2>
       <form onSubmit={handleSubmit} className="rounded-lg border bg-white p-6 shadow-sm">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="md:col-span-2">
+          <div>
             <label className="block text-sm font-medium text-slate-700">Candidate</label>
             <select value={form.candidate_id} onChange={(e) => setForm({ ...form, candidate_id: Number(e.target.value) })}
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
               <option value={0}>Select Candidate (Optional)</option>
               {candidatesData?.items.map((c) => <option key={c.id} value={c.id}>{c.candidate_code} - {c.full_name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700">Agent</label>
+            <select value={form.agent_id} onChange={(e) => setForm({ ...form, agent_id: Number(e.target.value) })}
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+              <option value={0}>Select Agent (Optional)</option>
+              {agentsData?.items.map((a) => <option key={a.id} value={a.id}>{a.agent_code} - {a.name}</option>)}
             </select>
           </div>
           <div>

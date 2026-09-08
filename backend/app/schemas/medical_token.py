@@ -52,3 +52,8 @@ class MedicalTokenListResponse(BaseModel):
     total: int
     page: int
     per_page: int
+
+
+class MedicalTokenStatusUpdate(BaseModel):
+    medical_status: str | None = None
+    payment_status: str | None = None

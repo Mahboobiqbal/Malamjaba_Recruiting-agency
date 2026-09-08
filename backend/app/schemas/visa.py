@@ -69,3 +69,7 @@ class VisaListResponse(BaseModel):
     total: int
     page: int
     per_page: int
+
+
+class VisaStatusUpdate(BaseModel):
+    status: str

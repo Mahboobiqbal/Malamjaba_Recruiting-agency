@@ -30,3 +30,7 @@ class Agent(Base):
     medical_tokens: Mapped[list["MedicalToken"]] = relationship(back_populates="agent")
     visas: Mapped[list["Visa"]] = relationship(back_populates="agent")
     tickets: Mapped[list["Ticket"]] = relationship(back_populates="agent")
+    payments: Mapped[list["Payment"]] = relationship(back_populates="agent")
+
+
+from app.models.payment import Payment

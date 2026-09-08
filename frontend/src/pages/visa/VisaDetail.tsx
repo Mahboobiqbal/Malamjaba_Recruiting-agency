@@ -1,13 +1,15 @@
 import React from "react";
 import { useParams, Link } from "react-router-dom";
-import { useGetVisaQuery } from "../../services/dashboard.service";
+import { useGetVisaQuery, useUpdateVisaStatusMutation } from "../../services/dashboard.service";
 import { VISA_STATUSES } from "../../lib/constants";
 import { formatDate, formatCurrency } from "../../lib/utils";
 import { ArrowLeft, Printer } from "lucide-react";
+import StatusDropdown from "../../components/common/StatusDropdown";
 
 export default function VisaDetail() {
   const { id } = useParams();
   const { data, isLoading } = useGetVisaQuery(Number(id));
+  const [updateStatus] = useUpdateVisaStatusMutation();
 
   if (isLoading) return <div className="text-center py-8 text-secondary">Loading...</div>;
   if (!data) return <div className="text-center py-8 text-secondary">Visa not found</div>;
@@ -39,8 +41,8 @@ export default function VisaDetail() {
             <div className="flex justify-between"><dt className="text-secondary">Visa Number</dt><dd className="font-medium">{visa.visa_number || "-"}</dd></div>
             <div className="flex justify-between"><dt className="text-secondary">Issue Date</dt><dd className="font-medium">{visa.issue_date ? formatDate(visa.issue_date) : "-"}</dd></div>
             <div className="flex justify-between"><dt className="text-secondary">Expiry Date</dt><dd className="font-medium">{visa.expiry_date ? formatDate(visa.expiry_date) : "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Status</dt><dd className="font-medium">
-              <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${visa.status === "approved" ? "bg-success text-success" : visa.status === "rejected" ? "bg-warning text-warning" : "bg-secondary text-primary"}`}>{VISA_STATUSES.find(s => s.value === visa.status)?.label}</span>
+            <div className="flex justify-between items-center"><dt className="text-secondary">Status</dt><dd>
+              <StatusDropdown value={visa.status} options={VISA_STATUSES} onChange={(status) => updateStatus({ id: visa.id, status })} />
             </dd></div>
           </dl>
         </div>

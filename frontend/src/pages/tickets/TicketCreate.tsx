@@ -21,7 +21,24 @@ export default function TicketCreate() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await createTicket({ ...form, candidate_id: Number(form.candidate_id) }).unwrap();
+      const payload = {
+        ...form,
+        candidate_id: Number(form.candidate_id),
+        departure_date: form.departure_date || null,
+        arrival_date: form.arrival_date || null,
+        departure_time: form.departure_time || null,
+        arrival_time: form.arrival_time || null,
+        airline: form.airline || null,
+        pnr: form.pnr || null,
+        ticket_number: form.ticket_number || null,
+        flight_number: form.flight_number || null,
+        departure_airport: form.departure_airport || null,
+        arrival_airport: form.arrival_airport || null,
+        baggage_allowance: form.baggage_allowance || null,
+        ticket_class: form.ticket_class || null,
+        remarks: form.remarks || null,
+      };
+      await createTicket(payload).unwrap();
       navigate("/tickets");
     } catch (err: any) {
       alert(err?.data?.detail || "Failed to create ticket");

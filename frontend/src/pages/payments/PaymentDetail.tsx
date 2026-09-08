@@ -1,13 +1,15 @@
 import React from "react";
-import { useParams, Link } from "react-router-dom";
-import { useGetPaymentsQuery } from "../../services/dashboard.service";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useGetPaymentQuery, useDeletePaymentMutation } from "../../services/dashboard.service";
+import { PAYMENT_METHODS, PAYMENT_TYPES } from "../../lib/constants";
 import { formatDateTime, formatCurrency } from "../../lib/utils";
-import { ArrowLeft, Printer } from "lucide-react";
+import { ArrowLeft, Printer, Trash2 } from "lucide-react";
 
 export default function PaymentDetail() {
   const { id } = useParams();
-  const { data, isLoading } = useGetPaymentsQuery({ per_page: 100 });
-  const payment = data?.items.find((p) => p.id === Number(id));
+  const navigate = useNavigate();
+  const { data: payment, isLoading } = useGetPaymentQuery(Number(id));
+  const [deletePayment] = useDeletePaymentMutation();
 
   if (isLoading) return <div className="text-center py-8 text-slate-500">Loading...</div>;
   if (!payment) return <div className="text-center py-8 text-slate-500">Payment not found</div>;
@@ -22,9 +24,15 @@ export default function PaymentDetail() {
             <p className="text-sm text-slate-500">Receipt: {payment.receipt_number}</p>
           </div>
         </div>
-        <button onClick={() => window.print()} className="flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-secondary">
-          <Printer className="h-4 w-4" /> Print Receipt
-        </button>
+        <div className="flex gap-3">
+          <button onClick={() => window.print()} className="flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-secondary">
+            <Printer className="h-4 w-4" /> Print Receipt
+          </button>
+          <button onClick={async () => { if (window.confirm("Delete this payment?")) { await deletePayment(payment.id); navigate("/payments"); } }}
+            className="flex items-center gap-2 rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-500 hover:bg-red-50">
+            <Trash2 className="h-4 w-4" /> Delete
+          </button>
+        </div>
       </div>
 
       <div className="mx-auto max-w-2xl rounded-lg border bg-white p-8 shadow-sm print:shadow-none">
@@ -36,12 +44,14 @@ export default function PaymentDetail() {
           <div className="flex justify-between"><dt className="text-slate-500">Payment Code</dt><dd className="font-medium">{payment.payment_code}</dd></div>
           <div className="flex justify-between"><dt className="text-slate-500">Receipt Number</dt><dd className="font-medium">{payment.receipt_number}</dd></div>
           <div className="flex justify-between"><dt className="text-slate-500">Candidate</dt><dd className="font-medium">{payment.candidate?.full_name || "N/A"}</dd></div>
+          {payment.agent && <div className="flex justify-between"><dt className="text-slate-500">Agent</dt><dd className="font-medium">{payment.agent.name}</dd></div>}
           <div className="flex justify-between"><dt className="text-slate-500">Amount</dt><dd className="font-bold text-lg">{formatCurrency(payment.amount)}</dd></div>
-          <div className="flex justify-between"><dt className="text-slate-500">Payment Type</dt><dd className="font-medium capitalize">{payment.payment_type}</dd></div>
-          <div className="flex justify-between"><dt className="text-slate-500">Payment Method</dt><dd className="font-medium">{payment.payment_method}</dd></div>
+          <div className="flex justify-between"><dt className="text-slate-500">Payment Type</dt><dd className="font-medium capitalize">{PAYMENT_TYPES.find(t => t.value === payment.payment_type)?.label || payment.payment_type}</dd></div>
+          <div className="flex justify-between"><dt className="text-slate-500">Payment Method</dt><dd className="font-medium">{PAYMENT_METHODS.find(m => m.value === payment.payment_method)?.label || payment.payment_method}</dd></div>
           <div className="flex justify-between"><dt className="text-slate-500">Date</dt><dd className="font-medium">{formatDateTime(payment.payment_date)}</dd></div>
           {payment.reference_number && <div className="flex justify-between"><dt className="text-slate-500">Reference</dt><dd className="font-medium">{payment.reference_number}</dd></div>}
           {payment.description && <div className="flex justify-between"><dt className="text-slate-500">Description</dt><dd className="font-medium">{payment.description}</dd></div>}
+          {payment.remarks && <div className="flex justify-between"><dt className="text-slate-500">Remarks</dt><dd className="font-medium">{payment.remarks}</dd></div>}
         </dl>
         <div className="mt-8 border-t pt-4 text-center text-xs text-slate-400">
           <p>Authorized Signature</p>

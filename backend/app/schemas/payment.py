@@ -22,6 +22,18 @@ class PaymentCreate(PaymentBase):
     pass
 
 
+class PaymentUpdate(BaseModel):
+    candidate_id: int | None = None
+    agent_id: int | None = None
+    payment_date: datetime | None = None
+    payment_type: str | None = None
+    amount: float | None = None
+    payment_method: str | None = None
+    reference_number: str | None = None
+    description: str | None = None
+    remarks: str | None = None
+
+
 class PaymentResponse(PaymentBase):
     id: int
     payment_code: str

@@ -1,6 +1,11 @@
 import { api } from "./api";
 import type { Candidate, DashboardSummary, PaginatedResponse, Payment, Expense, MedicalToken, Visa, Ticket, LedgerEntry } from "../types";
 
+interface OutstandingBalance {
+  candidate: Candidate;
+  balance: number;
+}
+
 export const dashboardApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getDashboard: builder.query<DashboardSummary, void>({
@@ -23,6 +28,21 @@ export const dashboardApi = api.injectEndpoints({
         url: "/payments",
         method: "POST",
         body: data,
+      }),
+      invalidatesTags: ["Payment", "Dashboard", "Ledger"],
+    }),
+    updatePayment: builder.mutation<Payment, { id: number; data: Partial<Payment> }>({
+      query: ({ id, data }) => ({
+        url: `/payments/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["Payment", "Dashboard", "Ledger"],
+    }),
+    deletePayment: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/payments/${id}`,
+        method: "DELETE",
       }),
       invalidatesTags: ["Payment", "Dashboard", "Ledger"],
     }),
@@ -64,6 +84,14 @@ export const dashboardApi = api.injectEndpoints({
       }),
       invalidatesTags: ["MedicalToken"],
     }),
+    updateMedicalTokenStatus: builder.mutation<MedicalToken, { id: number; medical_status?: string; payment_status?: string }>({
+      query: ({ id, ...data }) => ({
+        url: `/medical-tokens/${id}/status`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["MedicalToken", "Dashboard"],
+    }),
     getVisas: builder.query<
       PaginatedResponse<Visa>,
       { page?: number; per_page?: number; search?: string; status?: string }
@@ -82,6 +110,14 @@ export const dashboardApi = api.injectEndpoints({
         body: data,
       }),
       invalidatesTags: ["Visa"],
+    }),
+    updateVisaStatus: builder.mutation<Visa, { id: number; status: string }>({
+      query: ({ id, ...data }) => ({
+        url: `/visas/${id}/status`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["Visa", "Dashboard"],
     }),
     getTickets: builder.query<
       PaginatedResponse<Ticket>,
@@ -102,11 +138,23 @@ export const dashboardApi = api.injectEndpoints({
       }),
       invalidatesTags: ["Ticket"],
     }),
+    updateTicketStatus: builder.mutation<Ticket, { id: number; status: string }>({
+      query: ({ id, ...data }) => ({
+        url: `/tickets/${id}/status`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["Ticket", "Dashboard"],
+    }),
     getCandidateLedger: builder.query<
       { candidate: Candidate; entries: LedgerEntry[]; summary: { total_charges: number; total_payments: number; balance: number } },
       number
     >({
       query: (candidateId) => `/ledger/candidate/${candidateId}`,
+      providesTags: ["Ledger"],
+    }),
+    getOutstandingBalances: builder.query<OutstandingBalance[], void>({
+      query: () => "/ledger/outstanding",
       providesTags: ["Ledger"],
     }),
     getNotifications: builder.query<any[], void>({
@@ -137,21 +185,27 @@ export const dashboardApi = api.injectEndpoints({
 export const {
   useGetDashboardQuery,
   useGetPaymentsQuery,
+  useGetPaymentQuery,
   useCreatePaymentMutation,
+  useUpdatePaymentMutation,
+  useDeletePaymentMutation,
   useGetExpensesQuery,
   useCreateExpenseMutation,
   useGetMedicalTokensQuery,
   useCreateMedicalTokenMutation,
+  useUpdateMedicalTokenStatusMutation,
   useGetVisasQuery,
   useCreateVisaMutation,
+  useUpdateVisaStatusMutation,
   useGetTicketsQuery,
   useCreateTicketMutation,
+  useUpdateTicketStatusMutation,
   useGetMedicalTokenQuery,
   useGetVisaQuery,
   useGetTicketQuery,
-  useGetPaymentQuery,
   useGetExpenseQuery,
   useGetCandidateLedgerQuery,
+  useGetOutstandingBalancesQuery,
   useGetNotificationsQuery,
   useGetFinancialReportQuery,
   useGetAgentPerformanceQuery,

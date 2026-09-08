@@ -1,13 +1,21 @@
 import React from "react";
 import { useParams, Link } from "react-router-dom";
-import { useGetMedicalTokenQuery } from "../../services/dashboard.service";
+import { useGetMedicalTokenQuery, useUpdateMedicalTokenStatusMutation } from "../../services/dashboard.service";
 import { MEDICAL_STATUSES } from "../../lib/constants";
 import { formatDate, formatCurrency } from "../../lib/utils";
 import { ArrowLeft, Printer } from "lucide-react";
+import StatusDropdown from "../../components/common/StatusDropdown";
+
+const PAYMENT_STATUSES = [
+  { value: "unpaid", label: "Unpaid" },
+  { value: "partial", label: "Partial" },
+  { value: "paid", label: "Paid" },
+];
 
 export default function MedicalTokenDetail() {
   const { id } = useParams();
   const { data, isLoading } = useGetMedicalTokenQuery(Number(id));
+  const [updateStatus] = useUpdateMedicalTokenStatusMutation();
 
   if (isLoading) return <div className="text-center py-8 text-secondary">Loading...</div>;
   if (!data) return <div className="text-center py-8 text-secondary">Token not found</div>;
@@ -37,10 +45,12 @@ export default function MedicalTokenDetail() {
             <div className="flex justify-between"><dt className="text-secondary">Medical Date</dt><dd className="font-medium">{data.medical_date ? formatDate(data.medical_date) : "-"}</dd></div>
             <div className="flex justify-between"><dt className="text-secondary">Appointment Date</dt><dd className="font-medium">{data.appointment_date ? formatDate(data.appointment_date) : "-"}</dd></div>
             <div className="flex justify-between"><dt className="text-secondary">Fee</dt><dd className="font-medium">{formatCurrency(data.medical_fee)}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Status</dt><dd className="font-medium">
-              <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${data.medical_status === "completed" ? "bg-success text-success" : data.medical_status === "failed" ? "bg-warning text-warning" : "bg-secondary text-primary"}`}>{MEDICAL_STATUSES.find(s => s.value === data.medical_status)?.label}</span>
+            <div className="flex justify-between items-center"><dt className="text-secondary">Status</dt><dd>
+              <StatusDropdown value={data.medical_status} options={MEDICAL_STATUSES} onChange={(medical_status) => updateStatus({ id: data.id, medical_status })} />
             </dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Payment Status</dt><dd className="font-medium capitalize">{data.payment_status}</dd></div>
+            <div className="flex justify-between items-center"><dt className="text-secondary">Payment Status</dt><dd>
+              <StatusDropdown value={data.payment_status} options={PAYMENT_STATUSES} onChange={(payment_status) => updateStatus({ id: data.id, payment_status })} />
+            </dd></div>
           </dl>
         </div>
         <div className="rounded-lg border bg-white p-6 shadow-sm">
