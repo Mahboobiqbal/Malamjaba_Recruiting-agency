@@ -1,13 +1,66 @@
 import React from "react";
 import { useParams, Link } from "react-router-dom";
 import { useGetCandidateLedgerQuery } from "../../services/dashboard.service";
+import { useGetCandidatesQuery } from "../../services/candidate.service";
 import { formatCurrency, formatDateTime } from "../../lib/utils";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, FileText } from "lucide-react";
 
 export default function CandidateLedger() {
   const { id } = useParams();
   const ledgerId = id ? Number(id) : 0;
-  const { data, isLoading } = useGetCandidateLedgerQuery(ledgerId);
+
+  if (!ledgerId) {
+    return <LedgerCandidateList />;
+  }
+
+  return <LedgerDetail candidateId={ledgerId} />;
+}
+
+function LedgerCandidateList() {
+  const { data, isLoading } = useGetCandidatesQuery({ per_page: 100 });
+
+  if (isLoading) return <div className="text-center py-8 text-slate-500">Loading...</div>;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <Link to="/" className="text-slate-400 hover:text-slate-600"><ArrowLeft className="h-5 w-5" /></Link>
+        <h2 className="text-2xl font-bold text-slate-800">Select Candidate Ledger</h2>
+      </div>
+      <div className="overflow-hidden rounded-lg border bg-white shadow-sm">
+        <table className="w-full text-left text-sm">
+          <thead className="border-b bg-secondary">
+            <tr>
+              <th className="px-4 py-3 font-medium text-slate-600">Code</th>
+              <th className="px-4 py-3 font-medium text-slate-600">Name</th>
+              <th className="px-4 py-3 font-medium text-slate-600">Mobile</th>
+              <th className="px-4 py-3 font-medium text-slate-600">Status</th>
+              <th className="px-4 py-3 font-medium text-slate-600">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data?.items.map((c) => (
+              <tr key={c.id} className="border-b hover:bg-secondary">
+                <td className="px-4 py-3 font-medium text-primary">{c.candidate_code}</td>
+                <td className="px-4 py-3">{c.full_name}</td>
+                <td className="px-4 py-3">{c.mobile}</td>
+                <td className="px-4 py-3 capitalize">{c.status}</td>
+                <td className="px-4 py-3">
+                  <Link to={`/ledger/${c.id}`} className="flex items-center gap-1 text-primary hover:underline">
+                    <FileText className="h-4 w-4" /> View Ledger
+                  </Link>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function LedgerDetail({ candidateId }: { candidateId: number }) {
+  const { data, isLoading } = useGetCandidateLedgerQuery(candidateId);
 
   if (isLoading) return <div className="text-center py-8 text-slate-500">Loading...</div>;
   if (!data) return <div className="text-center py-8 text-slate-500">Ledger not found</div>;
@@ -15,7 +68,7 @@ export default function CandidateLedger() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Link to="/candidates" className="text-slate-400 hover:text-slate-600"><ArrowLeft className="h-5 w-5" /></Link>
+        <Link to="/ledger" className="text-slate-400 hover:text-slate-600"><ArrowLeft className="h-5 w-5" /></Link>
         <div>
           <h2 className="text-2xl font-bold text-slate-800">Ledger: {data.candidate.full_name}</h2>
           <p className="text-sm text-slate-500">{data.candidate.candidate_code}</p>

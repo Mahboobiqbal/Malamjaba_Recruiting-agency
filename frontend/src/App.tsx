@@ -28,6 +28,8 @@ import PaymentCreate from "./pages/payments/PaymentCreate";
 import PaymentDetail from "./pages/payments/PaymentDetail";
 import ExpenseList from "./pages/expenses/ExpenseList";
 import ExpenseCreate from "./pages/expenses/ExpenseCreate";
+import SalaryList from "./pages/expenses/SalaryList";
+import SalaryCreate from "./pages/expenses/SalaryCreate";
 import ReportDashboard from "./pages/reports/ReportDashboard";
 import CandidateLedger from "./pages/ledger/CandidateLedger";
 import CompanySettings from "./pages/settings/CompanySettings";
@@ -64,6 +66,8 @@ export default function App() {
             <Route path="/payments/:id" element={<PaymentDetail />} />
             <Route path="/expenses" element={<ExpenseList />} />
             <Route path="/expenses/new" element={<ExpenseCreate />} />
+            <Route path="/salaries" element={<SalaryList />} />
+            <Route path="/salaries/new" element={<SalaryCreate />} />
             <Route path="/ledger" element={<CandidateLedger />} />
             <Route path="/ledger/:id" element={<CandidateLedger />} />
             <Route path="/reports" element={<ReportDashboard />} />

@@ -13,6 +13,7 @@ import {
   Settings,
   BarChart3,
   Bell,
+  Banknote,
 } from "lucide-react";
 
 const navItems = [
@@ -24,6 +25,7 @@ const navItems = [
   { to: "/tickets", icon: Plane, label: "Tickets" },
   { to: "/payments", icon: CreditCard, label: "Payments" },
   { to: "/expenses", icon: Receipt, label: "Expenses" },
+  { to: "/salaries", icon: Banknote, label: "Salary" },
   { to: "/ledger", icon: FileText, label: "Ledger" },
   { to: "/reports", icon: BarChart3, label: "Reports" },
   { to: "/notifications", icon: Bell, label: "Notifications" },
