@@ -23,6 +23,7 @@ class Visa(Base):
     profession: Mapped[str | None] = mapped_column(String(100), nullable=True)
     employer: Mapped[str | None] = mapped_column(String(100), nullable=True)
     sponsor: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    sponsor_number: Mapped[str | None] = mapped_column(String(50), nullable=True)
     wakala_reference: Mapped[str | None] = mapped_column(String(50), nullable=True)
     visa_fee: Mapped[float] = mapped_column(Numeric(12, 2), default=0)
     agent_fee: Mapped[float] = mapped_column(Numeric(12, 2), default=0)

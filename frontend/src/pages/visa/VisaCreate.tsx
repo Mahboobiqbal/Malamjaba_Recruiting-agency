@@ -12,7 +12,7 @@ export default function VisaCreate() {
   const { data: candidatesData } = useGetCandidatesQuery({ per_page: 100 });
   const [form, setForm] = useState({
     candidate_id: candidateId ? Number(candidateId) : 0,
-    visa_type: "", country: "", visa_number: "", reference_number: "",
+    visa_type: "", country: "", visa_number: "", sponsor_number: "", reference_number: "",
     issue_date: "", expiry_date: "", status: "processing",
     profession: "", employer: "", sponsor: "", wakala_reference: "",
     visa_fee: 0, agent_fee: 0, other_charges: 0, remarks: "",
@@ -59,6 +59,11 @@ export default function VisaCreate() {
           <div>
             <label className="block text-sm font-medium text-slate-700">Visa Number</label>
             <input type="text" value={form.visa_number} onChange={(e) => setForm({ ...form, visa_number: e.target.value })}
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700">Sponsor Number</label>
+            <input type="text" value={form.sponsor_number} onChange={(e) => setForm({ ...form, sponsor_number: e.target.value })}
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
           </div>
           <div>

@@ -39,6 +39,7 @@ export default function VisaDetail() {
             <div className="flex justify-between"><dt className="text-secondary">Type</dt><dd className="font-medium">{visa.visa_type || "-"}</dd></div>
             <div className="flex justify-between"><dt className="text-secondary">Country</dt><dd className="font-medium">{visa.country || "-"}</dd></div>
             <div className="flex justify-between"><dt className="text-secondary">Visa Number</dt><dd className="font-medium">{visa.visa_number || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary">Sponsor Number</dt><dd className="font-medium">{visa.sponsor_number || "-"}</dd></div>
             <div className="flex justify-between"><dt className="text-secondary">Issue Date</dt><dd className="font-medium">{visa.issue_date ? formatDate(visa.issue_date) : "-"}</dd></div>
             <div className="flex justify-between"><dt className="text-secondary">Expiry Date</dt><dd className="font-medium">{visa.expiry_date ? formatDate(visa.expiry_date) : "-"}</dd></div>
             <div className="flex justify-between items-center"><dt className="text-secondary">Status</dt><dd>

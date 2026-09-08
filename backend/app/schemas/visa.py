@@ -19,6 +19,7 @@ class VisaBase(BaseModel):
     profession: str | None = Field(None, max_length=100)
     employer: str | None = Field(None, max_length=100)
     sponsor: str | None = Field(None, max_length=100)
+    sponsor_number: str | None = Field(None, max_length=50)
     wakala_reference: str | None = Field(None, max_length=50)
     visa_fee: float = Field(0, ge=0)
     agent_fee: float = Field(0, ge=0)
@@ -42,6 +43,7 @@ class VisaUpdate(BaseModel):
     profession: str | None = None
     employer: str | None = None
     sponsor: str | None = None
+    sponsor_number: str | None = None
     wakala_reference: str | None = None
     visa_fee: float | None = None
     agent_fee: float | None = None
