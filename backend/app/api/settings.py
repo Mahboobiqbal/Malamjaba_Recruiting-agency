@@ -2,7 +2,7 @@ import os
 import shutil
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, UploadFile, File
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -117,7 +117,7 @@ async def download_backup(
     backup = result.scalar_one_or_none()
 
     if not backup or not os.path.exists(backup.file_path):
-        return {"error": "Backup file not found"}
+        raise HTTPException(status_code=404, detail="Backup file not found")
 
     return FileResponse(
         backup.file_path,
@@ -137,7 +137,7 @@ async def restore_backup(
     backup = result.scalar_one_or_none()
 
     if not backup or not os.path.exists(backup.file_path):
-        return {"error": "Backup file not found"}
+        raise HTTPException(status_code=404, detail="Backup file not found")
 
     db_path = os.path.abspath("./dev.db")
     backup_dir = os.path.abspath(settings.backup_dir)
@@ -145,9 +145,16 @@ async def restore_backup(
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     pre_restore_path = os.path.join(backup_dir, f"pre_restore_{timestamp}.db")
-    shutil.copy2(db_path, pre_restore_path)
+    
+    try:
+        shutil.copy2(db_path, pre_restore_path)
+    except Exception:
+        pass
 
-    shutil.copy2(backup.file_path, db_path)
+    try:
+        shutil.copy2(backup.file_path, db_path)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to restore database: {str(e)}. The file may be in use.")
 
     return {
         "message": "Database restored successfully. Please restart the application.",
@@ -162,7 +169,7 @@ async def restore_from_upload(
     current_user: User = Depends(require_permission("settings.manage")),
 ):
     if not file.filename.endswith(".db"):
-        return {"error": "Invalid file type. Only .db files are allowed."}
+        raise HTTPException(status_code=400, detail="Invalid file type. Only .db files are allowed.")
 
     backup_dir = os.path.abspath(settings.backup_dir)
     os.makedirs(backup_dir, exist_ok=True)
@@ -171,9 +178,12 @@ async def restore_from_upload(
     filename = f"uploaded_{timestamp}.db"
     upload_path = os.path.join(backup_dir, filename)
 
-    content = await file.read()
-    with open(upload_path, "wb") as f:
-        f.write(content)
+    try:
+        content = await file.read()
+        with open(upload_path, "wb") as f:
+            f.write(content)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save uploaded file: {str(e)}")
 
     log = BackupLog(
         filename=filename,
@@ -187,9 +197,16 @@ async def restore_from_upload(
 
     db_path = os.path.abspath("./dev.db")
     pre_restore_path = os.path.join(backup_dir, f"pre_restore_{timestamp}.db")
-    shutil.copy2(db_path, pre_restore_path)
+    
+    try:
+        shutil.copy2(db_path, pre_restore_path)
+    except Exception as e:
+        pass
 
-    shutil.copy2(upload_path, db_path)
+    try:
+        shutil.copy2(upload_path, db_path)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to replace database file: {str(e)}. The file may be in use.")
 
     return {
         "message": "Database restored from uploaded file. Please restart the application.",
