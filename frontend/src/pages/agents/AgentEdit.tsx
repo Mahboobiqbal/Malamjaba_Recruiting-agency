@@ -6,7 +6,8 @@ export default function AgentEdit() {
   const params = useParams();
   const navigate = useNavigate();
   const agentId = params.id ? Number(params.id) : 0;
-  const [updateAgent, { isLoading, isError }] = useUpdateAgentMutation();
+  const { data: agent, isLoading: loadingAgent } = useGetAgentQuery(agentId, { skip: agentId <= 0 });
+  const [updateAgent, { isLoading }] = useUpdateAgentMutation();
   const [form, setForm] = useState({
     name: "",
     father_name: "",
@@ -23,44 +24,45 @@ export default function AgentEdit() {
   });
 
   useEffect(() => {
-    if (agentId > 0) {
-      const agent = useGetAgentQuery(agentId);
-      if (agent.data && !agent.error) {
-        setForm({
-          name: agent.data.name,
-          father_name: agent.data.father_name ?? "",
-          cnic: agent.data.cnic,
-          mobile: agent.data.mobile,
-          whatsapp: agent.data.whatsapp ?? "",
-          address: agent.data.address ?? "",
-          city: agent.data.city ?? "",
-          email: agent.data.email ?? "",
-          commission_rate: agent.data.commission_rate,
-          bank_info: agent.data.bank_info ?? "",
-          status: agent.data.status,
-          notes: agent.data.notes ?? "",
-        });
-      }
+    if (agent) {
+      setForm({
+        name: agent.name,
+        father_name: agent.father_name ?? "",
+        cnic: agent.cnic,
+        mobile: agent.mobile,
+        whatsapp: agent.whatsapp ?? "",
+        address: agent.address ?? "",
+        city: agent.city ?? "",
+        email: agent.email ?? "",
+        commission_rate: agent.commission_rate,
+        bank_info: agent.bank_info ?? "",
+        status: agent.status,
+        notes: agent.notes ?? "",
+      });
     }
-  }, [agentId]);
+  }, [agent]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!agentId) return;
-    await updateAgent({ id: agentId, data: form }).unwrap();
-    navigate("/agents");
+    try {
+      await updateAgent({ id: agentId, data: form }).unwrap();
+      navigate("/agents");
+    } catch (err: any) {
+      alert(err?.data?.detail || "Failed to update agent");
+    }
   };
 
   if (!agentId) {
     return <p className="text-sm text-slate-500">Agent ID not found</p>;
   }
 
-  if (isLoading) {
-    return <p className="text-sm text-slate-500">Updating agent...</p>;
+  if (loadingAgent) {
+    return <p className="text-sm text-slate-500">Loading agent...</p>;
   }
 
-  if (isError) {
-    return <p className="text-sm text-slate-500">Error updating agent</p>;
+  if (!agent) {
+    return <p className="text-sm text-slate-500">Agent not found</p>;
   }
 
   return (
@@ -69,32 +71,62 @@ export default function AgentEdit() {
       <form onSubmit={handleSubmit} className="rounded-lg border bg-white p-6 shadow-sm">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700">Name</label>
+            <label className="block text-sm font-medium text-slate-700">Name *</label>
             <input
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               type="text"
-              className="mt-1 rounded-lg border border-slate-300 px-3 py-2 w-full"
+              className="mt-1 rounded-lg border border-slate-300 px-3 py-2 w-full text-sm focus:border-primary focus:outline-none"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">CNIC</label>
+            <label className="block text-sm font-medium text-slate-700">Father Name</label>
+            <input
+              value={form.father_name}
+              onChange={(e) => setForm({ ...form, father_name: e.target.value })}
+              type="text"
+              className="mt-1 rounded-lg border border-slate-300 px-3 py-2 w-full text-sm focus:border-primary focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700">CNIC *</label>
             <input
               value={form.cnic}
               onChange={(e) => setForm({ ...form, cnic: e.target.value })}
               type="text"
-              className="mt-1 rounded-lg border border-slate-300 px-3 py-2 w-full"
+              placeholder="35202-1234567-1"
+              className="mt-1 rounded-lg border border-slate-300 px-3 py-2 w-full text-sm focus:border-primary focus:outline-none"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Mobile</label>
+            <label className="block text-sm font-medium text-slate-700">Mobile *</label>
             <input
               value={form.mobile}
               onChange={(e) => setForm({ ...form, mobile: e.target.value })}
               type="text"
-              className="mt-1 rounded-lg border border-slate-300 px-3 py-2 w-full"
+              placeholder="03012345678"
+              className="mt-1 rounded-lg border border-slate-300 px-3 py-2 w-full text-sm focus:border-primary focus:outline-none"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700">WhatsApp</label>
+            <input
+              value={form.whatsapp}
+              onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
+              type="text"
+              className="mt-1 rounded-lg border border-slate-300 px-3 py-2 w-full text-sm focus:border-primary focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700">Email</label>
+            <input
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              type="email"
+              className="mt-1 rounded-lg border border-slate-300 px-3 py-2 w-full text-sm focus:border-primary focus:outline-none"
             />
           </div>
           <div>
@@ -103,53 +135,51 @@ export default function AgentEdit() {
               value={form.city}
               onChange={(e) => setForm({ ...form, city: e.target.value })}
               type="text"
-              className="mt-1 rounded-lg border border-slate-300 px-3 py-2 w-full"
+              className="mt-1 rounded-lg border border-slate-300 px-3 py-2 w-full text-sm focus:border-primary focus:outline-none"
             />
           </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700">Commission Rate</label>
+            <label className="block text-sm font-medium text-slate-700">Commission Rate (%)</label>
             <input
               value={form.commission_rate}
               onChange={(e) => setForm({ ...form, commission_rate: Number(e.target.value) })}
               type="number"
-              className="mt-1 rounded-lg border border-slate-300 px-3 py-2 w-full"
+              min="0"
+              max="100"
+              step="0.01"
+              className="mt-1 rounded-lg border border-slate-300 px-3 py-2 w-full text-sm focus:border-primary focus:outline-none"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700">Status</label>
-            <select
-              value={form.status}
-              onChange={(e) => setForm({ ...form, status: e.target.value })}
-              className="mt-1 rounded-lg border border-slate-300 px-3 py-2 w-full"
-            >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-              <option value="blocked">Blocked</option>
-            </select>
-          </div>
         </div>
-        <div>
+        <div className="mt-4">
+          <label className="block text-sm font-medium text-slate-700">Address</label>
+          <textarea
+            value={form.address}
+            onChange={(e) => setForm({ ...form, address: e.target.value })}
+            rows={2}
+            className="mt-1 rounded-lg border border-slate-300 px-3 py-2 w-full text-sm focus:border-primary focus:outline-none resize-none"
+          />
+        </div>
+        <div className="mt-4">
           <label className="block text-sm font-medium text-slate-700">Notes</label>
           <textarea
             value={form.notes}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
             rows={3}
-            className="mt-1 rounded-lg border border-slate-300 px-3 py-2 w-full resize-none"
-          ></textarea>
+            className="mt-1 rounded-lg border border-slate-300 px-3 py-2 w-full text-sm focus:border-primary focus:outline-none resize-none"
+          />
         </div>
         <div className="mt-6 flex gap-3">
           <button type="button" onClick={() => navigate("/agents")}
             className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-secondary">
-            Back to Agents
+            Cancel
           </button>
           <button
             type="submit"
             disabled={isLoading}
-            className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+            className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:opacity-50"
           >
-            Update Agent
+            {isLoading ? "Updating..." : "Update Agent"}
           </button>
         </div>
       </form>

@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 
 from app.schemas.agent import AgentResponse
 from app.schemas.candidate import CandidateResponse
@@ -55,5 +55,5 @@ class MedicalTokenListResponse(BaseModel):
 
 
 class MedicalTokenStatusUpdate(BaseModel):
-    medical_status: str | None = None
-    payment_status: str | None = None
+    medical_status: str | None = Field(None, pattern=r"^(pending|token_issued|scheduled|completed|failed|cancelled)$")
+    payment_status: str | None = Field(None, pattern=r"^(unpaid|partial|paid)$")

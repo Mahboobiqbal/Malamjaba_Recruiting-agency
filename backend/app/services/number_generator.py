@@ -1,3 +1,4 @@
+import uuid
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -10,40 +11,53 @@ from app.models.payment import Payment
 from app.models.expense import Expense
 
 
-async def generate_number(db: AsyncSession, model, prefix: str) -> str:
-    max_stmt = select(func.max(model.id)).select_from(model)
-    result = await db.execute(max_stmt)
-    max_id = result.scalar() or 0
-    return f"{prefix}-{max_id + 1:06d}"
+async def generate_unique_code(db: AsyncSession, model, column, prefix: str) -> str:
+    """Generate a unique code by checking existing codes in the database."""
+    max_len = 12 - len(prefix) - 1  # e.g., AGT-XXXXXX
+    for _ in range(100):  # retry limit
+        short_id = uuid.uuid4().hex[:6].upper()
+        code = f"{prefix}-{short_id}"
+        exists = await db.execute(select(model).where(column == code))
+        if not exists.scalar_one_or_none():
+            return code
+    raise ValueError(f"Failed to generate unique {prefix} code after 100 attempts")
 
 
 async def generate_agent_code(db: AsyncSession) -> str:
-    return await generate_number(db, Agent, "AGT")
+    from app.models.agent import Agent
+    return await generate_unique_code(db, Agent, Agent.agent_code, "AGT")
 
 
 async def generate_candidate_code(db: AsyncSession) -> str:
-    return await generate_number(db, Candidate, "C")
+    from app.models.candidate import Candidate
+    return await generate_unique_code(db, Candidate, Candidate.candidate_code, "C")
 
 
 async def generate_token_code(db: AsyncSession) -> str:
-    return await generate_number(db, MedicalToken, "MED")
+    from app.models.medical_token import MedicalToken
+    return await generate_unique_code(db, MedicalToken, MedicalToken.token_code, "MED")
 
 
 async def generate_visa_code(db: AsyncSession) -> str:
-    return await generate_number(db, Visa, "VISA")
+    from app.models.visa import Visa
+    return await generate_unique_code(db, Visa, Visa.visa_code, "VISA")
 
 
 async def generate_ticket_code(db: AsyncSession) -> str:
-    return await generate_number(db, Ticket, "TKT")
+    from app.models.ticket import Ticket
+    return await generate_unique_code(db, Ticket, Ticket.ticket_code, "TKT")
 
 
 async def generate_payment_code(db: AsyncSession) -> str:
-    return await generate_number(db, Payment, "PAY")
+    from app.models.payment import Payment
+    return await generate_unique_code(db, Payment, Payment.payment_code, "PAY")
 
 
 async def generate_receipt_number(db: AsyncSession) -> str:
-    return await generate_number(db, Payment, "REC")
+    from app.models.payment import Payment
+    return await generate_unique_code(db, Payment, Payment.receipt_number, "REC")
 
 
 async def generate_expense_code(db: AsyncSession) -> str:
-    return await generate_number(db, Expense, "EXP")
+    from app.models.expense import Expense
+    return await generate_unique_code(db, Expense, Expense.expense_code, "EXP")

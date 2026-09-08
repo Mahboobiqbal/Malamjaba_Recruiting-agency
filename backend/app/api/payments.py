@@ -9,8 +9,6 @@ from app.database import get_db
 from app.dependencies import require_permission
 from app.models.payment import Payment
 from app.models.candidate import Candidate
-from app.models.visa import Visa
-from app.models.ticket import Ticket
 from app.models.ledger import LedgerEntry
 from app.models.user import User
 from app.schemas.payment import PaymentCreate, PaymentUpdate, PaymentResponse, PaymentListResponse
@@ -71,9 +69,6 @@ async def create_payment(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_permission("payments.create")),
 ):
-    if data.amount <= 0:
-        raise ValidationException("Payment amount must be positive")
-
     payment_code = await generate_payment_code(db)
     receipt_number = await generate_receipt_number(db)
 
@@ -84,29 +79,28 @@ async def create_payment(
         **data.model_dump(),
     )
     db.add(payment)
+    await db.flush()
 
     if data.candidate_id:
-        stmt = select(Candidate).where(Candidate.id == data.candidate_id)
-        result = await db.execute(stmt)
-        candidate = result.scalar_one_or_none()
-        if candidate:
-            balance_stmt = select(func.coalesce(func.sum(LedgerEntry.debit - LedgerEntry.credit), 0)).where(
-                LedgerEntry.candidate_id == data.candidate_id
-            )
-            balance_result = await db.execute(balance_stmt)
-            current_balance = float(balance_result.scalar() or 0)
+        balance_stmt = select(func.coalesce(func.sum(LedgerEntry.debit - LedgerEntry.credit), 0)).where(
+            LedgerEntry.candidate_id == data.candidate_id
+        )
+        balance_result = await db.execute(balance_stmt)
+        current_balance = float(balance_result.scalar() or 0)
 
-            new_balance = current_balance - data.amount
+        new_balance = current_balance - data.amount
 
-            ledger_entry = LedgerEntry(
-                candidate_id=data.candidate_id,
-                entry_type="payment",
-                description=f"Payment {payment_code} - {data.payment_method}",
-                credit=data.amount,
-                balance=new_balance,
-                created_by=current_user.id,
-            )
-            db.add(ledger_entry)
+        ledger_entry = LedgerEntry(
+            candidate_id=data.candidate_id,
+            entry_type="payment",
+            reference_type="payment",
+            reference_id=payment.id,
+            description=f"Payment {payment_code} - {data.payment_method}",
+            credit=data.amount,
+            balance=new_balance,
+            created_by=current_user.id,
+        )
+        db.add(ledger_entry)
 
     await db.commit()
     await db.refresh(payment)
@@ -175,6 +169,16 @@ async def delete_payment(
     payment = result.scalar_one_or_none()
     if not payment:
         raise NotFoundException("Payment not found")
+
+    if payment.candidate_id:
+        ledger_stmt = select(LedgerEntry).where(
+            LedgerEntry.reference_type == "payment",
+            LedgerEntry.reference_id == payment_id,
+        )
+        ledger_result = await db.execute(ledger_stmt)
+        for entry in ledger_result.scalars().all():
+            await db.delete(entry)
+
     await db.delete(payment)
     await db.commit()
     return {"message": "Payment deleted successfully", "success": True}

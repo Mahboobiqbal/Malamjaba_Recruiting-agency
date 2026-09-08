@@ -3,10 +3,25 @@ import { useNavigate } from "react-router-dom";
 import { useCreateCandidateMutation } from "../../services/candidate.service";
 import { useGetAgentsQuery } from "../../services/agent.service";
 
+function parseErrors(err: any): string {
+  if (err?.data?.detail) {
+    const d = err.data.detail;
+    if (Array.isArray(d)) {
+      return d.map((e: any) => {
+        const field = e.loc?.[1] || e.loc?.[0] || "";
+        return `${field ? field + ": " : ""}${e.msg}`;
+      }).join("\n");
+    }
+    return d;
+  }
+  return "Failed to create candidate";
+}
+
 export default function CandidateCreate() {
   const navigate = useNavigate();
   const [createCandidate, { isLoading }] = useCreateCandidateMutation();
   const { data: agentsData } = useGetAgentsQuery({ per_page: 100 });
+  const [errors, setErrors] = useState("");
   const [form, setForm] = useState({
     full_name: "", father_name: "", cnic: "", passport_number: "",
     mobile: "", alternate_mobile: "", address: "", city: "", country: "",
@@ -16,6 +31,7 @@ export default function CandidateCreate() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors("");
     try {
       await createCandidate({
         ...form,
@@ -23,18 +39,24 @@ export default function CandidateCreate() {
       }).unwrap();
       navigate("/candidates");
     } catch (err: any) {
-      alert(err?.data?.detail || "Failed to create candidate");
+      setErrors(parseErrors(err));
     }
   };
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <h2 className="text-2xl font-bold text-slate-800">New Candidate</h2>
+      {errors && (
+        <div className="rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-700 whitespace-pre-line">
+          {errors}
+        </div>
+      )}
       <form onSubmit={handleSubmit} className="rounded-lg border bg-white p-6 shadow-sm">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <label className="block text-sm font-medium text-slate-700">Full Name *</label>
             <input type="text" value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+              placeholder="e.g. Muhammad Ali"
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
           </div>
           <div>
@@ -45,22 +67,25 @@ export default function CandidateCreate() {
           <div>
             <label className="block text-sm font-medium text-slate-700">CNIC</label>
             <input type="text" value={form.cnic} onChange={(e) => setForm({ ...form, cnic: e.target.value })}
-              placeholder="XXXXX-XXXXXXX-X"
+              placeholder="35202-1234567-1"
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none" />
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700">Passport Number *</label>
-            <input type="text" value={form.passport_number} onChange={(e) => setForm({ ...form, passport_number: e.target.value })}
+            <input type="text" value={form.passport_number} onChange={(e) => setForm({ ...form, passport_number: e.target.value.toUpperCase() })}
+              placeholder="AB1234567"
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700">Mobile *</label>
             <input type="text" value={form.mobile} onChange={(e) => setForm({ ...form, mobile: e.target.value })}
+              placeholder="03012345678"
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700">Alternate Mobile</label>
             <input type="text" value={form.alternate_mobile} onChange={(e) => setForm({ ...form, alternate_mobile: e.target.value })}
+              placeholder="03012345678"
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none" />
           </div>
           <div>

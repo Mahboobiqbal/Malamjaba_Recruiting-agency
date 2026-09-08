@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.schemas.agent import AgentResponse
 from app.schemas.candidate import CandidateResponse
@@ -9,21 +9,21 @@ from app.schemas.candidate import CandidateResponse
 class VisaBase(BaseModel):
     candidate_id: int
     agent_id: int | None = None
-    visa_type: str | None = None
-    country: str | None = None
-    visa_number: str | None = None
-    reference_number: str | None = None
+    visa_type: str | None = Field(None, max_length=50)
+    country: str | None = Field(None, max_length=50)
+    visa_number: str | None = Field(None, max_length=50)
+    reference_number: str | None = Field(None, max_length=50)
     issue_date: date | None = None
     expiry_date: date | None = None
-    status: str = "processing"
-    profession: str | None = None
-    employer: str | None = None
-    sponsor: str | None = None
-    wakala_reference: str | None = None
-    visa_fee: float = 0
-    agent_fee: float = 0
-    other_charges: float = 0
-    remarks: str | None = None
+    status: str = Field("processing", pattern=r"^(processing|submitted|approved|rejected|cancelled|expired)$")
+    profession: str | None = Field(None, max_length=100)
+    employer: str | None = Field(None, max_length=100)
+    sponsor: str | None = Field(None, max_length=100)
+    wakala_reference: str | None = Field(None, max_length=50)
+    visa_fee: float = Field(0, ge=0)
+    agent_fee: float = Field(0, ge=0)
+    other_charges: float = Field(0, ge=0)
+    remarks: str | None = Field(None, max_length=500)
 
 
 class VisaCreate(VisaBase):
@@ -72,4 +72,4 @@ class VisaListResponse(BaseModel):
 
 
 class VisaStatusUpdate(BaseModel):
-    status: str
+    status: str = Field(..., pattern=r"^(processing|submitted|approved|rejected|cancelled|expired)$")
