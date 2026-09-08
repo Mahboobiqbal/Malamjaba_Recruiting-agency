@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useGetCandidateQuery, useUpdateCandidateMutation } from "../../services/candidate.service";
 import { useGetAgentsQuery } from "../../services/agent.service";
+import { formatCNIC } from "../../lib/utils";
 
 export default function CandidateEdit() {
   const { id } = useParams();
@@ -63,7 +64,7 @@ export default function CandidateEdit() {
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700">CNIC</label>
-            <input type="text" value={form.cnic || ""} onChange={(e) => setForm({ ...form, cnic: e.target.value })}
+            <input type="text" value={form.cnic || ""} onChange={(e) => setForm({ ...form, cnic: formatCNIC(e.target.value) })}
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none" />
           </div>
           <div>

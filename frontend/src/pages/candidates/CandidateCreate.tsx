@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCreateCandidateMutation } from "../../services/candidate.service";
 import { useGetAgentsQuery } from "../../services/agent.service";
+import { formatCNIC } from "../../lib/utils";
 
 function parseErrors(err: any): string {
   if (err?.data?.detail) {
@@ -66,7 +67,7 @@ export default function CandidateCreate() {
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700">CNIC</label>
-            <input type="text" value={form.cnic} onChange={(e) => setForm({ ...form, cnic: e.target.value })}
+            <input type="text" value={form.cnic} onChange={(e) => setForm({ ...form, cnic: formatCNIC(e.target.value) })}
               placeholder="35202-1234567-1"
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none" />
           </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetAgentQuery, useUpdateAgentMutation } from "../../services/agent.service";
+import { formatCNIC } from "../../lib/utils";
 
 export default function AgentEdit() {
   const params = useParams();
@@ -93,7 +94,7 @@ export default function AgentEdit() {
             <label className="block text-sm font-medium text-slate-700">CNIC *</label>
             <input
               value={form.cnic}
-              onChange={(e) => setForm({ ...form, cnic: e.target.value })}
+              onChange={(e) => setForm({ ...form, cnic: formatCNIC(e.target.value) })}
               type="text"
               placeholder="35202-1234567-1"
               className="mt-1 rounded-lg border border-slate-300 px-3 py-2 w-full text-sm focus:border-primary focus:outline-none"

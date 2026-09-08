@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCreateAgentMutation } from "../../services/agent.service";
+import { formatCNIC } from "../../lib/utils";
 
 function parseErrors(err: any): string {
   if (err?.data?.detail) {
@@ -57,7 +58,7 @@ export default function AgentCreate() {
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700">CNIC *</label>
-            <input type="text" value={form.cnic} onChange={(e) => setForm({ ...form, cnic: e.target.value })}
+            <input type="text" value={form.cnic} onChange={(e) => setForm({ ...form, cnic: formatCNIC(e.target.value) })}
               placeholder="35202-1234567-1"
               pattern="\d{5}-\d{7}-\d"
               title="Format: XXXXX-XXXXXXX-X"
