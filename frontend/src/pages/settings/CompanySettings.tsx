@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import toast from "react-hot-toast";
 import {
   useGetCompanySettingsQuery,
   useUpdateCompanySettingsMutation,
@@ -10,7 +11,7 @@ import {
   useResetAllDataMutation,
 } from "../../services/dashboard.service";
 import { formatDateTime } from "../../lib/utils";
-import { Building2, Database, Upload, Download, RotateCcw, Trash2, Save, Check, Shield, HardDrive, AlertTriangle } from "lucide-react";
+import { Building2, Database, Upload, Download, RotateCcw, Trash2, Save, Check, Shield, HardDrive, AlertTriangle, X } from "lucide-react";
 
 function formatFileSize(bytes: number | null): string {
   if (!bytes) return "0 B";
@@ -80,9 +81,10 @@ function CompanyTab() {
     try {
       await updateSettings(form).unwrap();
       setSaved(true);
+      toast.success("Settings saved successfully");
       setTimeout(() => setSaved(false), 2000);
     } catch (err: any) {
-      alert(err?.data?.detail || "Failed to save settings");
+      toast.error(err?.data?.detail || "Failed to save settings");
     }
   };
 
@@ -139,6 +141,8 @@ function BackupTab() {
   const [restoreFromUpload] = useRestoreFromUploadMutation();
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [confirmRestore, setConfirmRestore] = useState<{ id: number; filename: string } | null>(null);
+  const [confirmUpload, setConfirmUpload] = useState<File | null>(null);
 
   const handleDownload = async (id: number, filename: string) => {
     try {
@@ -151,8 +155,9 @@ function BackupTab() {
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
+      toast.success(`Downloaded ${filename}`);
     } catch (err: any) {
-      alert(err?.data?.detail || "Failed to download backup");
+      toast.error(err?.data?.detail || "Failed to download backup");
     }
   };
 
@@ -160,18 +165,20 @@ function BackupTab() {
     try {
       await createBackup().unwrap();
       refetch();
+      toast.success("Backup created successfully");
     } catch (err: any) {
-      alert(err?.data?.detail || "Failed to create backup");
+      toast.error(err?.data?.detail || "Failed to create backup");
     }
   };
 
-  const handleRestore = async (id: number, filename: string) => {
-    if (!window.confirm(`Restore from "${filename}"?\n\nCurrent database will be backed up automatically before restoring.`)) return;
+  const handleRestoreConfirm = async () => {
+    if (!confirmRestore) return;
     try {
-      await restoreBackup(id).unwrap();
-      alert("Database restored. Please restart the application.");
+      await restoreBackup(confirmRestore.id).unwrap();
+      toast.success("Database restored successfully. Please refresh the page.");
+      setConfirmRestore(null);
     } catch (err: any) {
-      alert(err?.data?.detail || "Failed to restore");
+      toast.error(err?.data?.detail || "Failed to restore database");
     }
   };
 
@@ -179,17 +186,21 @@ function BackupTab() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.name.endsWith(".db")) {
-      alert("Only .db files are allowed");
+      toast.error("Only .db files are allowed");
       return;
     }
-    if (!window.confirm("Restore from uploaded file?\n\nCurrent database will be backed up automatically.")) return;
+    setConfirmUpload(file);
+  };
 
+  const handleUploadConfirm = async () => {
+    if (!confirmUpload) return;
     setUploading(true);
     try {
-      await restoreFromUpload(file).unwrap();
-      alert("Database restored. Please restart the application.");
+      await restoreFromUpload(confirmUpload).unwrap();
+      toast.success("Database restored successfully. Please refresh the page.");
+      setConfirmUpload(null);
     } catch (err: any) {
-      alert(err?.data?.detail || "Failed to restore");
+      toast.error(err?.data?.detail || "Failed to restore database");
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -246,7 +257,7 @@ function BackupTab() {
                   </td>
                   <td className="px-4 py-3">
                     <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                      b.backup_type === "manual" ? "bg-blue-50 text-blue-700" : "bg-purple-50 text-purple-700"
+                      b.backup_type === "manual" ? "bg-blue-50 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400" : "bg-purple-50 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400"
                     }`}>
                       {b.backup_type}
                     </span>
@@ -262,7 +273,7 @@ function BackupTab() {
                         <Download className="h-3.5 w-3.5" /> Download
                       </button>
                       <button
-                        onClick={() => handleRestore(b.id, b.filename)}
+                        onClick={() => setConfirmRestore({ id: b.id, filename: b.filename })}
                         className="flex items-center gap-1 text-sm text-amber-600 hover:underline font-medium"
                       >
                         <RotateCcw className="h-3.5 w-3.5" /> Restore
@@ -279,6 +290,88 @@ function BackupTab() {
           <HardDrive className="mx-auto h-8 w-8 text-slate-300" />
           <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">No backups yet</p>
           <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Click "New Backup" to create your first backup</p>
+        </div>
+      )}
+
+      {/* Restore Confirmation Modal */}
+      {confirmRestore && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="mx-4 w-full max-w-md rounded-xl bg-white dark:bg-slate-900 shadow-2xl">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-500/20">
+                  <RotateCcw className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                </div>
+                <button onClick={() => setConfirmRestore(null)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <h3 className="mt-4 text-lg font-bold text-slate-900 dark:text-white">Restore Database</h3>
+              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                Are you sure you want to restore from <span className="font-semibold text-slate-700 dark:text-slate-200">{confirmRestore.filename}</span>?
+              </p>
+              <div className="mt-4 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 p-3">
+                <p className="text-sm text-amber-700 dark:text-amber-400">
+                  Your current database will be backed up automatically before restoring.
+                </p>
+              </div>
+            </div>
+            <div className="flex border-t border-slate-200 dark:border-slate-700">
+              <button
+                onClick={() => setConfirmRestore(null)}
+                className="flex-1 px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-bl-xl transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRestoreConfirm}
+                className="flex-1 px-4 py-3 text-sm font-medium text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 border-l border-slate-200 dark:border-slate-700 rounded-br-xl transition-colors"
+              >
+                Restore
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Upload Confirmation Modal */}
+      {confirmUpload && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="mx-4 w-full max-w-md rounded-xl bg-white dark:bg-slate-900 shadow-2xl">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-500/20">
+                  <Upload className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                </div>
+                <button onClick={() => setConfirmUpload(null)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <h3 className="mt-4 text-lg font-bold text-slate-900 dark:text-white">Upload & Restore</h3>
+              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                Restore from uploaded file <span className="font-semibold text-slate-700 dark:text-slate-200">{confirmUpload.name}</span>?
+              </p>
+              <div className="mt-4 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 p-3">
+                <p className="text-sm text-amber-700 dark:text-amber-400">
+                  Your current database will be backed up automatically before restoring.
+                </p>
+              </div>
+            </div>
+            <div className="flex border-t border-slate-200 dark:border-slate-700">
+              <button
+                onClick={() => setConfirmUpload(null)}
+                className="flex-1 px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-bl-xl transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUploadConfirm}
+                className="flex-1 px-4 py-3 text-sm font-medium text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 border-l border-slate-200 dark:border-slate-700 rounded-br-xl transition-colors"
+              >
+                Restore
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -300,7 +393,7 @@ function DangerTab() {
       setShowModal(false);
       setShowSuccess(true);
     } catch (err: any) {
-      alert(err?.data?.detail || "Failed to reset data");
+      toast.error(err?.data?.detail || "Failed to reset data");
       setResetting(false);
     }
   };
@@ -355,7 +448,7 @@ function DangerTab() {
                   value={confirmText}
                   onChange={(e) => setConfirmText(e.target.value)}
                   placeholder="Type DELETE"
-                  className="w-full rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+                  className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-sm text-slate-800 dark:text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
                   autoFocus
                 />
               </div>
