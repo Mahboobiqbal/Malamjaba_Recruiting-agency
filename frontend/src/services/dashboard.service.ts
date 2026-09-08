@@ -11,6 +11,7 @@ export const dashboardApi = api.injectEndpoints({
     getDashboard: builder.query<DashboardSummary, void>({
       query: () => "/dashboard",
       providesTags: ["Dashboard"],
+      refetchOnMountOrArgChange: true,
     }),
     getPayments: builder.query<
       PaginatedResponse<Payment>,

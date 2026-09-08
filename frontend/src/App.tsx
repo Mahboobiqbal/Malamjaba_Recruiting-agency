@@ -13,6 +13,7 @@ import CandidateEdit from "./pages/candidates/CandidateEdit";
 import AgentList from "./pages/agents/AgentList";
 import AgentCreate from "./pages/agents/AgentCreate";
 import AgentDetail from "./pages/agents/AgentDetail";
+import AgentEdit from "./pages/agents/AgentEdit";
 import MedicalTokenList from "./pages/medical/MedicalTokenList";
 import MedicalTokenCreate from "./pages/medical/MedicalTokenCreate";
 import MedicalTokenDetail from "./pages/medical/MedicalTokenDetail";
@@ -48,6 +49,7 @@ export default function App() {
             <Route path="/agents" element={<AgentList />} />
             <Route path="/agents/new" element={<AgentCreate />} />
             <Route path="/agents/:id" element={<AgentDetail />} />
+            <Route path="/agents/:id/edit" element={<AgentEdit />} />
             <Route path="/medical" element={<MedicalTokenList />} />
             <Route path="/medical/new" element={<MedicalTokenCreate />} />
             <Route path="/medical/:id" element={<MedicalTokenDetail />} />

@@ -1,5 +1,5 @@
 import re
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
 
 from pydantic import BaseModel, Field, field_validator
@@ -10,7 +10,7 @@ PAK_MOBILE_REGEX = r"^(?:\+92|92|0)?3[0-9]{9}$"
 
 
 class AgentBase(BaseModel):
-    name: str = Field(..., min_length=2, max_length=100, description="Agent full name")
+    name: str = Field(..., min_length=2, max_length=100)
     father_name: str | None = Field(None, max_length=100)
     cnic: str = Field(..., description="CNIC in format XXXXX-XXXXXXX-X")
     mobile: str = Field(..., description="Pakistani mobile number")
@@ -18,11 +18,13 @@ class AgentBase(BaseModel):
     address: str | None = Field(None, max_length=500)
     city: str | None = Field(None, max_length=50)
     email: str | None = None
-    commission_rate: float = Field(0, ge=0, le=100, description="Commission rate 0-100%")
+    commission_rate: float = Field(0, ge=0, le=100)
     bank_info: str | None = Field(None, max_length=500)
     status: str = Field("active", pattern=r"^(active|inactive|blocked)$")
     notes: str | None = Field(None, max_length=1000)
 
+
+class AgentCreate(AgentBase):
     @field_validator("name")
     @classmethod
     def validate_name(cls, v: str) -> str:
@@ -84,10 +86,6 @@ class AgentBase(BaseModel):
             if v and not re.match(r"^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$", v):
                 raise ValueError("Invalid email address")
         return v or None
-
-
-class AgentCreate(AgentBase):
-    pass
 
 
 class AgentUpdate(BaseModel):
@@ -188,7 +186,7 @@ class AgentCandidateSummary(BaseModel):
     passport_number: str
     mobile: str
     status: str
-    registration_date: str
+    registration_date: date
     created_at: datetime
 
     model_config = {"from_attributes": True}

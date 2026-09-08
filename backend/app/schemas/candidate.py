@@ -31,6 +31,8 @@ class CandidateBase(BaseModel):
     reference: str | None = Field(None, max_length=100)
     notes: str | None = Field(None, max_length=1000)
 
+
+class CandidateCreate(CandidateBase):
     @field_validator("full_name")
     @classmethod
     def validate_full_name(cls, v: str) -> str:
@@ -116,10 +118,6 @@ class CandidateBase(BaseModel):
         return self
 
 
-class CandidateCreate(CandidateBase):
-    pass
-
-
 class CandidateUpdate(BaseModel):
     full_name: str | None = Field(None, min_length=2, max_length=100)
     father_name: str | None = None
@@ -159,7 +157,7 @@ class CandidateUpdate(BaseModel):
             v = v.strip().replace(" ", "")
             if v and not re.match(CNIC_REGEX, v):
                 raise ValueError("CNIC must be in format XXXXX-XXXXXXX-X")
-        return v or None
+        return v
 
     @field_validator("passport_number")
     @classmethod
@@ -197,7 +195,7 @@ class CandidateUpdate(BaseModel):
                     v = "+92" + v[1:]
                 elif not v.startswith("+"):
                     v = "+" + v
-        return v or None
+        return v
 
     @field_validator("passport_issue_date", "passport_expiry_date", "date_of_birth")
     @classmethod
