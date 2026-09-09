@@ -126,42 +126,6 @@ async def download_backup(
     )
 
 
-@router.post("/restore/{backup_id}")
-async def restore_backup(
-    backup_id: int,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_permission("settings.manage")),
-):
-    stmt = select(BackupLog).where(BackupLog.id == backup_id)
-    result = await db.execute(stmt)
-    backup = result.scalar_one_or_none()
-
-    if not backup or not os.path.exists(backup.file_path):
-        raise HTTPException(status_code=404, detail="Backup file not found")
-
-    db_path = os.path.abspath("./dev.db")
-    backup_dir = os.path.abspath(settings.backup_dir)
-    os.makedirs(backup_dir, exist_ok=True)
-
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    pre_restore_path = os.path.join(backup_dir, f"pre_restore_{timestamp}.db")
-    
-    try:
-        shutil.copy2(db_path, pre_restore_path)
-    except Exception:
-        pass
-
-    try:
-        shutil.copy2(backup.file_path, db_path)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to restore database: {str(e)}. The file may be in use.")
-
-    return {
-        "message": "Database restored successfully. Please restart the application.",
-        "restored_from": backup.filename,
-    }
-
-
 @router.post("/restore/upload")
 async def restore_from_upload(
     file: UploadFile = File(...),
@@ -211,6 +175,42 @@ async def restore_from_upload(
     return {
         "message": "Database restored from uploaded file. Please restart the application.",
         "filename": filename,
+    }
+
+
+@router.post("/restore/{backup_id}")
+async def restore_backup(
+    backup_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_permission("settings.manage")),
+):
+    stmt = select(BackupLog).where(BackupLog.id == backup_id)
+    result = await db.execute(stmt)
+    backup = result.scalar_one_or_none()
+
+    if not backup or not os.path.exists(backup.file_path):
+        raise HTTPException(status_code=404, detail="Backup file not found")
+
+    db_path = os.path.abspath("./dev.db")
+    backup_dir = os.path.abspath(settings.backup_dir)
+    os.makedirs(backup_dir, exist_ok=True)
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    pre_restore_path = os.path.join(backup_dir, f"pre_restore_{timestamp}.db")
+    
+    try:
+        shutil.copy2(db_path, pre_restore_path)
+    except Exception:
+        pass
+
+    try:
+        shutil.copy2(backup.file_path, db_path)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to restore database: {str(e)}. The file may be in use.")
+
+    return {
+        "message": "Database restored successfully. Please restart the application.",
+        "restored_from": backup.filename,
     }
 
 
