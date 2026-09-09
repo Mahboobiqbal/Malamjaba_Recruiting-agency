@@ -1,22 +1,38 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { useGetCandidatesQuery, useDeleteCandidateMutation, useUpdateCandidateStatusMutation } from "../../services/candidate.service";
+import { useGetCandidatesQuery, useLazyGetCandidateQuery, useDeleteCandidateMutation, useUpdateCandidateStatusMutation } from "../../services/candidate.service";
 import { CANDIDATE_STATUSES } from "../../lib/constants";
 import { formatDate } from "../../lib/utils";
-import { Plus, Search, Trash2, Eye, Edit } from "lucide-react";
+import { downloadPDF } from "../../lib/pdf";
+import { Plus, Search, Trash2, Eye, Edit, Printer } from "lucide-react";
 import StatusDropdown from "../../components/common/StatusDropdown";
+import DateFilter from "../../components/common/DateFilter";
+import CandidatePrintDocument from "../../components/print/CandidatePrintDocument";
+import type { Candidate } from "../../types";
 
 export default function CandidateList() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
-  const { data, isLoading } = useGetCandidatesQuery({ page, per_page: 20, search, status });
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const { data, isLoading } = useGetCandidatesQuery({ page, per_page: 20, search, status, date_from: dateFrom || undefined, date_to: dateTo || undefined });
   const [deleteCandidate] = useDeleteCandidateMutation();
   const [updateStatus] = useUpdateCandidateStatusMutation();
+  const [fetchCandidate] = useLazyGetCandidateQuery();
+  const [printCandidate, setPrintCandidate] = useState<Candidate | null>(null);
 
   const handleDelete = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this candidate?")) {
       await deleteCandidate(id);
+    }
+  };
+
+  const handlePrint = async (id: number) => {
+    const result = await fetchCandidate(id);
+    if (result.data) {
+      setPrintCandidate(result.data);
+      setTimeout(() => downloadPDF("print-area", `Candidate-${result.data!.candidate_code}`), 100);
     }
   };
 
@@ -33,7 +49,7 @@ export default function CandidateList() {
         </Link>
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex flex-wrap gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
           <input
@@ -54,6 +70,7 @@ export default function CandidateList() {
             <option key={s.value} value={s.value}>{s.label}</option>
           ))}
         </select>
+        <DateFilter dateFrom={dateFrom} dateTo={dateTo} onDateFromChange={(v) => { setDateFrom(v); setPage(1); }} onDateToChange={(v) => { setDateTo(v); setPage(1); }} onClear={() => { setDateFrom(""); setDateTo(""); setPage(1); }} />
       </div>
 
       <div className="overflow-hidden rounded-lg border bg-white dark:bg-slate-900 shadow-sm dark:shadow-none">
@@ -90,6 +107,9 @@ export default function CandidateList() {
                       <Link to={`/candidates/${c.id}`} className="text-slate-400 dark:text-slate-500 hover:text-primary">
                         <Eye className="h-4 w-4" />
                       </Link>
+                      <button onClick={() => handlePrint(c.id)} className="text-slate-400 dark:text-slate-500 hover:text-primary">
+                        <Printer className="h-4 w-4" />
+                      </button>
                       <Link to={`/candidates/${c.id}/edit`} className="text-slate-400 dark:text-slate-500 hover:text-amber-600 dark:hover:text-amber-400">
                         <Edit className="h-4 w-4" />
                       </Link>
@@ -104,6 +124,12 @@ export default function CandidateList() {
           </tbody>
         </table>
       </div>
+
+      {printCandidate && (
+        <div id="print-area" className="print-only" style={{ position: "absolute", left: "-9999px", top: 0 }}>
+          <CandidatePrintDocument candidate={printCandidate} />
+        </div>
+      )}
 
       {data && data.total > 20 && (
         <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">

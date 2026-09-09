@@ -27,6 +27,7 @@ class MedicalToken(Base):
 
     candidate: Mapped["Candidate"] = relationship(back_populates="medical_tokens")
     agent: Mapped["Agent | None"] = relationship(back_populates="medical_tokens")
+    payments: Mapped[list["Payment"]] = relationship(back_populates="medical_token")
 
 
 from app.models.agent import Agent

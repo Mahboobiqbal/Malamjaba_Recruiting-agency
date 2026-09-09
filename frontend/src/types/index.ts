@@ -65,6 +65,10 @@ export interface Candidate {
   created_at: string;
   updated_at: string;
   agent?: Agent;
+  medical_tokens?: MedicalToken[];
+  visas?: Visa[];
+  tickets?: Ticket[];
+  payments?: Payment[];
 }
 
 export interface MedicalToken {
@@ -156,6 +160,9 @@ export interface Payment {
   receipt_number: string;
   candidate_id?: number;
   agent_id?: number;
+  visa_id?: number;
+  ticket_id?: number;
+  medical_token_id?: number;
   payment_date: string;
   payment_type: string;
   amount: number;
@@ -167,6 +174,32 @@ export interface Payment {
   created_at: string;
   candidate?: Candidate;
   agent?: Agent;
+  visa?: {
+    id: number;
+    visa_code: string;
+    visa_type?: string;
+    country?: string;
+    total_cost: number;
+    paid_amount: number;
+    remaining_amount: number;
+  };
+  ticket?: {
+    id: number;
+    ticket_code: string;
+    airline?: string;
+    departure_airport?: string;
+    arrival_airport?: string;
+    total: number;
+    paid: number;
+    remaining: number;
+  };
+  medical_token?: {
+    id: number;
+    token_code: string;
+    medical_center?: string;
+    medical_fee: number;
+    payment_status: string;
+  };
 }
 
 export interface Expense {

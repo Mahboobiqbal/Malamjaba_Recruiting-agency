@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,12 +9,24 @@ from app.database import get_db
 from app.dependencies import require_permission
 from app.models.candidate import Candidate
 from app.models.agent import Agent
+from app.models.medical_token import MedicalToken
+from app.models.visa import Visa
+from app.models.ticket import Ticket
+from app.models.payment import Payment
 from app.models.user import User
 from app.schemas.candidate import CandidateCreate, CandidateUpdate, CandidateResponse, CandidateListResponse, CandidateStatusUpdate
 from app.services.number_generator import generate_candidate_code
 from app.core.exceptions import NotFoundException, DuplicateException
 
 router = APIRouter(prefix="/candidates", tags=["Candidates"])
+
+LOAD_CANDIDATE_OPTIONS = [
+    selectinload(Candidate.agent),
+    selectinload(Candidate.medical_tokens),
+    selectinload(Candidate.visas),
+    selectinload(Candidate.tickets),
+    selectinload(Candidate.payments),
+]
 
 
 @router.get("", response_model=CandidateListResponse)
@@ -23,10 +37,12 @@ async def list_candidates(
     status: str = Query(None),
     agent_id: int = Query(None),
     country: str = Query(None),
+    date_from: str = Query(None),
+    date_to: str = Query(None),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_permission("candidates.view")),
 ):
-    stmt = select(Candidate).options(selectinload(Candidate.agent))
+    stmt = select(Candidate).options(*LOAD_CANDIDATE_OPTIONS)
     count_stmt = select(func.count()).select_from(Candidate)
 
     if search:
@@ -52,6 +68,13 @@ async def list_candidates(
     if country:
         stmt = stmt.where(Candidate.country == country)
         count_stmt = count_stmt.where(Candidate.country == country)
+
+    if date_from:
+        stmt = stmt.where(Candidate.created_at >= date_from)
+        count_stmt = count_stmt.where(Candidate.created_at >= date_from)
+    if date_to:
+        stmt = stmt.where(Candidate.created_at <= date_to + " 23:59:59")
+        count_stmt = count_stmt.where(Candidate.created_at <= date_to + " 23:59:59")
 
     total_result = await db.execute(count_stmt)
     total = total_result.scalar() or 0
@@ -83,7 +106,7 @@ async def create_candidate(
     await db.commit()
     await db.refresh(candidate)
 
-    stmt = select(Candidate).where(Candidate.id == candidate.id).options(selectinload(Candidate.agent))
+    stmt = select(Candidate).where(Candidate.id == candidate.id).options(*LOAD_CANDIDATE_OPTIONS)
     result = await db.execute(stmt)
     return result.scalar_one()
 
@@ -94,7 +117,11 @@ async def get_candidate(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_permission("candidates.view")),
 ):
-    stmt = select(Candidate).where(Candidate.id == candidate_id).options(selectinload(Candidate.agent))
+    stmt = (
+        select(Candidate)
+        .where(Candidate.id == candidate_id)
+        .options(*LOAD_CANDIDATE_OPTIONS)
+    )
     result = await db.execute(stmt)
     candidate = result.scalar_one_or_none()
     if not candidate:
@@ -122,7 +149,7 @@ async def update_candidate(
     await db.commit()
     await db.refresh(candidate)
 
-    stmt = select(Candidate).where(Candidate.id == candidate.id).options(selectinload(Candidate.agent))
+    stmt = select(Candidate).where(Candidate.id == candidate.id).options(*LOAD_CANDIDATE_OPTIONS)
     result = await db.execute(stmt)
     return result.scalar_one()
 
@@ -144,7 +171,7 @@ async def update_candidate_status(
     await db.commit()
     await db.refresh(candidate)
 
-    stmt = select(Candidate).where(Candidate.id == candidate.id).options(selectinload(Candidate.agent))
+    stmt = select(Candidate).where(Candidate.id == candidate.id).options(*LOAD_CANDIDATE_OPTIONS)
     result = await db.execute(stmt)
     return result.scalar_one()
 

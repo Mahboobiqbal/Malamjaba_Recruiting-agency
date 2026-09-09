@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,6 +23,8 @@ async def list_tickets(
     per_page: int = Query(20, ge=1, le=100),
     search: str = Query(None),
     status: str = Query(None),
+    date_from: str = Query(None),
+    date_to: str = Query(None),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_permission("tickets.view")),
 ):
@@ -39,6 +43,13 @@ async def list_tickets(
     if status:
         stmt = stmt.where(Ticket.status == status)
         count_stmt = count_stmt.where(Ticket.status == status)
+
+    if date_from:
+        stmt = stmt.where(Ticket.created_at >= date_from)
+        count_stmt = count_stmt.where(Ticket.created_at >= date_from)
+    if date_to:
+        stmt = stmt.where(Ticket.created_at <= date_to + " 23:59:59")
+        count_stmt = count_stmt.where(Ticket.created_at <= date_to + " 23:59:59")
 
     total_result = await db.execute(count_stmt)
     total = total_result.scalar() or 0

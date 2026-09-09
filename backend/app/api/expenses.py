@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,6 +21,8 @@ async def list_expenses(
     per_page: int = Query(20, ge=1, le=100),
     search: str = Query(None),
     category: str = Query(None),
+    date_from: str = Query(None),
+    date_to: str = Query(None),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_permission("expenses.view")),
 ):
@@ -34,6 +38,13 @@ async def list_expenses(
     if category:
         stmt = stmt.where(Expense.category == category)
         count_stmt = count_stmt.where(Expense.category == category)
+
+    if date_from:
+        stmt = stmt.where(Expense.date >= date_from)
+        count_stmt = count_stmt.where(Expense.date >= date_from)
+    if date_to:
+        stmt = stmt.where(Expense.date <= date_to + " 23:59:59")
+        count_stmt = count_stmt.where(Expense.date <= date_to + " 23:59:59")
 
     total_result = await db.execute(count_stmt)
     total = total_result.scalar() or 0

@@ -15,6 +15,9 @@ export default function PaymentCreate() {
   const [form, setForm] = useState({
     candidate_id: candidateId ? Number(candidateId) : 0,
     agent_id: 0,
+    visa_id: searchParams.get("visa_id") ? Number(searchParams.get("visa_id")) : 0,
+    ticket_id: searchParams.get("ticket_id") ? Number(searchParams.get("ticket_id")) : 0,
+    medical_token_id: searchParams.get("medical_token_id") ? Number(searchParams.get("medical_token_id")) : 0,
     payment_date: new Date().toISOString().slice(0, 16),
     payment_type: "partial",
     amount: 0,
@@ -31,6 +34,9 @@ export default function PaymentCreate() {
         ...form,
         candidate_id: form.candidate_id || undefined,
         agent_id: form.agent_id || undefined,
+        visa_id: form.visa_id || undefined,
+        ticket_id: form.ticket_id || undefined,
+        medical_token_id: form.medical_token_id || undefined,
         payment_date: new Date(form.payment_date).toISOString(),
       }).unwrap();
       navigate("/payments");
@@ -42,6 +48,15 @@ export default function PaymentCreate() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Record Payment</h2>
+      {(searchParams.get("visa_id") || searchParams.get("ticket_id") || searchParams.get("medical_token_id")) && (
+        <div className="rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 p-4">
+          <p className="text-sm text-emerald-700 dark:text-emerald-300 font-medium">
+            {searchParams.get("visa_id") && "Payment for Visa"}
+            {searchParams.get("ticket_id") && "Payment for Ticket"}
+            {searchParams.get("medical_token_id") && "Payment for Medical Token"}
+          </p>
+        </div>
+      )}
       <form onSubmit={handleSubmit} className="rounded-lg border bg-white dark:bg-slate-900 p-6 shadow-sm dark:shadow-none">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>

@@ -3,8 +3,10 @@ import { useParams, Link } from "react-router-dom";
 import { useGetMedicalTokenQuery, useUpdateMedicalTokenStatusMutation } from "../../services/dashboard.service";
 import { MEDICAL_STATUSES } from "../../lib/constants";
 import { formatDate, formatCurrency } from "../../lib/utils";
-import { ArrowLeft, Printer } from "lucide-react";
+import { ArrowLeft, Printer, FileDown, DollarSign } from "lucide-react";
+import { downloadPDF } from "../../lib/pdf";
 import StatusDropdown from "../../components/common/StatusDropdown";
+import MedicalPrintDocument from "../../components/print/MedicalPrintDocument";
 
 const PAYMENT_STATUSES = [
   { value: "unpaid", label: "Unpaid" },
@@ -30,9 +32,22 @@ export default function MedicalTokenDetail() {
             <p className="text-sm text-secondary">{data.candidate?.full_name || "N/A"}</p>
           </div>
         </div>
-        <button onClick={() => window.print()} className="flex items-center gap-2 rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2 text-sm font-medium hover:bg-secondary">
-          <Printer className="h-4 w-4" /> Print
-        </button>
+        <div className="flex gap-3">
+          <Link to={`/payments/new?candidate_id=${data.candidate_id}&medical_token_id=${data.id}`}
+            className="flex items-center gap-2 rounded-lg bg-emerald-600 text-white px-4 py-2 text-sm font-medium hover:bg-emerald-700">
+            <DollarSign className="h-4 w-4" /> Pay Now
+          </Link>
+          <button onClick={() => downloadPDF("print-area", data.token_code)} className="flex items-center gap-2 rounded-lg bg-primary text-white px-4 py-2 text-sm font-medium hover:bg-primary/90">
+            <FileDown className="h-4 w-4" /> Download PDF
+          </button>
+          <button onClick={() => window.print()} className="flex items-center gap-2 rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2 text-sm font-medium hover:bg-secondary">
+            <Printer className="h-4 w-4" /> Print
+          </button>
+        </div>
+      </div>
+
+      <div id="print-area" className="print-only">
+        <MedicalPrintDocument token={data} />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">

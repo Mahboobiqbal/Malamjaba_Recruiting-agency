@@ -6,9 +6,44 @@ from app.schemas.agent import AgentResponse
 from app.schemas.candidate import CandidateResponse
 
 
+class VisaMinimal(BaseModel):
+    id: int
+    visa_code: str
+    visa_type: str | None = None
+    country: str | None = None
+    total_cost: float
+    paid_amount: float
+    remaining_amount: float
+    model_config = {"from_attributes": True}
+
+
+class TicketMinimal(BaseModel):
+    id: int
+    ticket_code: str
+    airline: str | None = None
+    departure_airport: str | None = None
+    arrival_airport: str | None = None
+    total: float
+    paid: float
+    remaining: float
+    model_config = {"from_attributes": True}
+
+
+class MedicalTokenMinimal(BaseModel):
+    id: int
+    token_code: str
+    medical_center: str | None = None
+    medical_fee: float
+    payment_status: str
+    model_config = {"from_attributes": True}
+
+
 class PaymentBase(BaseModel):
     candidate_id: int | None = None
     agent_id: int | None = None
+    visa_id: int | None = None
+    ticket_id: int | None = None
+    medical_token_id: int | None = None
     payment_date: datetime
     payment_type: str = Field(..., pattern=r"^(full|partial|advance|refund|adjustment)$")
     amount: float = Field(..., gt=0, description="Amount must be greater than 0")
@@ -34,6 +69,9 @@ class PaymentCreate(PaymentBase):
 class PaymentUpdate(BaseModel):
     candidate_id: int | None = None
     agent_id: int | None = None
+    visa_id: int | None = None
+    ticket_id: int | None = None
+    medical_token_id: int | None = None
     payment_date: datetime | None = None
     payment_type: str | None = Field(None, pattern=r"^(full|partial|advance|refund|adjustment)$")
     amount: float | None = Field(None, gt=0)
@@ -51,6 +89,9 @@ class PaymentResponse(PaymentBase):
     created_at: datetime
     candidate: CandidateResponse | None = None
     agent: AgentResponse | None = None
+    visa: VisaMinimal | None = None
+    ticket: TicketMinimal | None = None
+    medical_token: MedicalTokenMinimal | None = None
 
     model_config = {"from_attributes": True}
 

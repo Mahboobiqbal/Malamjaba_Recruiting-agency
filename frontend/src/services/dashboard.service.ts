@@ -14,7 +14,7 @@ export const dashboardApi = api.injectEndpoints({
     }),
     getPayments: builder.query<
       PaginatedResponse<Payment>,
-      { page?: number; per_page?: number; search?: string; candidate_id?: number }
+      { page?: number; per_page?: number; search?: string; candidate_id?: number; date_from?: string; date_to?: string }
     >({
       query: (params) => ({ url: "/payments", params }),
       providesTags: ["Payment"],
@@ -48,7 +48,7 @@ export const dashboardApi = api.injectEndpoints({
     }),
     getExpenses: builder.query<
       PaginatedResponse<Expense>,
-      { page?: number; per_page?: number; search?: string; category?: string }
+      { page?: number; per_page?: number; search?: string; category?: string; date_from?: string; date_to?: string }
     >({
       query: (params) => ({ url: "/expenses", params }),
       providesTags: ["Expense"],
@@ -67,7 +67,7 @@ export const dashboardApi = api.injectEndpoints({
     }),
     getMedicalTokens: builder.query<
       PaginatedResponse<MedicalToken>,
-      { page?: number; per_page?: number; search?: string; medical_status?: string }
+      { page?: number; per_page?: number; search?: string; medical_status?: string; date_from?: string; date_to?: string }
     >({
       query: (params) => ({ url: "/medical-tokens", params }),
       providesTags: ["MedicalToken"],
@@ -94,7 +94,7 @@ export const dashboardApi = api.injectEndpoints({
     }),
     getVisas: builder.query<
       PaginatedResponse<Visa>,
-      { page?: number; per_page?: number; search?: string; status?: string }
+      { page?: number; per_page?: number; search?: string; status?: string; date_from?: string; date_to?: string }
     >({
       query: (params) => ({ url: "/visas", params }),
       providesTags: ["Visa"],
@@ -121,7 +121,7 @@ export const dashboardApi = api.injectEndpoints({
     }),
     getTickets: builder.query<
       PaginatedResponse<Ticket>,
-      { page?: number; per_page?: number; search?: string; status?: string }
+      { page?: number; per_page?: number; search?: string; status?: string; date_from?: string; date_to?: string }
     >({
       query: (params) => ({ url: "/tickets", params }),
       providesTags: ["Ticket"],

@@ -38,6 +38,7 @@ class Visa(Base):
 
     candidate: Mapped["Candidate"] = relationship(back_populates="visas")
     agent: Mapped["Agent | None"] = relationship(back_populates="visas")
+    payments: Mapped[list["Payment"]] = relationship(back_populates="visa")
 
 
 from app.models.agent import Agent

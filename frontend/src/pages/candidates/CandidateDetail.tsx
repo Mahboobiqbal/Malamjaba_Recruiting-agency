@@ -3,7 +3,9 @@ import { useParams, Link } from "react-router-dom";
 import { useGetCandidateQuery, useUpdateCandidateStatusMutation } from "../../services/candidate.service";
 import { CANDIDATE_STATUSES } from "../../lib/constants";
 import { formatDate } from "../../lib/utils";
-import { Edit, ArrowLeft } from "lucide-react";
+import { downloadPDF } from "../../lib/pdf";
+import { Edit, ArrowLeft, FileDown } from "lucide-react";
+import CandidatePrintDocument from "../../components/print/CandidatePrintDocument";
 
 export default function CandidateDetail() {
   const { id } = useParams();
@@ -26,6 +28,12 @@ export default function CandidateDetail() {
           </div>
         </div>
         <div className="flex gap-3">
+          <button
+            onClick={() => downloadPDF("print-area", `Candidate-${candidate.candidate_code}`)}
+            className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
+          >
+            <FileDown className="h-4 w-4" /> Download PDF
+          </button>
           <select
             value={candidate.status}
             onChange={(e) => updateStatus({ id: candidate.id, status: e.target.value })}
@@ -91,6 +99,10 @@ export default function CandidateDetail() {
         <Link to={`/tickets/new?candidate_id=${candidate.id}`} className="rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2 text-sm font-medium hover:bg-secondary">Add Ticket</Link>
         <Link to={`/payments/new?candidate_id=${candidate.id}`} className="rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2 text-sm font-medium hover:bg-secondary">Record Payment</Link>
         <Link to={`/ledger/${candidate.id}`} className="rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2 text-sm font-medium hover:bg-secondary">View Ledger</Link>
+      </div>
+
+      <div id="print-area" className="print-only" style={{ position: "absolute", left: "-9999px", top: 0 }}>
+        <CandidatePrintDocument candidate={candidate} />
       </div>
     </div>
   );

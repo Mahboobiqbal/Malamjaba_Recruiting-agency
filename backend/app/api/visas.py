@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,6 +24,8 @@ async def list_visas(
     search: str = Query(None),
     status: str = Query(None),
     country: str = Query(None),
+    date_from: str = Query(None),
+    date_to: str = Query(None),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_permission("visa.view")),
 ):
@@ -44,6 +48,13 @@ async def list_visas(
     if country:
         stmt = stmt.where(Visa.country == country)
         count_stmt = count_stmt.where(Visa.country == country)
+
+    if date_from:
+        stmt = stmt.where(Visa.created_at >= date_from)
+        count_stmt = count_stmt.where(Visa.created_at >= date_from)
+    if date_to:
+        stmt = stmt.where(Visa.created_at <= date_to + " 23:59:59")
+        count_stmt = count_stmt.where(Visa.created_at <= date_to + " 23:59:59")
 
     total_result = await db.execute(count_stmt)
     total = total_result.scalar() or 0

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,6 +24,8 @@ async def list_medical_tokens(
     search: str = Query(None),
     medical_status: str = Query(None),
     payment_status: str = Query(None),
+    date_from: str = Query(None),
+    date_to: str = Query(None),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_permission("medical.view")),
 ):
@@ -44,6 +48,13 @@ async def list_medical_tokens(
     if payment_status:
         stmt = stmt.where(MedicalToken.payment_status == payment_status)
         count_stmt = count_stmt.where(MedicalToken.payment_status == payment_status)
+
+    if date_from:
+        stmt = stmt.where(MedicalToken.created_at >= date_from)
+        count_stmt = count_stmt.where(MedicalToken.created_at >= date_from)
+    if date_to:
+        stmt = stmt.where(MedicalToken.created_at <= date_to + " 23:59:59")
+        count_stmt = count_stmt.where(MedicalToken.created_at <= date_to + " 23:59:59")
 
     total_result = await db.execute(count_stmt)
     total = total_result.scalar() or 0

@@ -40,7 +40,7 @@ export const agentApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getAgents: builder.query<
       PaginatedResponse<Agent>,
-      { page?: number; per_page?: number; search?: string; status?: string }
+      { page?: number; per_page?: number; search?: string; status?: string; date_from?: string; date_to?: string }
     >({
       query: (params) => ({
         url: "/agents",

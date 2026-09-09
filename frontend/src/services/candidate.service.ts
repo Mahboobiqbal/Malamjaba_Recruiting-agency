@@ -5,7 +5,7 @@ export const candidateApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getCandidates: builder.query<
       PaginatedResponse<Candidate>,
-      { page?: number; per_page?: number; search?: string; status?: string; agent_id?: number; country?: string }
+      { page?: number; per_page?: number; search?: string; status?: string; agent_id?: number; country?: string; date_from?: string; date_to?: string }
     >({
       query: (params) => ({
         url: "/candidates",
@@ -54,6 +54,7 @@ export const candidateApi = api.injectEndpoints({
 export const {
   useGetCandidatesQuery,
   useGetCandidateQuery,
+  useLazyGetCandidateQuery,
   useCreateCandidateMutation,
   useUpdateCandidateMutation,
   useUpdateCandidateStatusMutation,

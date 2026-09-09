@@ -39,6 +39,7 @@ class Ticket(Base):
 
     candidate: Mapped["Candidate"] = relationship(back_populates="tickets")
     agent: Mapped["Agent | None"] = relationship(back_populates="tickets")
+    payments: Mapped[list["Payment"]] = relationship(back_populates="ticket")
 
 
 from app.models.agent import Agent

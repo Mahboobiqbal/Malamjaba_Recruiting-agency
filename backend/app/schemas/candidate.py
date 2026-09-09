@@ -205,6 +205,73 @@ class CandidateUpdate(BaseModel):
         return v
 
 
+class CandidateStatusUpdate(BaseModel):
+    status: str = Field(..., pattern=r"^(new|processing|medical_pending|medical_completed|visa_processing|visa_approved|ticket_pending|ticket_booked|ready_to_travel|completed|cancelled)$")
+
+
+# Nested schemas for print document (avoid circular imports)
+class MedicalTokenNested(BaseModel):
+    id: int
+    token_code: str
+    token_number: str | None = None
+    medical_center: str | None = None
+    medical_date: date | None = None
+    medical_fee: float
+    payment_status: str
+    medical_status: str
+    model_config = {"from_attributes": True}
+
+
+class VisaNested(BaseModel):
+    id: int
+    visa_code: str
+    visa_type: str | None = None
+    country: str | None = None
+    visa_number: str | None = None
+    status: str
+    visa_fee: float
+    agent_fee: float
+    other_charges: float
+    total_cost: float
+    paid_amount: float
+    remaining_amount: float
+    model_config = {"from_attributes": True}
+
+
+class TicketNested(BaseModel):
+    id: int
+    ticket_code: str
+    airline: str | None = None
+    pnr: str | None = None
+    ticket_number: str | None = None
+    flight_number: str | None = None
+    departure_airport: str | None = None
+    arrival_airport: str | None = None
+    departure_date: date | None = None
+    departure_time: str | None = None
+    ticket_price: float
+    agent_commission: float
+    other_charges: float
+    total: float
+    paid: float
+    remaining: float
+    status: str
+    model_config = {"from_attributes": True}
+
+
+class PaymentNested(BaseModel):
+    id: int
+    payment_code: str
+    receipt_number: str
+    payment_date: datetime
+    payment_type: str
+    amount: float
+    payment_method: str
+    reference_number: str | None = None
+    description: str | None = None
+    model_config = {"from_attributes": True}
+
+
 class CandidateResponse(CandidateBase):
     id: int
     candidate_code: str
@@ -214,6 +281,10 @@ class CandidateResponse(CandidateBase):
     created_at: datetime
     updated_at: datetime
     agent: AgentResponse | None = None
+    medical_tokens: list[MedicalTokenNested] = []
+    visas: list[VisaNested] = []
+    tickets: list[TicketNested] = []
+    payments: list[PaymentNested] = []
 
     model_config = {"from_attributes": True}
 
@@ -223,7 +294,3 @@ class CandidateListResponse(BaseModel):
     total: int
     page: int
     per_page: int
-
-
-class CandidateStatusUpdate(BaseModel):
-    status: str = Field(..., pattern=r"^(new|processing|medical_pending|medical_completed|visa_processing|visa_approved|ticket_pending|ticket_booked|ready_to_travel|completed|cancelled)$")

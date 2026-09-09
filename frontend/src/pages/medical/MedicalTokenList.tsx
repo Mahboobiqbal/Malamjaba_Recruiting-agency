@@ -3,8 +3,11 @@ import { Link } from "react-router-dom";
 import { useGetMedicalTokensQuery, useUpdateMedicalTokenStatusMutation } from "../../services/dashboard.service";
 import { MEDICAL_STATUSES } from "../../lib/constants";
 import { formatDate } from "../../lib/utils";
-import { Plus, Search, Eye } from "lucide-react";
+import { Plus, Search, Eye, Printer } from "lucide-react";
 import StatusDropdown from "../../components/common/StatusDropdown";
+import DateFilter from "../../components/common/DateFilter";
+import { downloadPDF } from "../../lib/pdf";
+import MedicalPrintDocument from "../../components/print/MedicalPrintDocument";
 
 const PAYMENT_STATUSES = [
   { value: "unpaid", label: "Unpaid" },
@@ -16,7 +19,9 @@ export default function MedicalTokenList() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
-  const { data, isLoading } = useGetMedicalTokensQuery({ page, per_page: 20, search, medical_status: status });
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const { data, isLoading } = useGetMedicalTokensQuery({ page, per_page: 20, search, medical_status: status, date_from: dateFrom || undefined, date_to: dateTo || undefined });
   const [updateStatus] = useUpdateMedicalTokenStatusMutation();
 
   return (
@@ -27,7 +32,7 @@ export default function MedicalTokenList() {
           <Plus className="h-4 w-4" /> New Token
         </Link>
       </div>
-      <div className="flex gap-3">
+      <div className="flex flex-wrap gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
           <input type="text" placeholder="Search..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }}
@@ -38,6 +43,7 @@ export default function MedicalTokenList() {
           <option value="">All Status</option>
           {MEDICAL_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
         </select>
+        <DateFilter dateFrom={dateFrom} dateTo={dateTo} onDateFromChange={(v) => { setDateFrom(v); setPage(1); }} onDateToChange={(v) => { setDateTo(v); setPage(1); }} onClear={() => { setDateFrom(""); setDateTo(""); setPage(1); }} />
       </div>
       <div className="overflow-hidden rounded-lg border bg-white dark:bg-slate-900 shadow-sm dark:shadow-none">
         <table className="w-full text-left text-sm">
@@ -50,28 +56,38 @@ export default function MedicalTokenList() {
               <th className="px-4 py-3 font-medium text-slate-600 dark:text-slate-300">Fee</th>
               <th className="px-4 py-3 font-medium text-slate-600 dark:text-slate-300">Status</th>
               <th className="px-4 py-3 font-medium text-slate-600 dark:text-slate-300">Payment</th>
+              <th className="px-4 py-3 font-medium text-slate-600 dark:text-slate-300">Actions</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan={7} className="px-4 py-8 text-center text-secondary">Loading...</td></tr>
+              <tr><td colSpan={8} className="px-4 py-8 text-center text-secondary">Loading...</td></tr>
             ) : data?.items.length === 0 ? (
-              <tr><td colSpan={7} className="px-4 py-8 text-center text-secondary">No medical tokens found</td></tr>
+              <tr><td colSpan={8} className="px-4 py-8 text-center text-secondary">No medical tokens found</td></tr>
             ) : (
               data?.items.map((t) => (
-                <tr key={t.id} className="border-b hover:bg-secondary">
-                  <td className="px-4 py-3 font-medium text-primary">{t.token_code}</td>
-                  <td className="px-4 py-3">{t.candidate?.full_name || "-"}</td>
-                  <td className="px-4 py-3">{t.medical_center || "-"}</td>
-                  <td className="px-4 py-3">{t.medical_date ? formatDate(t.medical_date) : "-"}</td>
-                  <td className="px-4 py-3">{t.medical_fee}</td>
-                  <td className="px-4 py-3">
-                    <StatusDropdown value={t.medical_status} options={MEDICAL_STATUSES} onChange={(s) => updateStatus({ id: t.id, medical_status: s })} />
-                  </td>
-                  <td className="px-4 py-3">
-                    <StatusDropdown value={t.payment_status} options={PAYMENT_STATUSES} onChange={(s) => updateStatus({ id: t.id, payment_status: s })} />
-                  </td>
-                </tr>
+                <React.Fragment key={t.id}>
+                  <tr className="border-b hover:bg-secondary">
+                    <td className="px-4 py-3 font-medium text-primary">{t.token_code}</td>
+                    <td className="px-4 py-3">{t.candidate?.full_name || "-"}</td>
+                    <td className="px-4 py-3">{t.medical_center || "-"}</td>
+                    <td className="px-4 py-3">{t.medical_date ? formatDate(t.medical_date) : "-"}</td>
+                    <td className="px-4 py-3">{t.medical_fee}</td>
+                    <td className="px-4 py-3">
+                      <StatusDropdown value={t.medical_status} options={MEDICAL_STATUSES} onChange={(s) => updateStatus({ id: t.id, medical_status: s })} />
+                    </td>
+                    <td className="px-4 py-3">
+                      <StatusDropdown value={t.payment_status} options={PAYMENT_STATUSES} onChange={(s) => updateStatus({ id: t.id, payment_status: s })} />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <Link to={`/medical/${t.id}`} className="text-slate-400 hover:text-primary"><Eye className="h-4 w-4" /></Link>
+                        <button onClick={() => downloadPDF(`print-${t.id}`, t.token_code)} className="text-slate-400 hover:text-primary"><Printer className="h-4 w-4" /></button>
+                      </div>
+                    </td>
+                  </tr>
+                  <div id={`print-${t.id}`} className="print-only"><MedicalPrintDocument token={t} /></div>
+                </React.Fragment>
               ))
             )}
           </tbody>

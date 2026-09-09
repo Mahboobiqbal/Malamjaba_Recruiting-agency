@@ -3,13 +3,16 @@ import { useGetExpensesQuery } from "../../services/dashboard.service";
 import { EXPENSE_CATEGORIES, PAYMENT_METHODS } from "../../lib/constants";
 import { formatDateTime, formatCurrency } from "../../lib/utils";
 import { Plus, Search } from "lucide-react";
+import DateFilter from "../../components/common/DateFilter";
 import { Link } from "react-router-dom";
 
 export default function ExpenseList() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
-  const { data, isLoading } = useGetExpensesQuery({ page, per_page: 20, search, category });
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const { data, isLoading } = useGetExpensesQuery({ page, per_page: 20, search, category, date_from: dateFrom || undefined, date_to: dateTo || undefined });
 
   return (
     <div className="space-y-4">
@@ -19,7 +22,7 @@ export default function ExpenseList() {
           <Plus className="h-4 w-4" /> New Expense
         </Link>
       </div>
-      <div className="flex gap-3">
+      <div className="flex flex-wrap gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
           <input type="text" placeholder="Search..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }}
@@ -30,6 +33,7 @@ export default function ExpenseList() {
           <option value="">All Categories</option>
           {EXPENSE_CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
         </select>
+        <DateFilter dateFrom={dateFrom} dateTo={dateTo} onDateFromChange={(v) => { setDateFrom(v); setPage(1); }} onDateToChange={(v) => { setDateTo(v); setPage(1); }} onClear={() => { setDateFrom(""); setDateTo(""); setPage(1); }} />
       </div>
       <div className="overflow-hidden rounded-lg border bg-white dark:bg-slate-900 shadow-sm dark:shadow-none">
         <table className="w-full text-left text-sm">

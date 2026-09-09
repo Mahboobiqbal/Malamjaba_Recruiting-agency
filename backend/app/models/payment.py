@@ -14,6 +14,9 @@ class Payment(Base):
     receipt_number: Mapped[str] = mapped_column(String(20), unique=True, nullable=False)
     candidate_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("candidates.id", ondelete="SET NULL"), nullable=True)
     agent_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("agents.id", ondelete="SET NULL"), nullable=True)
+    visa_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("visas.id", ondelete="SET NULL"), nullable=True)
+    ticket_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("tickets.id", ondelete="SET NULL"), nullable=True)
+    medical_token_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("medical_tokens.id", ondelete="SET NULL"), nullable=True)
     payment_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     payment_type: Mapped[str] = mapped_column(String(20), nullable=False)
     amount: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False)
@@ -26,9 +29,15 @@ class Payment(Base):
 
     candidate: Mapped["Candidate | None"] = relationship(back_populates="payments")
     agent: Mapped["Agent | None"] = relationship(foreign_keys=[agent_id], remote_side="Agent.id", back_populates="payments", lazy="select")
+    visa: Mapped["Visa | None"] = relationship(foreign_keys=[visa_id], back_populates="payments", lazy="select")
+    ticket: Mapped["Ticket | None"] = relationship(foreign_keys=[ticket_id], back_populates="payments", lazy="select")
+    medical_token: Mapped["MedicalToken | None"] = relationship(foreign_keys=[medical_token_id], back_populates="payments", lazy="select")
     received_by_user: Mapped["User | None"] = relationship(foreign_keys=[received_by], remote_side="User.id", lazy="select")
 
 
 from app.models.candidate import Candidate
 from app.models.agent import Agent
+from app.models.visa import Visa
+from app.models.ticket import Ticket
+from app.models.medical_token import MedicalToken
 from app.models.user import User

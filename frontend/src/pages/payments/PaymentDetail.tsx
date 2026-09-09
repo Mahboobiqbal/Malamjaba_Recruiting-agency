@@ -3,7 +3,9 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useGetPaymentQuery, useDeletePaymentMutation } from "../../services/dashboard.service";
 import { PAYMENT_METHODS, PAYMENT_TYPES } from "../../lib/constants";
 import { formatDateTime, formatCurrency } from "../../lib/utils";
-import { ArrowLeft, Printer, Trash2 } from "lucide-react";
+import { ArrowLeft, Printer, FileDown, Trash2 } from "lucide-react";
+import { downloadPDF } from "../../lib/pdf";
+import PaymentPrintDocument from "../../components/print/PaymentPrintDocument";
 
 export default function PaymentDetail() {
   const { id } = useParams();
@@ -25,6 +27,9 @@ export default function PaymentDetail() {
           </div>
         </div>
         <div className="flex gap-3">
+          <button onClick={() => downloadPDF("print-area", payment.payment_code)} className="flex items-center gap-2 rounded-lg bg-primary text-white px-4 py-2 text-sm font-medium hover:bg-primary/90">
+            <FileDown className="h-4 w-4" /> Download PDF
+          </button>
           <button onClick={() => window.print()} className="flex items-center gap-2 rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2 text-sm font-medium hover:bg-secondary">
             <Printer className="h-4 w-4" /> Print Receipt
           </button>
@@ -33,6 +38,10 @@ export default function PaymentDetail() {
             <Trash2 className="h-4 w-4" /> Delete
           </button>
         </div>
+      </div>
+
+      <div id="print-area" className="print-only">
+        <PaymentPrintDocument payment={payment} />
       </div>
 
       <div className="mx-auto max-w-2xl rounded-lg border bg-white dark:bg-slate-900 p-8 shadow-sm dark:shadow-none print:shadow-none">
@@ -52,6 +61,36 @@ export default function PaymentDetail() {
           {payment.reference_number && <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Reference</dt><dd className="font-medium">{payment.reference_number}</dd></div>}
           {payment.description && <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Description</dt><dd className="font-medium">{payment.description}</dd></div>}
           {payment.remarks && <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Remarks</dt><dd className="font-medium">{payment.remarks}</dd></div>}
+          {payment.visa && (
+            <div className="flex justify-between">
+              <dt className="text-slate-500 dark:text-slate-400">Linked Visa</dt>
+              <dd className="font-medium">
+                <Link to={`/visas/${payment.visa.id}`} className="text-primary hover:underline">
+                  {payment.visa.visa_code} - {payment.visa.country || "N/A"}
+                </Link>
+              </dd>
+            </div>
+          )}
+          {payment.ticket && (
+            <div className="flex justify-between">
+              <dt className="text-slate-500 dark:text-slate-400">Linked Ticket</dt>
+              <dd className="font-medium">
+                <Link to={`/tickets/${payment.ticket.id}`} className="text-primary hover:underline">
+                  {payment.ticket.ticket_code} - {payment.ticket.airline || "N/A"}
+                </Link>
+              </dd>
+            </div>
+          )}
+          {payment.medical_token && (
+            <div className="flex justify-between">
+              <dt className="text-slate-500 dark:text-slate-400">Linked Medical</dt>
+              <dd className="font-medium">
+                <Link to={`/medical/${payment.medical_token.id}`} className="text-primary hover:underline">
+                  {payment.medical_token.token_code} - {payment.medical_token.medical_center || "N/A"}
+                </Link>
+              </dd>
+            </div>
+          )}
         </dl>
         <div className="mt-8 border-t pt-4 text-center text-xs text-slate-400 dark:text-slate-500">
           <p>Authorized Signature</p>
