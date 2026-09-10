@@ -16,6 +16,14 @@ from app.core.exceptions import NotFoundException
 
 router = APIRouter(prefix="/visas", tags=["Visas"])
 
+LOAD_CANDIDATE_OPTIONS = [
+    selectinload(Candidate.agent),
+    selectinload(Candidate.payments),
+    selectinload(Candidate.visas),
+    selectinload(Candidate.tickets),
+    selectinload(Candidate.medical_tokens),
+]
+
 
 @router.get("", response_model=VisaListResponse)
 async def list_visas(
@@ -30,7 +38,7 @@ async def list_visas(
     current_user: User = Depends(require_permission("visa.view")),
 ):
     stmt = select(Visa).options(
-        selectinload(Visa.candidate).selectinload(Candidate.agent),
+        selectinload(Visa.candidate).options(*LOAD_CANDIDATE_OPTIONS),
         selectinload(Visa.agent),
     )
     count_stmt = select(func.count()).select_from(Visa)
@@ -86,7 +94,7 @@ async def create_visa(
     await db.refresh(visa)
 
     stmt = select(Visa).where(Visa.id == visa.id).options(
-        selectinload(Visa.candidate).selectinload(Candidate.agent), selectinload(Visa.agent)
+        selectinload(Visa.candidate).options(*LOAD_CANDIDATE_OPTIONS), selectinload(Visa.agent)
     )
     result = await db.execute(stmt)
     return result.scalar_one()
@@ -99,7 +107,7 @@ async def get_visa(
     current_user: User = Depends(require_permission("visa.view")),
 ):
     stmt = select(Visa).where(Visa.id == visa_id).options(
-        selectinload(Visa.candidate).selectinload(Candidate.agent), selectinload(Visa.agent)
+        selectinload(Visa.candidate).options(*LOAD_CANDIDATE_OPTIONS), selectinload(Visa.agent)
     )
     result = await db.execute(stmt)
     visa = result.scalar_one_or_none()
@@ -132,7 +140,7 @@ async def update_visa(
     await db.refresh(visa)
 
     stmt = select(Visa).where(Visa.id == visa.id).options(
-        selectinload(Visa.candidate).selectinload(Candidate.agent), selectinload(Visa.agent)
+        selectinload(Visa.candidate).options(*LOAD_CANDIDATE_OPTIONS), selectinload(Visa.agent)
     )
     result = await db.execute(stmt)
     return result.scalar_one()
@@ -156,7 +164,7 @@ async def update_visa_status(
     await db.refresh(visa)
 
     stmt = select(Visa).where(Visa.id == visa.id).options(
-        selectinload(Visa.candidate).selectinload(Candidate.agent), selectinload(Visa.agent)
+        selectinload(Visa.candidate).options(*LOAD_CANDIDATE_OPTIONS), selectinload(Visa.agent)
     )
     result = await db.execute(stmt)
     return result.scalar_one()

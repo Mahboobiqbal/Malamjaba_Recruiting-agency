@@ -14,7 +14,20 @@ export const dashboardApi = api.injectEndpoints({
     }),
     getPayments: builder.query<
       PaginatedResponse<Payment>,
-      { page?: number; per_page?: number; search?: string; candidate_id?: number; date_from?: string; date_to?: string }
+      {
+        page?: number;
+        per_page?: number;
+        search?: string;
+        payment_type?: string;
+        payment_method?: string;
+        candidate_id?: number;
+        agent_id?: number;
+        visa_id?: number;
+        ticket_id?: number;
+        medical_token_id?: number;
+        date_from?: string;
+        date_to?: string;
+      }
     >({
       query: (params) => ({ url: "/payments", params }),
       providesTags: ["Payment"],
@@ -65,6 +78,21 @@ export const dashboardApi = api.injectEndpoints({
       }),
       invalidatesTags: ["Expense", "Dashboard"],
     }),
+    updateExpense: builder.mutation<Expense, { id: number; data: Partial<Expense> }>({
+      query: ({ id, data }) => ({
+        url: `/expenses/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["Expense", "Dashboard"],
+    }),
+    deleteExpense: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/expenses/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Expense", "Dashboard"],
+    }),
     getMedicalTokens: builder.query<
       PaginatedResponse<MedicalToken>,
       { page?: number; per_page?: number; search?: string; medical_status?: string; date_from?: string; date_to?: string }
@@ -84,11 +112,26 @@ export const dashboardApi = api.injectEndpoints({
       }),
       invalidatesTags: ["MedicalToken"],
     }),
+    updateMedicalToken: builder.mutation<MedicalToken, { id: number; data: Partial<MedicalToken> }>({
+      query: ({ id, data }) => ({
+        url: `/medical-tokens/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["MedicalToken", "Dashboard"],
+    }),
     updateMedicalTokenStatus: builder.mutation<MedicalToken, { id: number; medical_status?: string; payment_status?: string }>({
       query: ({ id, ...data }) => ({
         url: `/medical-tokens/${id}/status`,
         method: "PATCH",
         body: data,
+      }),
+      invalidatesTags: ["MedicalToken", "Dashboard"],
+    }),
+    deleteMedicalToken: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/medical-tokens/${id}`,
+        method: "DELETE",
       }),
       invalidatesTags: ["MedicalToken", "Dashboard"],
     }),
@@ -111,11 +154,26 @@ export const dashboardApi = api.injectEndpoints({
       }),
       invalidatesTags: ["Visa"],
     }),
+    updateVisa: builder.mutation<Visa, { id: number; data: Partial<Visa> }>({
+      query: ({ id, data }) => ({
+        url: `/visas/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["Visa", "Dashboard"],
+    }),
     updateVisaStatus: builder.mutation<Visa, { id: number; status: string }>({
       query: ({ id, ...data }) => ({
         url: `/visas/${id}/status`,
         method: "PATCH",
         body: data,
+      }),
+      invalidatesTags: ["Visa", "Dashboard"],
+    }),
+    deleteVisa: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/visas/${id}`,
+        method: "DELETE",
       }),
       invalidatesTags: ["Visa", "Dashboard"],
     }),
@@ -138,11 +196,26 @@ export const dashboardApi = api.injectEndpoints({
       }),
       invalidatesTags: ["Ticket"],
     }),
+    updateTicket: builder.mutation<Ticket, { id: number; data: Partial<Ticket> }>({
+      query: ({ id, data }) => ({
+        url: `/tickets/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["Ticket", "Dashboard"],
+    }),
     updateTicketStatus: builder.mutation<Ticket, { id: number; status: string }>({
       query: ({ id, ...data }) => ({
         url: `/tickets/${id}/status`,
         method: "PATCH",
         body: data,
+      }),
+      invalidatesTags: ["Ticket", "Dashboard"],
+    }),
+    deleteTicket: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/tickets/${id}`,
+        method: "DELETE",
       }),
       invalidatesTags: ["Ticket", "Dashboard"],
     }),
@@ -229,15 +302,23 @@ export const {
   useDeletePaymentMutation,
   useGetExpensesQuery,
   useCreateExpenseMutation,
+  useUpdateExpenseMutation,
+  useDeleteExpenseMutation,
   useGetMedicalTokensQuery,
   useCreateMedicalTokenMutation,
+  useUpdateMedicalTokenMutation,
   useUpdateMedicalTokenStatusMutation,
+  useDeleteMedicalTokenMutation,
   useGetVisasQuery,
   useCreateVisaMutation,
+  useUpdateVisaMutation,
   useUpdateVisaStatusMutation,
+  useDeleteVisaMutation,
   useGetTicketsQuery,
   useCreateTicketMutation,
+  useUpdateTicketMutation,
   useUpdateTicketStatusMutation,
+  useDeleteTicketMutation,
   useGetMedicalTokenQuery,
   useGetVisaQuery,
   useGetTicketQuery,

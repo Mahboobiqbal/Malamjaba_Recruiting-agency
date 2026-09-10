@@ -4,6 +4,8 @@ import { Search, Plus, Edit, Trash2, Shield } from "lucide-react";
 import { useGetUsersQuery, useDeleteUserMutation } from "../../services/user.service";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store";
+import ConfirmModal from "../../components/common/ConfirmModal";
+import toast from "react-hot-toast";
 
 export default function UserList() {
   const [search, setSearch] = useState("");
@@ -11,20 +13,16 @@ export default function UserList() {
   const [deleteUser] = useDeleteUserMutation();
   const permissions = useSelector((state: RootState) => state.auth.permissions);
   const canCreate = permissions.includes("users.create") || permissions.includes("super_admin");
+  const [deleteId, setDeleteId] = useState<number | null>(null);
 
   const { data, isLoading } = useGetUsersQuery({ page, per_page: 10, search: search || undefined });
 
-  const handleDelete = async (id: number, name: string) => {
-    if (!confirm(`Delete user "${name}"?`)) return;
-    try { await deleteUser(id).unwrap(); } catch { alert("Failed to delete user"); }
-  };
-
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Users</h2>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-white">Users</h2>
         {canCreate && (
-          <Link to="/users/new" className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary/90">
+          <Link to="/users/new" className="flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary/90">
             <Plus className="h-4 w-4" /> Add User
           </Link>
         )}
@@ -36,7 +34,7 @@ export default function UserList() {
           className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 py-2 pl-10 pr-4 text-sm text-slate-800 dark:text-white focus:border-primary focus:outline-none" />
       </div>
 
-      <div className="overflow-hidden rounded-lg border bg-white dark:bg-slate-900 shadow-sm dark:shadow-none">
+      <div className="overflow-x-auto rounded-lg border bg-white dark:bg-slate-900 shadow-sm dark:shadow-none">
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
@@ -84,7 +82,7 @@ export default function UserList() {
                         <Edit className="h-4 w-4" />
                       </Link>
                       {!user.is_superadmin && permissions.includes("users.delete") && (
-                        <button onClick={() => handleDelete(user.id, user.full_name)} className="text-slate-400 hover:text-red-600 dark:hover:text-red-400">
+                        <button onClick={() => setDeleteId(user.id)} className="text-slate-400 hover:text-red-600 dark:hover:text-red-400">
                           <Trash2 className="h-4 w-4" />
                         </button>
                       )}
@@ -108,6 +106,23 @@ export default function UserList() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        open={deleteId !== null}
+        title="Delete User"
+        message="Are you sure you want to delete this user? This action cannot be undone."
+        onConfirm={async () => {
+          if (deleteId === null) return;
+          try {
+            await deleteUser(deleteId).unwrap();
+            toast.success("User deleted");
+          } catch {
+            toast.error("Failed to delete user");
+          }
+          setDeleteId(null);
+        }}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   );
 }

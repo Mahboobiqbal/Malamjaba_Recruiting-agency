@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useCreateExpenseMutation } from "../../services/dashboard.service";
+import React, { useState, useEffect, useMemo } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useGetExpenseQuery, useUpdateExpenseMutation } from "../../services/dashboard.service";
 import { PAYMENT_METHODS } from "../../lib/constants";
-import { getErrorMessage } from "../../lib/utils";
+import { formatCurrency, getErrorMessage } from "../../lib/utils";
 import toast from "react-hot-toast";
 
 const MONTHS = [
@@ -10,25 +10,40 @@ const MONTHS = [
   "July", "August", "September", "October", "November", "December"
 ];
 
-export default function SalaryCreate() {
+export default function SalaryEdit() {
+  const { id } = useParams();
   const navigate = useNavigate();
-  const [createExpense, { isLoading }] = useCreateExpenseMutation();
-  const currentMonth = MONTHS[new Date().getMonth()];
-  const currentYear = new Date().getFullYear();
-  const [form, setForm] = useState({
-    employee_name: "",
-    month: currentMonth,
-    year: currentYear,
-    basic_salary: 0,
-    allowances: 0,
-    deductions: 0,
-    payment_method: "bank_transfer",
-    paid_to: "",
-    reference: "",
-    remarks: "",
-  });
+  const { data: expense, isLoading: loadingExpense } = useGetExpenseQuery(Number(id));
+  const [updateExpense, { isLoading }] = useUpdateExpenseMutation();
+  const [form, setForm] = useState<any>({});
 
-  const netPay = form.basic_salary + form.allowances - form.deductions;
+  useEffect(() => {
+    if (expense) {
+      const desc = expense.description || "";
+      const parts = desc.split("|");
+      const employee = parts[0]?.replace("Employee: ", "") || expense.paid_to || "";
+      const month = parts[1]?.replace("Month: ", "") || MONTHS[new Date().getMonth()];
+      const year = parseInt(parts[1]?.replace("Month: ", "").split(" ")[1] || new Date().getFullYear().toString());
+      const basic = parts[2]?.replace("Basic: ", "");
+      const allowances = parts[3]?.replace("Allowances: ", "");
+      const deductions = parts[4]?.replace("Deductions: ", "");
+      const remarks = parts[5]?.replace("Remarks: ", "");
+      
+      setForm({
+        employee_name: employee,
+        month: month,
+        year: year,
+        basic_salary: basic ? Number(basic) : 0,
+        allowances: allowances ? Number(allowances) : 0,
+        deductions: deductions ? Number(deductions) : 0,
+        payment_method: expense.payment_method || "bank_transfer",
+        reference: expense.reference || "",
+        remarks: remarks || "",
+      });
+    }
+  }, [expense]);
+
+  const netPay = useMemo(() => (form.basic_salary || 0) + (form.allowances || 0) - (form.deductions || 0), [form.basic_salary, form.allowances, form.deductions]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,24 +57,25 @@ export default function SalaryCreate() {
         form.remarks ? `Remarks: ${form.remarks}` : "",
       ].filter(Boolean).join(" | ");
 
-      await createExpense({
-        date: new Date().toISOString(),
+      await updateExpense({ id: Number(id), data: {
         category: "salary",
         description,
         amount: netPay,
         payment_method: form.payment_method,
         paid_to: form.employee_name,
         reference: form.reference,
-      }).unwrap();
-      navigate("/salaries");
+      } }).unwrap();
+      navigate(`/expenses/${id}`);
     } catch (err: any) {
-      toast.error(getErrorMessage(err, "Failed to record salary"));
+      toast.error(getErrorMessage(err, "Failed to update salary"));
     }
   };
 
+  if (loadingExpense) return <div className="text-center py-8 text-slate-500 dark:text-slate-400">Loading...</div>;
+
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Add Salary</h2>
+      <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Edit Salary</h2>
       <form onSubmit={handleSubmit} className="rounded-lg border bg-white dark:bg-slate-900 p-6 shadow-sm dark:shadow-none">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="md:col-span-2">
@@ -121,9 +137,9 @@ export default function SalaryCreate() {
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <button type="submit" disabled={isLoading}
             className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50">
-            {isLoading ? "Saving..." : "Record Salary"}
+            {isLoading ? "Saving..." : "Update Salary"}
           </button>
-          <button type="button" onClick={() => navigate("/salaries")}
+          <button type="button" onClick={() => navigate(`/expenses/${id}`)}
             className="rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-secondary">
             Cancel
           </button>

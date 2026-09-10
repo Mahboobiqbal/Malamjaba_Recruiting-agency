@@ -8,7 +8,7 @@ from app.database import get_db
 from app.dependencies import require_permission
 from app.models.expense import Expense
 from app.models.user import User
-from app.schemas.expense import ExpenseCreate, ExpenseResponse, ExpenseListResponse
+from app.schemas.expense import ExpenseCreate, ExpenseUpdate, ExpenseResponse, ExpenseListResponse
 from app.services.number_generator import generate_expense_code
 from app.core.exceptions import NotFoundException
 
@@ -81,6 +81,28 @@ async def get_expense(
     expense = result.scalar_one_or_none()
     if not expense:
         raise NotFoundException("Expense not found")
+    return expense
+
+
+@router.put("/{expense_id}", response_model=ExpenseResponse)
+async def update_expense(
+    expense_id: int,
+    data: ExpenseUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_permission("expenses.edit")),
+):
+    stmt = select(Expense).where(Expense.id == expense_id)
+    result = await db.execute(stmt)
+    expense = result.scalar_one_or_none()
+    if not expense:
+        raise NotFoundException("Expense not found")
+
+    update_data = data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(expense, key, value)
+
+    await db.commit()
+    await db.refresh(expense)
     return expense
 
 

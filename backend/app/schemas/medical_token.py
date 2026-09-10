@@ -14,6 +14,7 @@ class MedicalTokenBase(BaseModel):
     medical_date: date | None = None
     appointment_date: date | None = None
     medical_fee: float = 0
+    paid_amount: float = 0
     payment_status: str = "unpaid"
     medical_status: str = "pending"
     remarks: str | None = None
@@ -30,6 +31,7 @@ class MedicalTokenUpdate(BaseModel):
     medical_date: date | None = None
     appointment_date: date | None = None
     medical_fee: float | None = None
+    paid_amount: float | None = None
     payment_status: str | None = None
     medical_status: str | None = None
     remarks: str | None = None

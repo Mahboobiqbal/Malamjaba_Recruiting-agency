@@ -36,13 +36,13 @@ class Candidate(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
 
-    agent: Mapped["Agent | None"] = relationship(back_populates="candidates")
-    medical_tokens: Mapped[list["MedicalToken"]] = relationship(back_populates="candidate", cascade="all, delete-orphan")
-    visas: Mapped[list["Visa"]] = relationship(back_populates="candidate", cascade="all, delete-orphan")
-    tickets: Mapped[list["Ticket"]] = relationship(back_populates="candidate", cascade="all, delete-orphan")
-    payments: Mapped[list["Payment"]] = relationship(back_populates="candidate", cascade="all, delete-orphan")
-    documents: Mapped[list["CandidateDocument"]] = relationship(back_populates="candidate", cascade="all, delete-orphan")
-    ledger_entries: Mapped[list["LedgerEntry"]] = relationship(back_populates="candidate", cascade="all, delete-orphan")
+    agent: Mapped["Agent | None"] = relationship(back_populates="candidates", lazy="selectin")
+    medical_tokens: Mapped[list["MedicalToken"]] = relationship(back_populates="candidate", cascade="all, delete-orphan", lazy="selectin")
+    visas: Mapped[list["Visa"]] = relationship(back_populates="candidate", cascade="all, delete-orphan", lazy="selectin")
+    tickets: Mapped[list["Ticket"]] = relationship(back_populates="candidate", cascade="all, delete-orphan", lazy="selectin")
+    payments: Mapped[list["Payment"]] = relationship(back_populates="candidate", cascade="all, delete-orphan", lazy="selectin")
+    documents: Mapped[list["CandidateDocument"]] = relationship(back_populates="candidate", cascade="all, delete-orphan", lazy="selectin")
+    ledger_entries: Mapped[list["LedgerEntry"]] = relationship(back_populates="candidate", cascade="all, delete-orphan", lazy="selectin")
 
 
 from app.models.agent import Agent

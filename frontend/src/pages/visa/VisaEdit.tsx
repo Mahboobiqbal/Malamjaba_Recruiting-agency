@@ -1,43 +1,58 @@
-import React, { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { useCreateVisaMutation } from "../../services/dashboard.service";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useGetVisaQuery, useUpdateVisaMutation } from "../../services/dashboard.service";
 import { useGetCandidatesQuery } from "../../services/candidate.service";
 import { VISA_STATUSES } from "../../lib/constants";
 import { getErrorMessage } from "../../lib/utils";
 import toast from "react-hot-toast";
 
-export default function VisaCreate() {
+export default function VisaEdit() {
+  const { id } = useParams();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const candidateId = searchParams.get("candidate_id");
-  const [createVisa, { isLoading }] = useCreateVisaMutation();
+  const { data: visa, isLoading: loadingVisa } = useGetVisaQuery(Number(id));
+  const [updateVisa, { isLoading }] = useUpdateVisaMutation();
   const { data: candidatesData } = useGetCandidatesQuery({ per_page: 100 });
-  const [form, setForm] = useState({
-    candidate_id: candidateId ? Number(candidateId) : 0,
-    visa_type: "", country: "", visa_number: "", sponsor_number: "", reference_number: "",
-    issue_date: "", expiry_date: "", status: "processing",
-    profession: "", employer: "", sponsor: "", wakala_reference: "",
-    visa_fee: 0, agent_fee: 0, other_charges: 0, remarks: "",
-  });
+  const [form, setForm] = useState<any>({});
+
+  useEffect(() => {
+    if (visa) {
+      setForm({
+        candidate_id: visa.candidate_id,
+        visa_type: visa.visa_type || "",
+        country: visa.country || "",
+        visa_number: visa.visa_number || "",
+        sponsor_number: visa.sponsor_number || "",
+        reference_number: visa.reference_number || "",
+        issue_date: visa.issue_date ? visa.issue_date.split("T")[0] : "",
+        expiry_date: visa.expiry_date ? visa.expiry_date.split("T")[0] : "",
+        status: visa.status || "processing",
+        profession: visa.profession || "",
+        employer: visa.employer || "",
+        sponsor: visa.sponsor || "",
+        wakala_reference: visa.wakala_reference || "",
+        visa_fee: visa.visa_fee || 0,
+        agent_fee: visa.agent_fee || 0,
+        other_charges: visa.other_charges || 0,
+        remarks: visa.remarks || "",
+      });
+    }
+  }, [visa]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await createVisa({
-        ...form,
-        candidate_id: Number(form.candidate_id),
-        issue_date: form.issue_date || undefined,
-        expiry_date: form.expiry_date || undefined,
-      }).unwrap();
-      navigate("/visas");
+      await updateVisa({ id: Number(id), data: { ...form, candidate_id: Number(form.candidate_id) } }).unwrap();
+      navigate(`/visas/${id}`);
     } catch (err: any) {
-      toast.error(getErrorMessage(err, "Failed to create visa"));
+      toast.error(getErrorMessage(err, "Failed to update visa"));
     }
   };
 
+  if (loadingVisa) return <div className="text-center py-8 text-slate-500 dark:text-slate-400">Loading...</div>;
+
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <h2 className="text-2xl font-bold text-slate-800 dark:text-white">New Visa</h2>
+      <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Edit Visa</h2>
       <form onSubmit={handleSubmit} className="rounded-lg border bg-white dark:bg-slate-900 p-6 shadow-sm dark:shadow-none">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="md:col-span-2">
@@ -114,9 +129,9 @@ export default function VisaCreate() {
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <button type="submit" disabled={isLoading}
             className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50">
-            {isLoading ? "Saving..." : "Create Visa"}
+            {isLoading ? "Saving..." : "Update Visa"}
           </button>
-          <button type="button" onClick={() => navigate("/visas")}
+          <button type="button" onClick={() => navigate(`/visas/${id}`)}
             className="rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-secondary">
             Cancel
           </button>

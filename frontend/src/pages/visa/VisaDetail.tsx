@@ -28,7 +28,7 @@ export default function VisaDetail() {
             <p className="text-sm text-secondary">{visa.candidate?.full_name || "N/A"} - {visa.country || ""}</p>
           </div>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row">
           <Link to={`/payments/new?candidate_id=${visa.candidate_id}&visa_id=${visa.id}`}
             className="flex items-center gap-2 rounded-lg bg-emerald-600 text-white px-4 py-2 text-sm font-medium hover:bg-emerald-700">
             <DollarSign className="h-4 w-4" /> Pay Now

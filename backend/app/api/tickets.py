@@ -16,6 +16,14 @@ from app.core.exceptions import NotFoundException
 
 router = APIRouter(prefix="/tickets", tags=["Tickets"])
 
+LOAD_CANDIDATE_OPTIONS = [
+    selectinload(Candidate.agent),
+    selectinload(Candidate.payments),
+    selectinload(Candidate.visas),
+    selectinload(Candidate.tickets),
+    selectinload(Candidate.medical_tokens),
+]
+
 
 @router.get("", response_model=TicketListResponse)
 async def list_tickets(
@@ -29,7 +37,7 @@ async def list_tickets(
     current_user: User = Depends(require_permission("tickets.view")),
 ):
     stmt = select(Ticket).options(
-        selectinload(Ticket.candidate).selectinload(Candidate.agent),
+        selectinload(Ticket.candidate).options(*LOAD_CANDIDATE_OPTIONS),
         selectinload(Ticket.agent),
     )
     count_stmt = select(func.count()).select_from(Ticket)
@@ -81,7 +89,7 @@ async def create_ticket(
     await db.refresh(ticket)
 
     stmt = select(Ticket).where(Ticket.id == ticket.id).options(
-        selectinload(Ticket.candidate).selectinload(Candidate.agent), selectinload(Ticket.agent)
+        selectinload(Ticket.candidate).options(*LOAD_CANDIDATE_OPTIONS), selectinload(Ticket.agent)
     )
     result = await db.execute(stmt)
     return result.scalar_one()
@@ -94,7 +102,7 @@ async def get_ticket(
     current_user: User = Depends(require_permission("tickets.view")),
 ):
     stmt = select(Ticket).where(Ticket.id == ticket_id).options(
-        selectinload(Ticket.candidate).selectinload(Candidate.agent), selectinload(Ticket.agent)
+        selectinload(Ticket.candidate).options(*LOAD_CANDIDATE_OPTIONS), selectinload(Ticket.agent)
     )
     result = await db.execute(stmt)
     ticket = result.scalar_one_or_none()
@@ -127,7 +135,7 @@ async def update_ticket(
     await db.refresh(ticket)
 
     stmt = select(Ticket).where(Ticket.id == ticket.id).options(
-        selectinload(Ticket.candidate).selectinload(Candidate.agent), selectinload(Ticket.agent)
+        selectinload(Ticket.candidate).options(*LOAD_CANDIDATE_OPTIONS), selectinload(Ticket.agent)
     )
     result = await db.execute(stmt)
     return result.scalar_one()
@@ -151,7 +159,7 @@ async def update_ticket_status(
     await db.refresh(ticket)
 
     stmt = select(Ticket).where(Ticket.id == ticket.id).options(
-        selectinload(Ticket.candidate).selectinload(Candidate.agent), selectinload(Ticket.agent)
+        selectinload(Ticket.candidate).options(*LOAD_CANDIDATE_OPTIONS), selectinload(Ticket.agent)
     )
     result = await db.execute(stmt)
     return result.scalar_one()

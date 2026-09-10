@@ -37,3 +37,14 @@ export function formatCNIC(value: string): string {
   if (digits.length <= 12) return `${digits.slice(0, 5)}-${digits.slice(5)}`;
   return `${digits.slice(0, 5)}-${digits.slice(5, 12)}-${digits.slice(12)}`;
 }
+
+export function getErrorMessage(err: any, fallback: string): string {
+  if (!err?.data?.detail) return fallback;
+  const detail = err.data.detail;
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) {
+    return detail.map((e: any) => e.msg || e.message || String(e)).join(", ");
+  }
+  if (typeof detail === "object" && detail.msg) return detail.msg;
+  return fallback;
+}

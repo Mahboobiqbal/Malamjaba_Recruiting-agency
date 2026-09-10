@@ -27,12 +27,12 @@ class Payment(Base):
     remarks: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
-    candidate: Mapped["Candidate | None"] = relationship(back_populates="payments")
-    agent: Mapped["Agent | None"] = relationship(foreign_keys=[agent_id], remote_side="Agent.id", back_populates="payments", lazy="select")
-    visa: Mapped["Visa | None"] = relationship(foreign_keys=[visa_id], back_populates="payments", lazy="select")
-    ticket: Mapped["Ticket | None"] = relationship(foreign_keys=[ticket_id], back_populates="payments", lazy="select")
-    medical_token: Mapped["MedicalToken | None"] = relationship(foreign_keys=[medical_token_id], back_populates="payments", lazy="select")
-    received_by_user: Mapped["User | None"] = relationship(foreign_keys=[received_by], remote_side="User.id", lazy="select")
+    candidate: Mapped["Candidate | None"] = relationship(back_populates="payments", lazy="selectin")
+    agent: Mapped["Agent | None"] = relationship(foreign_keys=[agent_id], remote_side="Agent.id", back_populates="payments", lazy="selectin")
+    visa: Mapped["Visa | None"] = relationship(foreign_keys=[visa_id], back_populates="payments", lazy="selectin")
+    ticket: Mapped["Ticket | None"] = relationship(foreign_keys=[ticket_id], back_populates="payments", lazy="selectin")
+    medical_token: Mapped["MedicalToken | None"] = relationship(foreign_keys=[medical_token_id], back_populates="payments", lazy="selectin")
+    received_by_user: Mapped["User | None"] = relationship(foreign_keys=[received_by], remote_side="User.id", lazy="selectin")
 
 
 from app.models.candidate import Candidate

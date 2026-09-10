@@ -197,6 +197,8 @@ class AgentModuleSummary(BaseModel):
     candidate_name: str
     status: str
     amount: float
+    paid: float = 0
+    remaining: float = 0
     date: str | None = None
 
 

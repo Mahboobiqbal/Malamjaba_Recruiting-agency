@@ -1,59 +1,51 @@
-import { formatDateTime, formatCurrency } from "../../lib/utils";
-import type { Payment } from "../../types";
+import React from "react";
+import { Payment } from "../../types";
+import { formatCurrency, formatDateTime } from "../../lib/utils";
+import PrintHeader from "./PrintHeader";
 
-interface Props {
-  payment: Payment;
-}
+const DEFAULT_COMPANY = {
+  name: "Malamjaba Recruiting Agency",
+  address: "",
+  phone: "",
+  email: "",
+  website: "",
+};
 
 const PAYMENT_TYPES: Record<string, string> = {
   full: "Full Payment",
   partial: "Partial Payment",
   advance: "Advance Payment",
-  final: "Final Payment",
+  refund: "Refund",
+  adjustment: "Adjustment",
 };
 
 const PAYMENT_METHODS: Record<string, string> = {
   cash: "Cash",
   bank_transfer: "Bank Transfer",
   cheque: "Cheque",
-  online: "Online Payment",
+  online_transfer: "Online Payment",
+  other: "Other",
 };
+
+interface Props {
+  payment: Payment;
+}
 
 export default function PaymentPrintDocument({ payment }: Props) {
   return (
-    <div className="print-document relative">
-      <div className="print-watermark">MALAMJABA</div>
+    <div className="print-document">
+      <PrintHeader title="PAYMENT RECEIPT" code={payment.payment_code} company={DEFAULT_COMPANY} />
 
-      {/* Header */}
-      <div className="print-header">
-        <div className="print-logo">
-          <div className="print-logo-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-            </svg>
-          </div>
-          <div className="print-logo-text">
-            <h1>Malamjaba</h1>
-            <p>Recruiting Agency</p>
-          </div>
-        </div>
-        <div className="print-title">
-          <h2>Payment Receipt</h2>
-          <p>{payment.payment_code}</p>
-        </div>
-      </div>
-
-      {/* Receipt Details */}
-      <div className="print-section">
+      <div className="print-section" style={{ marginTop: 20 }}>
         <div className="print-section-title">Receipt Details</div>
         <div className="print-grid">
           <div className="print-field">
             <span className="print-field-label">Receipt Number</span>
-            <span className="print-field-value">{payment.receipt_number || "-"}</span>
+            <span className="print-field-value">{payment.receipt_number}</span>
           </div>
           <div className="print-field">
             <span className="print-field-label">Payment Date</span>
-            <span className="print-field-value">{payment.payment_date ? formatDateTime(payment.payment_date) : "-"}</span>
+            <span className="print-field-value">{formatDateTime(payment.payment_date)}</span>
           </div>
           <div className="print-field">
             <span className="print-field-label">Candidate</span>
@@ -82,38 +74,34 @@ export default function PaymentPrintDocument({ payment }: Props) {
         </div>
       </div>
 
-      {/* Amount */}
       <div className="print-section">
-        <div className="print-section-title">Amount</div>
-        <div className="print-field">
-          <span className="print-field-label">Payment Amount</span>
-          <span className="print-field-value large">{formatCurrency(payment.amount)}</span>
+        <div className="print-section-title">Payment Amount</div>
+        <div style={{ border: "1px solid #e2e8f0", borderRadius: 8, overflow: "hidden" }}>
+          <div style={{ background: "#f0fdf4", padding: "16px 20px", textAlign: "center" }}>
+            <p style={{ fontSize: 12, color: "#166534", textTransform: "uppercase", fontWeight: 600 }}>Amount Received</p>
+            <p style={{ fontSize: 28, fontWeight: 700, color: "#166534", margin: "8px 0 0" }}>{formatCurrency(payment.amount)}</p>
+          </div>
         </div>
       </div>
 
-      {/* Description / Remarks */}
       {(payment.description || payment.remarks) && (
-        <>
-          <hr className="print-divider" />
-          <div className="print-section">
-            <div className="print-section-title">Notes</div>
-            {payment.description && (
-              <div className="print-field" style={{ marginBottom: 8 }}>
-                <span className="print-field-label">Description</span>
-                <span className="print-field-value">{payment.description}</span>
-              </div>
-            )}
-            {payment.remarks && (
-              <div className="print-field">
-                <span className="print-field-label">Remarks</span>
-                <span className="print-field-value">{payment.remarks}</span>
-              </div>
-            )}
-          </div>
-        </>
+        <div className="print-section">
+          <div className="print-section-title">Notes</div>
+          {payment.description && (
+            <div className="print-field" style={{ marginBottom: 8 }}>
+              <span className="print-field-label">Description</span>
+              <span className="print-field-value">{payment.description}</span>
+            </div>
+          )}
+          {payment.remarks && (
+            <div className="print-field">
+              <span className="print-field-label">Remarks</span>
+              <span className="print-field-value">{payment.remarks}</span>
+            </div>
+          )}
+        </div>
       )}
 
-      {/* Footer */}
       <div className="print-footer">
         <div className="print-signature">
           <div className="print-signature-line">

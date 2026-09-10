@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { useGetPaymentsQuery, useGetOutstandingBalancesQuery } from "../../services/dashboard.service";
+import { useGetPaymentsQuery, useGetOutstandingBalancesQuery, useDeletePaymentMutation } from "../../services/dashboard.service";
 import { PAYMENT_METHODS } from "../../lib/constants";
 import { formatDateTime, formatCurrency } from "../../lib/utils";
-import { Plus, Search, ArrowRight, CreditCard, Eye, Printer } from "lucide-react";
+import { Plus, Search, ArrowRight, CreditCard, Eye, Printer, Edit, Trash2 } from "lucide-react";
 import { downloadPDF } from "../../lib/pdf";
 import PaymentPrintDocument from "../../components/print/PaymentPrintDocument";
-import DateFilter from "../../components/common/DateFilter";
+import PeriodFilter from "../../components/common/PeriodFilter";
+import ConfirmModal from "../../components/common/ConfirmModal";
+import toast from "react-hot-toast";
 
 export default function PaymentList() {
   const [page, setPage] = useState(1);
@@ -16,14 +18,16 @@ export default function PaymentList() {
   const [dateTo, setDateTo] = useState("");
   const { data, isLoading } = useGetPaymentsQuery({ page, per_page: 20, search, date_from: dateFrom || undefined, date_to: dateTo || undefined });
   const { data: outstanding, isLoading: loadingOutstanding } = useGetOutstandingBalancesQuery();
+  const [deletePayment] = useDeletePaymentMutation();
+  const [deleteId, setDeleteId] = useState<number | null>(null);
 
   const totalOutstanding = outstanding?.reduce((sum, o) => sum + o.balance, 0) || 0;
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Payments</h2>
-        <Link to="/payments/new" className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary/90">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-white">Payments</h2>
+        <Link to="/payments/new" className="flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary/90">
           <Plus className="h-4 w-4" /> Record Payment
         </Link>
       </div>
@@ -67,15 +71,15 @@ export default function PaymentList() {
 
       {activeTab === "all" && (
         <>
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="relative flex-1">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative flex-1 sm:min-w-0">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
               <input type="text" placeholder="Search by payment code, receipt..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                 className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 py-2 pl-10 pr-4 text-sm text-slate-800 dark:text-white focus:border-primary focus:outline-none" />
             </div>
-            <DateFilter dateFrom={dateFrom} dateTo={dateTo} onDateFromChange={(v) => { setDateFrom(v); setPage(1); }} onDateToChange={(v) => { setDateTo(v); setPage(1); }} onClear={() => { setDateFrom(""); setDateTo(""); setPage(1); }} />
+            <PeriodFilter dateFrom={dateFrom} dateTo={dateTo} onDateFromChange={(v) => { setDateFrom(v); setPage(1); }} onDateToChange={(v) => { setDateTo(v); setPage(1); }} onClear={() => { setDateFrom(""); setDateTo(""); setPage(1); }} />
           </div>
-          <div className="overflow-hidden rounded-lg border bg-white dark:bg-slate-900 shadow-sm dark:shadow-none">
+          <div className="overflow-x-auto rounded-lg border bg-white dark:bg-slate-900 shadow-sm dark:shadow-none">
             <table className="w-full text-left text-sm">
               <thead className="border-b bg-secondary">
                 <tr>
@@ -98,40 +102,42 @@ export default function PaymentList() {
                   <tr><td colSpan={10} className="px-4 py-8 text-center text-slate-500 dark:text-slate-400">No payments found</td></tr>
                 ) : (
                   data?.items.map((p) => (
-                    <React.Fragment key={p.id}>
-                      <tr className="border-b hover:bg-secondary">
-                        <td className="px-4 py-3">
-                          <Link to={`/payments/${p.id}`} className="font-medium text-primary hover:underline">{p.payment_code}</Link>
-                        </td>
-                        <td className="px-4 py-3">{p.receipt_number}</td>
-                        <td className="px-4 py-3">{p.candidate?.full_name || "-"}</td>
-                        <td className="px-4 py-3">
-                          {p.visa ? (
-                            <Link to={`/visas/${p.visa.id}`} className="text-primary hover:underline text-xs">Visa: {p.visa.visa_code}</Link>
-                          ) : p.ticket ? (
-                            <Link to={`/tickets/${p.ticket.id}`} className="text-primary hover:underline text-xs">Ticket: {p.ticket.ticket_code}</Link>
-                          ) : p.medical_token ? (
-                            <Link to={`/medical/${p.medical_token.id}`} className="text-primary hover:underline text-xs">Medical: {p.medical_token.token_code}</Link>
-                          ) : <span className="text-slate-400">-</span>}
-                        </td>
-                        <td className="px-4 py-3">{p.agent?.name || "-"}</td>
-                        <td className="px-4 py-3 font-medium">{formatCurrency(p.amount)}</td>
-                        <td className="px-4 py-3">{PAYMENT_METHODS.find(m => m.value === p.payment_method)?.label || p.payment_method}</td>
-                        <td className="px-4 py-3 capitalize">{p.payment_type}</td>
-                        <td className="px-4 py-3 text-slate-500 dark:text-slate-400">{formatDateTime(p.payment_date)}</td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-2">
-                            <Link to={`/payments/${p.id}`} className="text-slate-400 hover:text-primary"><Eye className="h-4 w-4" /></Link>
-                            <button onClick={() => downloadPDF(`print-${p.id}`, p.payment_code)} className="text-slate-400 hover:text-primary"><Printer className="h-4 w-4" /></button>
-                          </div>
-                        </td>
-                      </tr>
-                      <div id={`print-${p.id}`} className="print-only"><PaymentPrintDocument payment={p} /></div>
-                    </React.Fragment>
+                    <tr key={p.id} className="border-b hover:bg-secondary">
+                      <td className="px-4 py-3">
+                        <Link to={`/payments/${p.id}`} className="font-medium text-primary hover:underline">{p.payment_code}</Link>
+                      </td>
+                      <td className="px-4 py-3">{p.receipt_number}</td>
+                      <td className="px-4 py-3">{p.candidate?.full_name || "-"}</td>
+                      <td className="px-4 py-3">
+                        {p.visa ? (
+                          <Link to={`/visas/${p.visa.id}`} className="text-primary hover:underline text-xs">Visa: {p.visa.visa_code}</Link>
+                        ) : p.ticket ? (
+                          <Link to={`/tickets/${p.ticket.id}`} className="text-primary hover:underline text-xs">Ticket: {p.ticket.ticket_code}</Link>
+                        ) : p.medical_token ? (
+                          <Link to={`/medical/${p.medical_token.id}`} className="text-primary hover:underline text-xs">Medical: {p.medical_token.token_code}</Link>
+                        ) : <span className="text-slate-400">-</span>}
+                      </td>
+                      <td className="px-4 py-3">{p.agent?.name || "-"}</td>
+                      <td className="px-4 py-3 font-medium">{formatCurrency(p.amount)}</td>
+                      <td className="px-4 py-3">{PAYMENT_METHODS.find(m => m.value === p.payment_method)?.label || p.payment_method}</td>
+                      <td className="px-4 py-3 capitalize">{p.payment_type}</td>
+                      <td className="px-4 py-3 text-slate-500 dark:text-slate-400">{formatDateTime(p.payment_date)}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <Link to={`/payments/${p.id}`} className="text-slate-400 hover:text-primary"><Eye className="h-4 w-4" /></Link>
+                          <Link to={`/payments/${p.id}/edit`} className="text-slate-400 hover:text-amber-600 dark:hover:text-amber-400"><Edit className="h-4 w-4" /></Link>
+                          <button onClick={() => downloadPDF(`print-${p.id}`, p.payment_code)} className="text-slate-400 hover:text-primary"><Printer className="h-4 w-4" /></button>
+                          <button onClick={() => setDeleteId(p.id)} className="text-slate-400 hover:text-red-500 dark:hover:text-red-400"><Trash2 className="h-4 w-4" /></button>
+                        </div>
+                      </td>
+                    </tr>
                   ))
                 )}
               </tbody>
             </table>
+            {data?.items.map((p) => (
+              <div key={`print-${p.id}`} id={`print-${p.id}`} className="print-only"><PaymentPrintDocument payment={p} /></div>
+            ))}
           </div>
           {data && data.total > 20 && (
             <div className="flex items-center justify-between">
@@ -157,7 +163,7 @@ export default function PaymentList() {
               <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">No outstanding balances. All clients are fully paid.</p>
             </div>
           ) : (
-            <div className="overflow-hidden rounded-lg border bg-white dark:bg-slate-900 shadow-sm dark:shadow-none">
+            <div className="overflow-x-auto rounded-lg border bg-white dark:bg-slate-900 shadow-sm dark:shadow-none">
               <table className="w-full text-left text-sm">
                 <thead className="border-b bg-secondary">
                   <tr>
@@ -199,6 +205,23 @@ export default function PaymentList() {
           )}
         </>
       )}
+
+      <ConfirmModal
+        open={deleteId !== null}
+        title="Delete Payment"
+        message="Are you sure you want to delete this payment? This action cannot be undone."
+        onConfirm={async () => {
+          if (deleteId === null) return;
+          try {
+            await deletePayment(deleteId).unwrap();
+            toast.success("Payment deleted");
+          } catch {
+            toast.error("Failed to delete payment");
+          }
+          setDeleteId(null);
+        }}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   );
 }

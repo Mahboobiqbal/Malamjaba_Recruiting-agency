@@ -81,6 +81,7 @@ export interface MedicalToken {
   medical_date?: string;
   appointment_date?: string;
   medical_fee: number;
+  paid_amount: number;
   payment_status: string;
   medical_status: string;
   remarks?: string;
@@ -245,6 +246,7 @@ export interface DashboardSummary {
   total_received: number;
   total_pending: number;
   total_expenses: number;
+  total_agent_commission: number;
   net_amount: number;
 }
 

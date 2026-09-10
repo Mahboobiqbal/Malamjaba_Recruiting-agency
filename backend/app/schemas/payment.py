@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.schemas.agent import AgentResponse
 from app.schemas.candidate import CandidateResponse
@@ -45,7 +45,7 @@ class PaymentBase(BaseModel):
     ticket_id: int | None = None
     medical_token_id: int | None = None
     payment_date: datetime
-    payment_type: str = Field(..., pattern=r"^(full|partial|advance|refund|adjustment)$")
+    payment_type: str = Field(..., max_length=50)
     amount: float = Field(..., gt=0, description="Amount must be greater than 0")
     payment_method: str = Field(..., pattern=r"^(cash|bank_transfer|online_transfer|other)$")
     reference_number: str | None = Field(None, max_length=50)
@@ -61,6 +61,15 @@ class PaymentBase(BaseModel):
             raise ValueError("Amount is too large")
         return round(v, 2)
 
+    @model_validator(mode="after")
+    def validate_payment_target(self):
+        linked_targets = [self.visa_id, self.ticket_id, self.medical_token_id]
+        if sum(1 for target_id in linked_targets if target_id is not None) > 1:
+            raise ValueError("Select only one linked payment target")
+        if self.candidate_id is None and not any(target_id is not None for target_id in linked_targets):
+            raise ValueError("Select a candidate or a linked payment target")
+        return self
+
 
 class PaymentCreate(PaymentBase):
     pass
@@ -73,7 +82,7 @@ class PaymentUpdate(BaseModel):
     ticket_id: int | None = None
     medical_token_id: int | None = None
     payment_date: datetime | None = None
-    payment_type: str | None = Field(None, pattern=r"^(full|partial|advance|refund|adjustment)$")
+    payment_type: str | None = Field(None, max_length=50)
     amount: float | None = Field(None, gt=0)
     payment_method: str | None = Field(None, pattern=r"^(cash|bank_transfer|online_transfer|other)$")
     reference_number: str | None = Field(None, max_length=50)

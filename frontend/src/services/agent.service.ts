@@ -17,6 +17,8 @@ interface AgentModuleSummary {
   candidate_name: string;
   status: string;
   amount: number;
+  paid: number;
+  remaining: number;
   date: string | null;
 }
 
@@ -33,6 +35,8 @@ export interface AgentDetailsResponse extends Agent {
     total_tickets: number;
     total_payments: number;
     total_paid: number;
+    total_amount: number;
+    total_remaining: number;
   };
 }
 

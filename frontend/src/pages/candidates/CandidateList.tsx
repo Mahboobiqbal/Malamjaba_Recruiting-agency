@@ -1,19 +1,22 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useGetCandidatesQuery, useLazyGetCandidateQuery, useDeleteCandidateMutation, useUpdateCandidateStatusMutation } from "../../services/candidate.service";
 import { CANDIDATE_STATUSES } from "../../lib/constants";
 import { formatDate } from "../../lib/utils";
 import { downloadPDF } from "../../lib/pdf";
 import { Plus, Search, Trash2, Eye, Edit, Printer } from "lucide-react";
 import StatusDropdown from "../../components/common/StatusDropdown";
-import DateFilter from "../../components/common/DateFilter";
+import PeriodFilter from "../../components/common/PeriodFilter";
 import CandidatePrintDocument from "../../components/print/CandidatePrintDocument";
+import ConfirmModal from "../../components/common/ConfirmModal";
 import type { Candidate } from "../../types";
+import toast from "react-hot-toast";
 
 export default function CandidateList() {
+  const [searchParams] = useSearchParams();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState(searchParams.get("status") || "");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const { data, isLoading } = useGetCandidatesQuery({ page, per_page: 20, search, status, date_from: dateFrom || undefined, date_to: dateTo || undefined });
@@ -21,12 +24,7 @@ export default function CandidateList() {
   const [updateStatus] = useUpdateCandidateStatusMutation();
   const [fetchCandidate] = useLazyGetCandidateQuery();
   const [printCandidate, setPrintCandidate] = useState<Candidate | null>(null);
-
-  const handleDelete = async (id: number) => {
-    if (window.confirm("Are you sure you want to delete this candidate?")) {
-      await deleteCandidate(id);
-    }
-  };
+  const [deleteId, setDeleteId] = useState<number | null>(null);
 
   const handlePrint = async (id: number) => {
     const result = await fetchCandidate(id);
@@ -38,19 +36,19 @@ export default function CandidateList() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Candidates</h2>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-white">Candidates</h2>
         <Link
           to="/candidates/new"
-          className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary/90"
+          className="flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary/90"
         >
           <Plus className="h-4 w-4" />
           Add Candidate
         </Link>
       </div>
 
-      <div className="flex flex-wrap gap-3">
-        <div className="relative flex-1">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+        <div className="relative flex-1 sm:min-w-0">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
           <input
             type="text"
@@ -63,17 +61,17 @@ export default function CandidateList() {
         <select
           value={status}
           onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-          className="rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white focus:border-primary focus:outline-none"
+          className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white focus:border-primary focus:outline-none sm:w-auto"
         >
           <option value="">All Status</option>
           {CANDIDATE_STATUSES.map((s) => (
             <option key={s.value} value={s.value}>{s.label}</option>
           ))}
         </select>
-        <DateFilter dateFrom={dateFrom} dateTo={dateTo} onDateFromChange={(v) => { setDateFrom(v); setPage(1); }} onDateToChange={(v) => { setDateTo(v); setPage(1); }} onClear={() => { setDateFrom(""); setDateTo(""); setPage(1); }} />
+        <PeriodFilter dateFrom={dateFrom} dateTo={dateTo} onDateFromChange={(v) => { setDateFrom(v); setPage(1); }} onDateToChange={(v) => { setDateTo(v); setPage(1); }} onClear={() => { setDateFrom(""); setDateTo(""); setPage(1); }} />
       </div>
 
-      <div className="overflow-hidden rounded-lg border bg-white dark:bg-slate-900 shadow-sm dark:shadow-none">
+      <div className="overflow-x-auto rounded-lg border bg-white dark:bg-slate-900 shadow-sm dark:shadow-none">
         <table className="w-full text-left text-sm">
           <thead className="border-b bg-secondary">
             <tr>
@@ -113,7 +111,7 @@ export default function CandidateList() {
                       <Link to={`/candidates/${c.id}/edit`} className="text-slate-400 dark:text-slate-500 hover:text-amber-600 dark:hover:text-amber-400">
                         <Edit className="h-4 w-4" />
                       </Link>
-                      <button onClick={() => handleDelete(c.id)} className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400">
+                      <button onClick={() => setDeleteId(c.id)} className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400">
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
@@ -130,6 +128,23 @@ export default function CandidateList() {
           <CandidatePrintDocument candidate={printCandidate} />
         </div>
       )}
+
+      <ConfirmModal
+        open={deleteId !== null}
+        title="Delete Candidate"
+        message="Are you sure you want to delete this candidate? This action cannot be undone."
+        onConfirm={async () => {
+          if (deleteId === null) return;
+          try {
+            await deleteCandidate(deleteId).unwrap();
+            toast.success("Candidate deleted");
+          } catch {
+            toast.error("Failed to delete candidate");
+          }
+          setDeleteId(null);
+        }}
+        onCancel={() => setDeleteId(null)}
+      />
 
       {data && data.total > 20 && (
         <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">

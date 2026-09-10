@@ -1,5 +1,15 @@
-import { formatDate, formatCurrency } from "../../lib/utils";
-import type { Visa } from "../../types";
+import React from "react";
+import { Visa } from "../../types";
+import { formatCurrency } from "../../lib/utils";
+import PrintHeader from "./PrintHeader";
+
+const DEFAULT_COMPANY = {
+  name: "Malamjaba Recruiting Agency",
+  address: "",
+  phone: "",
+  email: "",
+  website: "",
+};
 
 interface Props {
   visa: Visa;
@@ -8,32 +18,27 @@ interface Props {
   remainingAmount?: number;
 }
 
-export default function VisaPrintDocument({ visa, totalCost = 0, paidAmount = 0, remainingAmount = 0 }: Props) {
+export default function VisaPrintDocument({ visa, totalCost, paidAmount, remainingAmount }: Props) {
+  const v = visa as any;
+
+  const total = totalCost ?? v.total_cost ?? 0;
+  const paid = paidAmount ?? v.paid_amount ?? 0;
+  const remaining = remainingAmount ?? v.remaining_amount ?? 0;
+
+  function formatDateShort(d: any) {
+    if (!d) return "-";
+    try {
+      return new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+    } catch {
+      return String(d);
+    }
+  }
+
   return (
-    <div className="print-document relative">
-      <div className="print-watermark">MALAMJABA</div>
+    <div className="print-document">
+      <PrintHeader title="VISA DOCUMENT" code={visa.visa_code} company={DEFAULT_COMPANY} />
 
-      {/* Header */}
-      <div className="print-header">
-        <div className="print-logo">
-          <div className="print-logo-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-            </svg>
-          </div>
-          <div className="print-logo-text">
-            <h1>Malamjaba</h1>
-            <p>Recruiting Agency</p>
-          </div>
-        </div>
-        <div className="print-title">
-          <h2>Visa Document</h2>
-          <p>{visa.visa_code}</p>
-        </div>
-      </div>
-
-      {/* Candidate Info */}
-      <div className="print-section">
+      <div className="print-section" style={{ marginTop: 20 }}>
         <div className="print-section-title">Candidate Information</div>
         <div className="print-grid">
           <div className="print-field">
@@ -42,26 +47,25 @@ export default function VisaPrintDocument({ visa, totalCost = 0, paidAmount = 0,
           </div>
           <div className="print-field">
             <span className="print-field-label">Country</span>
-            <span className="print-field-value">{visa.country}</span>
+            <span className="print-field-value">{v.country || "-"}</span>
           </div>
         </div>
       </div>
 
-      {/* Visa Details */}
       <div className="print-section">
         <div className="print-section-title">Visa Details</div>
         <div className="print-grid">
           <div className="print-field">
             <span className="print-field-label">Visa Type</span>
-            <span className="print-field-value">{visa.visa_type}</span>
+            <span className="print-field-value">{v.visa_type || "-"}</span>
           </div>
           <div className="print-field">
             <span className="print-field-label">Visa Number</span>
-            <span className="print-field-value">{visa.visa_number || "-"}</span>
+            <span className="print-field-value">{v.visa_number || "-"}</span>
           </div>
           <div className="print-field">
             <span className="print-field-label">Sponsor Number</span>
-            <span className="print-field-value">{(visa as any).sponsor_number || "-"}</span>
+            <span className="print-field-value">{v.sponsor_number || "-"}</span>
           </div>
           <div className="print-field">
             <span className="print-field-label">Status</span>
@@ -69,49 +73,51 @@ export default function VisaPrintDocument({ visa, totalCost = 0, paidAmount = 0,
           </div>
           <div className="print-field">
             <span className="print-field-label">Issue Date</span>
-            <span className="print-field-value">{visa.issue_date ? formatDate(visa.issue_date) : "-"}</span>
+            <span className="print-field-value">{formatDateShort(v.issue_date)}</span>
           </div>
           <div className="print-field">
             <span className="print-field-label">Expiry Date</span>
-            <span className="print-field-value">{visa.expiry_date ? formatDate(visa.expiry_date) : "-"}</span>
+            <span className="print-field-value">{formatDateShort(v.expiry_date)}</span>
           </div>
         </div>
       </div>
 
-      <hr className="print-divider" />
+      <div className="print-divider" />
 
-      {/* Financial Details */}
       <div className="print-section">
         <div className="print-section-title">Financial Details</div>
-        <div className="print-grid">
-          <div className="print-field">
-            <span className="print-field-label">Visa Fee</span>
-            <span className="print-field-value">{formatCurrency(visa.visa_fee || 0)}</span>
+        <div style={{ border: "1px solid #e2e8f0", borderRadius: 8, overflow: "hidden" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 1, background: "#e2e8f0" }}>
+            <div style={{ background: "white", padding: "12px 16px" }}>
+              <p style={{ fontSize: 11, color: "#94a3b8", textTransform: "uppercase" }}>Visa Fee</p>
+              <p style={{ fontSize: 16, fontWeight: 700, color: "#1e293b", margin: "4px 0 0" }}>{formatCurrency(v.visa_fee || 0)}</p>
+            </div>
+            <div style={{ background: "white", padding: "12px 16px" }}>
+              <p style={{ fontSize: 11, color: "#94a3b8", textTransform: "uppercase" }}>Agent Fee</p>
+              <p style={{ fontSize: 16, fontWeight: 700, color: "#1e293b", margin: "4px 0 0" }}>{formatCurrency(v.agent_fee || 0)}</p>
+            </div>
+            <div style={{ background: "white", padding: "12px 16px" }}>
+              <p style={{ fontSize: 11, color: "#94a3b8", textTransform: "uppercase" }}>Other Charges</p>
+              <p style={{ fontSize: 16, fontWeight: 700, color: "#1e293b", margin: "4px 0 0" }}>{formatCurrency(v.other_charges || 0)}</p>
+            </div>
           </div>
-          <div className="print-field">
-            <span className="print-field-label">Agent Fee</span>
-            <span className="print-field-value">{formatCurrency(visa.agent_fee || 0)}</span>
-          </div>
-          <div className="print-field">
-            <span className="print-field-label">Other Charges</span>
-            <span className="print-field-value">{formatCurrency((visa as any).other_charges || 0)}</span>
-          </div>
-          <div className="print-field">
-            <span className="print-field-label">Total Cost</span>
-            <span className="print-field-value large">{formatCurrency(totalCost)}</span>
-          </div>
-          <div className="print-field">
-            <span className="print-field-label">Paid Amount</span>
-            <span className="print-field-value">{formatCurrency(paidAmount)}</span>
-          </div>
-          <div className="print-field">
-            <span className="print-field-label">Remaining</span>
-            <span className="print-field-value">{formatCurrency(remainingAmount)}</span>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 1, background: "#e2e8f0" }}>
+            <div style={{ background: "#fdf8f3", padding: "12px 16px" }}>
+              <p style={{ fontSize: 11, color: "hsl(25, 30%, 45%)", textTransform: "uppercase", fontWeight: 600 }}>Total Cost</p>
+              <p style={{ fontSize: 18, fontWeight: 700, color: "hsl(25, 30%, 45%)", margin: "4px 0 0" }}>{formatCurrency(total)}</p>
+            </div>
+            <div style={{ background: "#f0fdf4", padding: "12px 16px" }}>
+              <p style={{ fontSize: 11, color: "#166534", textTransform: "uppercase", fontWeight: 600 }}>Paid Amount</p>
+              <p style={{ fontSize: 18, fontWeight: 700, color: "#166534", margin: "4px 0 0" }}>{formatCurrency(paid)}</p>
+            </div>
+            <div style={{ background: "#fffbeb", padding: "12px 16px" }}>
+              <p style={{ fontSize: 11, color: "#92400e", textTransform: "uppercase", fontWeight: 600 }}>Remaining</p>
+              <p style={{ fontSize: 18, fontWeight: 700, color: "#92400e", margin: "4px 0 0" }}>{formatCurrency(remaining)}</p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Footer */}
       <div className="print-footer">
         <div className="print-signature">
           <div className="print-signature-line">

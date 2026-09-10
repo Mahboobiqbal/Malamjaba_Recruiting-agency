@@ -1,24 +1,43 @@
-import React, { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { useCreateTicketMutation } from "../../services/dashboard.service";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useGetTicketQuery, useUpdateTicketMutation } from "../../services/dashboard.service";
 import { useGetCandidatesQuery } from "../../services/candidate.service";
 import { TICKET_STATUSES } from "../../lib/constants";
 import { getErrorMessage } from "../../lib/utils";
 import toast from "react-hot-toast";
 
-export default function TicketCreate() {
+export default function TicketEdit() {
+  const { id } = useParams();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const candidateId = searchParams.get("candidate_id");
-  const [createTicket, { isLoading }] = useCreateTicketMutation();
+  const { data: ticket, isLoading: loadingTicket } = useGetTicketQuery(Number(id));
+  const [updateTicket, { isLoading }] = useUpdateTicketMutation();
   const { data: candidatesData } = useGetCandidatesQuery({ per_page: 100 });
-  const [form, setForm] = useState({
-    candidate_id: candidateId ? Number(candidateId) : 0,
-    airline: "", pnr: "", ticket_number: "", flight_number: "",
-    departure_airport: "", arrival_airport: "", departure_date: "", departure_time: "",
-    arrival_date: "", arrival_time: "", baggage_allowance: "", ticket_class: "",
-    ticket_price: 0, agent_commission: 0, other_charges: 0, status: "pending", remarks: "",
-  });
+  const [form, setForm] = useState<any>({});
+
+  useEffect(() => {
+    if (ticket) {
+      setForm({
+        candidate_id: ticket.candidate_id,
+        airline: ticket.airline || "",
+        pnr: ticket.pnr || "",
+        ticket_number: ticket.ticket_number || "",
+        flight_number: ticket.flight_number || "",
+        departure_airport: ticket.departure_airport || "",
+        arrival_airport: ticket.arrival_airport || "",
+        departure_date: ticket.departure_date ? ticket.departure_date.split("T")[0] : "",
+        departure_time: ticket.departure_time || "",
+        arrival_date: ticket.arrival_date ? ticket.arrival_date.split("T")[0] : "",
+        arrival_time: ticket.arrival_time || "",
+        baggage_allowance: ticket.baggage_allowance || "",
+        ticket_class: ticket.ticket_class || "",
+        ticket_price: ticket.ticket_price || 0,
+        agent_commission: ticket.agent_commission || 0,
+        other_charges: ticket.other_charges || 0,
+        status: ticket.status || "pending",
+        remarks: ticket.remarks || "",
+      });
+    }
+  }, [ticket]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,16 +59,18 @@ export default function TicketCreate() {
         ticket_class: form.ticket_class || undefined,
         remarks: form.remarks || undefined,
       };
-      await createTicket(payload).unwrap();
-      navigate("/tickets");
+      await updateTicket({ id: Number(id), data: payload }).unwrap();
+      navigate(`/tickets/${id}`);
     } catch (err: any) {
-      toast.error(getErrorMessage(err, "Failed to create ticket"));
+      toast.error(getErrorMessage(err, "Failed to update ticket"));
     }
   };
 
+  if (loadingTicket) return <div className="text-center py-8 text-slate-500 dark:text-slate-400">Loading...</div>;
+
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <h2 className="text-2xl font-bold text-slate-800 dark:text-white">New Ticket</h2>
+      <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Edit Ticket</h2>
       <form onSubmit={handleSubmit} className="rounded-lg border bg-white dark:bg-slate-900 p-6 shadow-sm dark:shadow-none">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="md:col-span-2">
@@ -131,9 +152,9 @@ export default function TicketCreate() {
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <button type="submit" disabled={isLoading}
             className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50">
-            {isLoading ? "Saving..." : "Create Ticket"}
+            {isLoading ? "Saving..." : "Update Ticket"}
           </button>
-          <button type="button" onClick={() => navigate("/tickets")}
+          <button type="button" onClick={() => navigate(`/tickets/${id}`)}
             className="rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-secondary">
             Cancel
           </button>

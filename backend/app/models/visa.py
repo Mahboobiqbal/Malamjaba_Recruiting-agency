@@ -36,9 +36,9 @@ class Visa(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
 
-    candidate: Mapped["Candidate"] = relationship(back_populates="visas")
-    agent: Mapped["Agent | None"] = relationship(back_populates="visas")
-    payments: Mapped[list["Payment"]] = relationship(back_populates="visa")
+    candidate: Mapped["Candidate"] = relationship(back_populates="visas", lazy="selectin")
+    agent: Mapped["Agent | None"] = relationship(back_populates="visas", lazy="selectin")
+    payments: Mapped[list["Payment"]] = relationship(back_populates="visa", lazy="selectin")
 
 
 from app.models.agent import Agent

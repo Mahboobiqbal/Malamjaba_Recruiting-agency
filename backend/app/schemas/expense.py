@@ -28,6 +28,17 @@ class ExpenseCreate(ExpenseBase):
     pass
 
 
+class ExpenseUpdate(BaseModel):
+    date: datetime | None = None
+    category: str | None = Field(None, pattern=r"^(office|medical|visa|ticket|agent_commission|transportation|salary|utility|other)$")
+    description: str | None = None
+    amount: float | None = Field(None, gt=0)
+    payment_method: str | None = Field(None, pattern=r"^(cash|bank_transfer|online_transfer|other)$")
+    paid_to: str | None = None
+    reference: str | None = None
+    remarks: str | None = None
+
+
 class ExpenseResponse(ExpenseBase):
     id: int
     expense_code: str

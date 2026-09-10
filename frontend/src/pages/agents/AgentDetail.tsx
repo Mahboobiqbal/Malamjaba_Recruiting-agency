@@ -4,6 +4,8 @@ import { useGetAgentDetailsQuery, useDeleteAgentMutation, useUpdateAgentStatusMu
 import { AGENT_STATUSES } from "../../lib/constants";
 import { ArrowLeft, Edit, Trash2, Users, Stethoscope, FileText, Plane, DollarSign } from "lucide-react";
 import StatusDropdown from "../../components/common/StatusDropdown";
+import ConfirmModal from "../../components/common/ConfirmModal";
+import toast from "react-hot-toast";
 
 const TABS = [
   { key: "candidates", label: "Candidates", icon: Users },
@@ -19,6 +21,7 @@ export default function AgentDetail() {
   const [deleteAgent] = useDeleteAgentMutation();
   const [updateStatus] = useUpdateAgentStatusMutation();
   const [activeTab, setActiveTab] = useState("candidates");
+  const [deleteId, setDeleteId] = useState<number | null>(null);
 
   if (isLoading) return <div className="text-center py-8 text-slate-500 dark:text-slate-400">Loading...</div>;
   if (!agent) return <div className="text-center py-8 text-slate-500 dark:text-slate-400">Agent not found</div>;
@@ -35,11 +38,11 @@ export default function AgentDetail() {
             <p className="text-sm text-slate-500 dark:text-slate-400">{agent.agent_code}</p>
           </div>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row">
           <Link to={`/agents/${agent.id}/edit`} className="flex items-center gap-2 rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2 text-sm font-medium hover:bg-secondary">
             <Edit className="h-4 w-4" /> Edit
           </Link>
-          <button onClick={async () => { if (window.confirm("Delete?")) { await deleteAgent(agent.id); } }}
+          <button onClick={() => setDeleteId(agent.id)}
             className="flex items-center gap-2 rounded-lg border border-red-300 dark:border-red-500/30 px-4 py-2 text-sm font-medium text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10">
             <Trash2 className="h-4 w-4" /> Delete
           </button>
@@ -76,8 +79,8 @@ export default function AgentDetail() {
           { label: "Medical", value: stats.total_medical || 0, color: "bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400" },
           { label: "Visas", value: stats.total_visas || 0, color: "bg-emerald-50 text-emerald-700" },
           { label: "Tickets", value: stats.total_tickets || 0, color: "bg-amber-50 dark:bg-amber-500/10 text-amber-700" },
-          { label: "Payments", value: stats.total_payments || 0, color: "bg-cyan-50 text-cyan-700" },
-          { label: "Total Paid", value: `PKR ${(stats.total_paid || 0).toLocaleString()}`, color: "bg-rose-50 text-rose-700" },
+          { label: "Total Amount", value: `PKR ${(stats.total_amount || 0).toLocaleString()}`, color: "bg-cyan-50 text-cyan-700" },
+          { label: "Total Paid", value: `PKR ${(stats.total_paid || 0).toLocaleString()}`, color: "bg-emerald-50 text-emerald-700" },
         ].map((s) => (
           <div key={s.label} className={`rounded-lg p-4 ${s.color}`}>
             <p className="text-xs font-medium opacity-75">{s.label}</p>
@@ -85,10 +88,19 @@ export default function AgentDetail() {
           </div>
         ))}
       </div>
+      {(stats.total_remaining || 0) > 0 && (
+        <div className="rounded-lg bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 p-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-rose-700 dark:text-rose-400">Outstanding Balance</span>
+            <span className="text-lg font-bold text-rose-700 dark:text-rose-400">PKR {(stats.total_remaining || 0).toLocaleString()}</span>
+          </div>
+        </div>
+      )}
 
       <div className="rounded-lg border bg-white dark:bg-slate-900 shadow-sm dark:shadow-none">
-        <div className="flex border-b border-slate-200 dark:border-slate-700">
-          {TABS.map(({ key, label, icon: Icon }) => (
+        <div className="overflow-x-auto">
+          <div className="flex min-w-max border-b border-slate-200 dark:border-slate-700">
+            {TABS.map(({ key, label, icon: Icon }) => (
             <button
               key={key}
               onClick={() => setActiveTab(key)}
@@ -106,19 +118,20 @@ export default function AgentDetail() {
             </button>
           ))}
         </div>
+        </div>
 
         <div className="p-4">
           {activeTab === "candidates" && (
             <CandidatesTab candidates={agent.candidates} />
           )}
           {activeTab === "medical" && (
-            <ModuleTab items={agent.medical_tokens} columns={["Code", "Candidate", "Status", "Fee", "Date"]} />
+            <ModuleTab items={agent.medical_tokens} columns={["Code", "Candidate", "Status", "Fee", "Paid", "Remaining", "Date"]} />
           )}
           {activeTab === "visas" && (
-            <ModuleTab items={agent.visas} columns={["Code", "Candidate", "Status", "Cost", "Date"]} />
+            <ModuleTab items={agent.visas} columns={["Code", "Candidate", "Status", "Total", "Paid", "Remaining", "Date"]} />
           )}
           {activeTab === "tickets" && (
-            <ModuleTab items={agent.tickets} columns={["Code", "Candidate", "Status", "Total", "Date"]} />
+            <ModuleTab items={agent.tickets} columns={["Code", "Candidate", "Status", "Total", "Paid", "Remaining", "Date"]} />
           )}
           {activeTab === "payments" && (
             <ModuleTab items={agent.payments} columns={["Code", "Candidate", "Type", "Amount", "Date"]} />
@@ -132,6 +145,23 @@ export default function AgentDetail() {
           <p className="text-sm text-slate-600 dark:text-slate-300">{agent.notes}</p>
         </div>
       )}
+
+      <ConfirmModal
+        open={deleteId !== null}
+        title="Delete Agent"
+        message="Are you sure you want to delete this agent? This action cannot be undone."
+        onConfirm={async () => {
+          if (deleteId === null) return;
+          try {
+            await deleteAgent(deleteId).unwrap();
+            toast.success("Agent deleted");
+          } catch {
+            toast.error("Failed to delete agent");
+          }
+          setDeleteId(null);
+        }}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   );
 }
@@ -199,6 +229,8 @@ function ModuleTab({ items, columns }: { items: any[]; columns: string[] }) {
                 <span className="inline-flex rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-1 text-xs font-medium text-slate-700 dark:text-slate-200 capitalize">{item.status}</span>
               </td>
               <td className="px-4 py-3">PKR {(item.amount || 0).toLocaleString()}</td>
+              <td className="px-4 py-3 text-emerald-600">PKR {(item.paid || 0).toLocaleString()}</td>
+              <td className="px-4 py-3 text-rose-600">PKR {(item.remaining || 0).toLocaleString()}</td>
               <td className="px-4 py-3 text-slate-500 dark:text-slate-400">{item.date || "-"}</td>
             </tr>
           ))}

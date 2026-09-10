@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetAgentQuery, useUpdateAgentMutation } from "../../services/agent.service";
-import { formatCNIC } from "../../lib/utils";
+import { formatCNIC, getErrorMessage } from "../../lib/utils";
+import toast from "react-hot-toast";
 
 export default function AgentEdit() {
   const params = useParams();
@@ -50,7 +51,7 @@ export default function AgentEdit() {
       await updateAgent({ id: agentId, data: form }).unwrap();
       navigate("/agents");
     } catch (err: any) {
-      alert(err?.data?.detail || "Failed to update agent");
+      toast.error(getErrorMessage(err, "Failed to update agent"));
     }
   };
 
@@ -170,7 +171,7 @@ export default function AgentEdit() {
             className="mt-1 rounded-lg border border-slate-300 dark:border-slate-700 px-3 py-2 w-full text-sm focus:border-primary focus:outline-none resize-none"
           />
         </div>
-        <div className="mt-6 flex gap-3">
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <button type="button" onClick={() => navigate("/agents")}
             className="rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-secondary">
             Cancel

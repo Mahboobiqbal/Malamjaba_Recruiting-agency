@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useGetCandidateQuery, useUpdateCandidateMutation } from "../../services/candidate.service";
 import { useGetAgentsQuery } from "../../services/agent.service";
-import { formatCNIC } from "../../lib/utils";
+import { formatCNIC, getErrorMessage } from "../../lib/utils";
+import toast from "react-hot-toast";
 
 export default function CandidateEdit() {
   const { id } = useParams();
@@ -41,7 +42,7 @@ export default function CandidateEdit() {
       await updateCandidate({ id: Number(id), data: { ...form, agent_id: form.agent_id || undefined } }).unwrap();
       navigate(`/candidates/${id}`);
     } catch (err: any) {
-      alert(err?.data?.detail || "Failed to update candidate");
+      toast.error(getErrorMessage(err, "Failed to update candidate"));
     }
   };
 
@@ -132,7 +133,7 @@ export default function CandidateEdit() {
               className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white focus:border-primary focus:outline-none" />
           </div>
         </div>
-        <div className="mt-6 flex gap-3">
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <button type="submit" disabled={isLoading}
             className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50">
             {isLoading ? "Saving..." : "Update Candidate"}

@@ -1,41 +1,57 @@
-import React, { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { useCreateMedicalTokenMutation, useGetMedicalTokensQuery } from "../../services/dashboard.service";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useGetMedicalTokenQuery, useUpdateMedicalTokenMutation } from "../../services/dashboard.service";
 import { useGetCandidatesQuery } from "../../services/candidate.service";
 import { MEDICAL_STATUSES } from "../../lib/constants";
 import { getErrorMessage } from "../../lib/utils";
 import toast from "react-hot-toast";
 
-export default function MedicalTokenCreate() {
+const PAYMENT_STATUSES = [
+  { value: "unpaid", label: "Unpaid" },
+  { value: "partial", label: "Partial" },
+  { value: "paid", label: "Paid" },
+];
+
+export default function MedicalTokenEdit() {
+  const { id } = useParams();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const candidateId = searchParams.get("candidate_id");
-  const [createToken, { isLoading }] = useCreateMedicalTokenMutation();
+  const { data: token, isLoading: loadingToken } = useGetMedicalTokenQuery(Number(id));
+  const [updateToken, { isLoading }] = useUpdateMedicalTokenMutation();
   const { data: candidatesData } = useGetCandidatesQuery({ per_page: 100 });
-  const [form, setForm] = useState({
-    candidate_id: candidateId ? Number(candidateId) : 0,
-    token_number: "", medical_center: "", medical_date: "", appointment_date: "",
-    medical_fee: 0, paid_amount: 0, payment_status: "unpaid", medical_status: "pending", remarks: "",
-  });
+  const [form, setForm] = useState<any>({});
+
+  useEffect(() => {
+    if (token) {
+      setForm({
+        candidate_id: token.candidate_id,
+        token_number: token.token_number || "",
+        medical_center: token.medical_center || "",
+        medical_date: token.medical_date ? token.medical_date.split("T")[0] : "",
+        appointment_date: token.appointment_date ? token.appointment_date.split("T")[0] : "",
+        medical_fee: token.medical_fee || 0,
+        paid_amount: token.paid_amount || 0,
+        payment_status: token.payment_status || "unpaid",
+        medical_status: token.medical_status || "pending",
+        remarks: token.remarks || "",
+      });
+    }
+  }, [token]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await createToken({
-        ...form,
-        candidate_id: Number(form.candidate_id),
-        medical_date: form.medical_date || undefined,
-        appointment_date: form.appointment_date || undefined,
-      }).unwrap();
-      navigate("/medical");
+      await updateToken({ id: Number(id), data: { ...form, candidate_id: Number(form.candidate_id) } }).unwrap();
+      navigate(`/medical/${id}`);
     } catch (err: any) {
-      toast.error(getErrorMessage(err, "Failed to create token"));
+      toast.error(getErrorMessage(err, "Failed to update medical token"));
     }
   };
 
+  if (loadingToken) return <div className="text-center py-8 text-slate-500 dark:text-slate-400">Loading...</div>;
+
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <h2 className="text-2xl font-bold text-slate-800 dark:text-white">New Medical Token</h2>
+      <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Edit Medical Token</h2>
       <form onSubmit={handleSubmit} className="rounded-lg border bg-white dark:bg-slate-900 p-6 shadow-sm dark:shadow-none">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="md:col-span-2">
@@ -92,9 +108,9 @@ export default function MedicalTokenCreate() {
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <button type="submit" disabled={isLoading}
             className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50">
-            {isLoading ? "Saving..." : "Create Token"}
+            {isLoading ? "Saving..." : "Update Token"}
           </button>
-          <button type="button" onClick={() => navigate("/medical")}
+          <button type="button" onClick={() => navigate(`/medical/${id}`)}
             className="rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-secondary">
             Cancel
           </button>

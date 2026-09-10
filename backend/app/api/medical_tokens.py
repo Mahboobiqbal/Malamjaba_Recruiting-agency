@@ -16,6 +16,20 @@ from app.core.exceptions import NotFoundException
 
 router = APIRouter(prefix="/medical-tokens", tags=["Medical Tokens"])
 
+# Reuse the candidate loading options
+LOAD_CANDIDATE_OPTIONS = [
+    selectinload(Candidate.agent),
+    selectinload(Candidate.medical_tokens),
+    selectinload(Candidate.visas),
+    selectinload(Candidate.tickets),
+    selectinload(Candidate.payments),
+]
+
+LOAD_MEDICAL_TOKEN_OPTIONS = [
+    selectinload(MedicalToken.candidate).options(*LOAD_CANDIDATE_OPTIONS),
+    selectinload(MedicalToken.agent),
+]
+
 
 @router.get("", response_model=MedicalTokenListResponse)
 async def list_medical_tokens(
@@ -29,10 +43,7 @@ async def list_medical_tokens(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_permission("medical.view")),
 ):
-    stmt = select(MedicalToken).options(
-        selectinload(MedicalToken.candidate).selectinload(Candidate.agent),
-        selectinload(MedicalToken.agent),
-    )
+    stmt = select(MedicalToken).options(*LOAD_MEDICAL_TOKEN_OPTIONS)
     count_stmt = select(func.count()).select_from(MedicalToken)
 
     if search:
@@ -78,9 +89,7 @@ async def create_medical_token(
     await db.commit()
     await db.refresh(token)
 
-    stmt = select(MedicalToken).where(MedicalToken.id == token.id).options(
-        selectinload(MedicalToken.candidate).selectinload(Candidate.agent), selectinload(MedicalToken.agent)
-    )
+    stmt = select(MedicalToken).where(MedicalToken.id == token.id).options(*LOAD_MEDICAL_TOKEN_OPTIONS)
     result = await db.execute(stmt)
     return result.scalar_one()
 
@@ -91,9 +100,7 @@ async def get_medical_token(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_permission("medical.view")),
 ):
-    stmt = select(MedicalToken).where(MedicalToken.id == token_id).options(
-        selectinload(MedicalToken.candidate).selectinload(Candidate.agent), selectinload(MedicalToken.agent)
-    )
+    stmt = select(MedicalToken).where(MedicalToken.id == token_id).options(*LOAD_MEDICAL_TOKEN_OPTIONS)
     result = await db.execute(stmt)
     token = result.scalar_one_or_none()
     if not token:
@@ -121,9 +128,7 @@ async def update_medical_token(
     await db.commit()
     await db.refresh(token)
 
-    stmt = select(MedicalToken).where(MedicalToken.id == token.id).options(
-        selectinload(MedicalToken.candidate).selectinload(Candidate.agent), selectinload(MedicalToken.agent)
-    )
+    stmt = select(MedicalToken).where(MedicalToken.id == token.id).options(*LOAD_MEDICAL_TOKEN_OPTIONS)
     result = await db.execute(stmt)
     return result.scalar_one()
 
@@ -148,9 +153,7 @@ async def update_medical_token_status(
     await db.commit()
     await db.refresh(token)
 
-    stmt = select(MedicalToken).where(MedicalToken.id == token.id).options(
-        selectinload(MedicalToken.candidate).selectinload(Candidate.agent), selectinload(MedicalToken.agent)
-    )
+    stmt = select(MedicalToken).where(MedicalToken.id == token.id).options(*LOAD_MEDICAL_TOKEN_OPTIONS)
     result = await db.execute(stmt)
     return result.scalar_one()
 

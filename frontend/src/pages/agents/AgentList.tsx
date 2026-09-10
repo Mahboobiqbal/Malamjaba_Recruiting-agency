@@ -4,7 +4,9 @@ import { useGetAgentsQuery, useDeleteAgentMutation, useUpdateAgentStatusMutation
 import { AGENT_STATUSES } from "../../lib/constants";
 import { Plus, Search, Trash2, Eye, Edit } from "lucide-react";
 import StatusDropdown from "../../components/common/StatusDropdown";
-import DateFilter from "../../components/common/DateFilter";
+import PeriodFilter from "../../components/common/PeriodFilter";
+import ConfirmModal from "../../components/common/ConfirmModal";
+import toast from "react-hot-toast";
 
 export default function AgentList() {
   const [page, setPage] = useState(1);
@@ -14,24 +16,25 @@ export default function AgentList() {
   const { data, isLoading } = useGetAgentsQuery({ page, per_page: 20, search, date_from: dateFrom || undefined, date_to: dateTo || undefined });
   const [deleteAgent] = useDeleteAgentMutation();
   const [updateStatus] = useUpdateAgentStatusMutation();
+  const [deleteId, setDeleteId] = useState<number | null>(null);
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Agents</h2>
-        <Link to="/agents/new" className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary/90">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-white">Agents</h2>
+        <Link to="/agents/new" className="flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary/90">
           <Plus className="h-4 w-4" /> Add Agent
         </Link>
       </div>
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative flex-1 sm:min-w-0">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
           <input type="text" placeholder="Search agents..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 py-2 pl-10 pr-4 text-sm text-slate-800 dark:text-white focus:border-primary focus:outline-none" />
         </div>
-        <DateFilter dateFrom={dateFrom} dateTo={dateTo} onDateFromChange={(v) => { setDateFrom(v); setPage(1); }} onDateToChange={(v) => { setDateTo(v); setPage(1); }} onClear={() => { setDateFrom(""); setDateTo(""); setPage(1); }} />
+        <PeriodFilter dateFrom={dateFrom} dateTo={dateTo} onDateFromChange={(v) => { setDateFrom(v); setPage(1); }} onDateToChange={(v) => { setDateTo(v); setPage(1); }} onClear={() => { setDateFrom(""); setDateTo(""); setPage(1); }} />
       </div>
-      <div className="overflow-hidden rounded-lg border bg-white dark:bg-slate-900 shadow-sm dark:shadow-none">
+      <div className="overflow-x-auto rounded-lg border bg-white dark:bg-slate-900 shadow-sm dark:shadow-none">
         <table className="w-full text-left text-sm">
           <thead className="border-b bg-secondary">
             <tr>
@@ -64,7 +67,7 @@ export default function AgentList() {
                     <div className="flex gap-2">
                       <Link to={`/agents/${a.id}`} className="text-slate-400 dark:text-slate-500 hover:text-primary"><Eye className="h-4 w-4" /></Link>
                       <Link to={`/agents/${a.id}/edit`} className="text-slate-400 dark:text-slate-500 hover:text-accent"><Edit className="h-4 w-4" /></Link>
-                      <button onClick={async () => { if (window.confirm("Delete?")) await deleteAgent(a.id); }} className="text-slate-400 dark:text-slate-500 hover:text-red-500"><Trash2 className="h-4 w-4" /></button>
+                      <button onClick={() => setDeleteId(a.id)} className="text-slate-400 dark:text-slate-500 hover:text-red-500"><Trash2 className="h-4 w-4" /></button>
                     </div>
                   </td>
                 </tr>
@@ -73,6 +76,22 @@ export default function AgentList() {
           </tbody>
         </table>
       </div>
+      <ConfirmModal
+        open={deleteId !== null}
+        title="Delete Agent"
+        message="Are you sure you want to delete this agent? This action cannot be undone."
+        onConfirm={async () => {
+          if (deleteId === null) return;
+          try {
+            await deleteAgent(deleteId).unwrap();
+              toast.success("Agent deleted");
+            } catch {
+              toast.error("Failed to delete agent");
+            }
+            setDeleteId(null);
+          }}
+          onCancel={() => setDeleteId(null)}
+        />
     </div>
   );
 }

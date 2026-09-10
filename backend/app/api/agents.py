@@ -139,6 +139,8 @@ async def get_agent_details(
             candidate_name=next((c.full_name for c in candidates if c.id == m.candidate_id), "N/A"),
             status=m.medical_status,
             amount=float(m.medical_fee),
+            paid=float(m.paid_amount),
+            remaining=max(float(m.medical_fee) - float(m.paid_amount), 0),
             date=str(m.medical_date) if m.medical_date else None,
         )
         for m in medical_tokens
@@ -154,6 +156,8 @@ async def get_agent_details(
             candidate_name=next((c.full_name for c in candidates if c.id == v.candidate_id), "N/A"),
             status=v.status,
             amount=float(v.total_cost),
+            paid=float(v.paid_amount),
+            remaining=float(v.remaining_amount),
             date=str(v.created_at) if v.created_at else None,
         )
         for v in visas
@@ -169,6 +173,8 @@ async def get_agent_details(
             candidate_name=next((c.full_name for c in candidates if c.id == t.candidate_id), "N/A"),
             status=t.status,
             amount=float(t.total),
+            paid=float(t.paid),
+            remaining=float(t.remaining),
             date=str(t.created_at) if t.created_at else None,
         )
         for t in tickets
@@ -195,6 +201,8 @@ async def get_agent_details(
     total_tickets = len(tickets)
     total_payments = len(payments)
     total_paid = sum(float(p.amount) for p in payments)
+    total_amount = sum(float(v.total_cost) for v in visas) + sum(float(t.total) for t in tickets) + sum(float(m.medical_fee) for m in medical_tokens)
+    total_remaining = sum(float(v.remaining_amount) for v in visas) + sum(float(t.remaining) for t in tickets) + sum(max(float(m.medical_fee) - float(m.paid_amount), 0) for m in medical_tokens)
 
     agent_data.stats = {
         "total_candidates": total_candidates,
@@ -203,6 +211,8 @@ async def get_agent_details(
         "total_tickets": total_tickets,
         "total_payments": total_payments,
         "total_paid": total_paid,
+        "total_amount": total_amount,
+        "total_remaining": total_remaining,
     }
 
     return agent_data

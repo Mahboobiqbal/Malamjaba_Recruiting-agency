@@ -14,6 +14,14 @@ from app.core.exceptions import NotFoundException
 
 router = APIRouter(prefix="/ledger", tags=["Ledger"])
 
+LOAD_CANDIDATE_OPTIONS = [
+    selectinload(Candidate.agent),
+    selectinload(Candidate.payments),
+    selectinload(Candidate.visas),
+    selectinload(Candidate.tickets),
+    selectinload(Candidate.medical_tokens),
+]
+
 
 @router.get("/outstanding")
 async def get_outstanding_balances(
@@ -36,7 +44,7 @@ async def get_outstanding_balances(
 
     candidate_ids = list(balances.keys())
     candidates_stmt = select(Candidate).where(Candidate.id.in_(candidate_ids)).options(
-        selectinload(Candidate.agent)
+        *LOAD_CANDIDATE_OPTIONS
     )
     candidates_result = await db.execute(candidates_stmt)
     candidates = {c.id: c for c in candidates_result.scalars().all()}
@@ -56,7 +64,7 @@ async def get_candidate_ledger(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_permission("candidates.view")),
 ):
-    stmt = select(Candidate).where(Candidate.id == candidate_id).options(selectinload(Candidate.agent))
+    stmt = select(Candidate).where(Candidate.id == candidate_id).options(*LOAD_CANDIDATE_OPTIONS)
     result = await db.execute(stmt)
     candidate = result.scalar_one_or_none()
     if not candidate:

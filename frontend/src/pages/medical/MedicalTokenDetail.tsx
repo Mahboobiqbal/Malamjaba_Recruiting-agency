@@ -32,7 +32,7 @@ export default function MedicalTokenDetail() {
             <p className="text-sm text-secondary">{data.candidate?.full_name || "N/A"}</p>
           </div>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row">
           <Link to={`/payments/new?candidate_id=${data.candidate_id}&medical_token_id=${data.id}`}
             className="flex items-center gap-2 rounded-lg bg-emerald-600 text-white px-4 py-2 text-sm font-medium hover:bg-emerald-700">
             <DollarSign className="h-4 w-4" /> Pay Now
@@ -60,6 +60,8 @@ export default function MedicalTokenDetail() {
             <div className="flex justify-between"><dt className="text-secondary">Medical Date</dt><dd className="font-medium">{data.medical_date ? formatDate(data.medical_date) : "-"}</dd></div>
             <div className="flex justify-between"><dt className="text-secondary">Appointment Date</dt><dd className="font-medium">{data.appointment_date ? formatDate(data.appointment_date) : "-"}</dd></div>
             <div className="flex justify-between"><dt className="text-secondary">Fee</dt><dd className="font-medium">{formatCurrency(data.medical_fee)}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary">Amount Paid</dt><dd className="font-medium">{formatCurrency(data.paid_amount || 0)}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary">Remaining</dt><dd className="font-medium text-rose-600 dark:text-rose-400">{formatCurrency((data.medical_fee || 0) - (data.paid_amount || 0))}</dd></div>
             <div className="flex justify-between items-center"><dt className="text-secondary">Status</dt><dd>
               <StatusDropdown value={data.medical_status} options={MEDICAL_STATUSES} onChange={(medical_status) => updateStatus({ id: data.id, medical_status })} />
             </dd></div>

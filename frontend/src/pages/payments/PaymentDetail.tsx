@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useGetPaymentQuery, useDeletePaymentMutation } from "../../services/dashboard.service";
 import { PAYMENT_METHODS, PAYMENT_TYPES } from "../../lib/constants";
@@ -6,12 +6,15 @@ import { formatDateTime, formatCurrency } from "../../lib/utils";
 import { ArrowLeft, Printer, FileDown, Trash2 } from "lucide-react";
 import { downloadPDF } from "../../lib/pdf";
 import PaymentPrintDocument from "../../components/print/PaymentPrintDocument";
+import ConfirmModal from "../../components/common/ConfirmModal";
+import toast from "react-hot-toast";
 
 export default function PaymentDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: payment, isLoading } = useGetPaymentQuery(Number(id));
   const [deletePayment] = useDeletePaymentMutation();
+  const [showConfirm, setShowConfirm] = useState(false);
 
   if (isLoading) return <div className="text-center py-8 text-slate-500 dark:text-slate-400">Loading...</div>;
   if (!payment) return <div className="text-center py-8 text-slate-500 dark:text-slate-400">Payment not found</div>;
@@ -26,14 +29,14 @@ export default function PaymentDetail() {
             <p className="text-sm text-slate-500 dark:text-slate-400">Receipt: {payment.receipt_number}</p>
           </div>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row">
           <button onClick={() => downloadPDF("print-area", payment.payment_code)} className="flex items-center gap-2 rounded-lg bg-primary text-white px-4 py-2 text-sm font-medium hover:bg-primary/90">
             <FileDown className="h-4 w-4" /> Download PDF
           </button>
           <button onClick={() => window.print()} className="flex items-center gap-2 rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2 text-sm font-medium hover:bg-secondary">
             <Printer className="h-4 w-4" /> Print Receipt
           </button>
-          <button onClick={async () => { if (window.confirm("Delete this payment?")) { await deletePayment(payment.id); navigate("/payments"); } }}
+          <button onClick={() => setShowConfirm(true)}
             className="flex items-center gap-2 rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10">
             <Trash2 className="h-4 w-4" /> Delete
           </button>
@@ -96,6 +99,23 @@ export default function PaymentDetail() {
           <p>Authorized Signature</p>
         </div>
       </div>
+
+      <ConfirmModal
+        open={showConfirm}
+        title="Delete Payment"
+        message="Are you sure you want to delete this payment? This action cannot be undone."
+        onConfirm={async () => {
+          try {
+            await deletePayment(payment.id).unwrap();
+            toast.success("Payment deleted");
+            navigate("/payments");
+          } catch {
+            toast.error("Failed to delete payment");
+          }
+          setShowConfirm(false);
+        }}
+        onCancel={() => setShowConfirm(false)}
+      />
     </div>
   );
 }

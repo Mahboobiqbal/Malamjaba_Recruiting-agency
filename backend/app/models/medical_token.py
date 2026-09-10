@@ -18,6 +18,7 @@ class MedicalToken(Base):
     medical_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     appointment_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     medical_fee: Mapped[float] = mapped_column(Numeric(12, 2), default=0)
+    paid_amount: Mapped[float] = mapped_column(Numeric(12, 2), default=0)
     payment_status: Mapped[str] = mapped_column(String(20), default="unpaid")
     medical_status: Mapped[str] = mapped_column(String(20), default="pending")
     remarks: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -25,9 +26,9 @@ class MedicalToken(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
 
-    candidate: Mapped["Candidate"] = relationship(back_populates="medical_tokens")
-    agent: Mapped["Agent | None"] = relationship(back_populates="medical_tokens")
-    payments: Mapped[list["Payment"]] = relationship(back_populates="medical_token")
+    candidate: Mapped["Candidate"] = relationship(back_populates="medical_tokens", lazy="selectin")
+    agent: Mapped["Agent | None"] = relationship(back_populates="medical_tokens", lazy="selectin")
+    payments: Mapped[list["Payment"]] = relationship(back_populates="medical_token", lazy="selectin")
 
 
 from app.models.agent import Agent

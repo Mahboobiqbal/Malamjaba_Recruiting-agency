@@ -14,9 +14,11 @@ import {
   BarChart3,
   Banknote,
   Shield,
+  X,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store";
+import { useMobileSidebar } from "../../context/MobileSidebarContext";
 
 interface NavItem {
   to: string;
@@ -41,7 +43,7 @@ const navItems: NavItem[] = [
   { to: "/settings", icon: Settings, label: "Settings", permission: "settings.view" },
 ];
 
-export default function Sidebar() {
+function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   const permissions = useSelector((state: RootState) => state.auth.permissions);
   const isSuperAdmin = permissions.includes("super_admin");
 
@@ -51,9 +53,9 @@ export default function Sidebar() {
   });
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+    <>
       {/* Logo */}
-      <div className="flex h-16 items-center border-b border-slate-200 px-6 dark:border-slate-700">
+      <div className="flex h-16 items-center justify-between border-b border-slate-200 px-6 dark:border-slate-700">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/20">
             <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -65,6 +67,10 @@ export default function Sidebar() {
             <span className="block text-[10px] font-medium text-slate-400 dark:text-slate-500">Recruiting Agency</span>
           </div>
         </div>
+        {/* Close button — mobile only */}
+        <button onClick={onNavClick} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:text-slate-500 dark:hover:bg-slate-800 md:hidden">
+          <X className="h-5 w-5" />
+        </button>
       </div>
 
       {/* Navigation */}
@@ -74,6 +80,7 @@ export default function Sidebar() {
             key={item.to}
             to={item.to}
             end={item.to === "/"}
+            onClick={onNavClick}
             className={({ isActive }) =>
               `flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all ${
                 isActive
@@ -87,6 +94,29 @@ export default function Sidebar() {
           </NavLink>
         ))}
       </nav>
-    </aside>
+    </>
+  );
+}
+
+export default function Sidebar() {
+  const { open, setOpen } = useMobileSidebar();
+
+  return (
+    <>
+      {/* Desktop — fixed sidebar */}
+      <aside className="fixed left-0 top-0 z-40 hidden h-screen w-64 border-r border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 md:block">
+        <SidebarContent />
+      </aside>
+
+      {/* Mobile — overlay drawer */}
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40 bg-black/40 md:hidden" onClick={() => setOpen(false)} />
+          <aside className="fixed left-0 top-0 z-50 h-full w-64 border-r border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 md:hidden overflow-y-auto">
+            <SidebarContent onNavClick={() => setOpen(false)} />
+          </aside>
+        </>
+      )}
+    </>
   );
 }

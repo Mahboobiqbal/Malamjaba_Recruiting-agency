@@ -27,7 +27,7 @@ export default function CandidateDetail() {
             <p className="text-sm text-slate-500 dark:text-slate-400">{candidate.candidate_code}</p>
           </div>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row">
           <button
             onClick={() => downloadPDF("print-area", `Candidate-${candidate.candidate_code}`)}
             className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
@@ -93,7 +93,7 @@ export default function CandidateDetail() {
         </div>
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex flex-wrap gap-3">
         <Link to={`/medical/new?candidate_id=${candidate.id}`} className="rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2 text-sm font-medium hover:bg-secondary">Add Medical Token</Link>
         <Link to={`/visas/new?candidate_id=${candidate.id}`} className="rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2 text-sm font-medium hover:bg-secondary">Add Visa</Link>
         <Link to={`/tickets/new?candidate_id=${candidate.id}`} className="rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2 text-sm font-medium hover:bg-secondary">Add Ticket</Link>

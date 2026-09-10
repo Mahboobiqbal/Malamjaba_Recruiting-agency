@@ -19,6 +19,7 @@ class DashboardSummary(BaseModel):
     total_received: float = 0
     total_pending: float = 0
     total_expenses: float = 0
+    total_agent_commission: float = 0
     net_amount: float = 0
 
 
