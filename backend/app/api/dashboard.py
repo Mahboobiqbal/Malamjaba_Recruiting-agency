@@ -96,30 +96,34 @@ async def get_dashboard(
 
     net_amount = total_received - total_expenses
 
-    # Agent commission: sum of (total fees per agent * commission_rate)
-    agents = (await db.execute(select(Agent))).scalars().all()
+    # Agent commission: calculated per service based on agent selected on each service
+    # Medical tokens with agent
+    agent_medical = (await db.execute(
+        select(Agent.id, Agent.commission_rate, func.coalesce(func.sum(MedicalToken.medical_fee), 0).label("total"))
+        .join(MedicalToken, MedicalToken.agent_id == Agent.id)
+        .group_by(Agent.id)
+    )).all()
     total_agent_commission = 0.0
-    for agent in agents:
-        rate = float(agent.commission_rate or 0)
-        if rate <= 0:
-            continue
-        agent_medical = (await db.execute(
-            select(func.coalesce(func.sum(MedicalToken.medical_fee), 0))
-            .join(Candidate, MedicalToken.candidate_id == Candidate.id)
-            .where(Candidate.agent_id == agent.id)
-        )).scalar() or 0
-        agent_visa = (await db.execute(
-            select(func.coalesce(func.sum(Visa.total_cost), 0))
-            .join(Candidate, Visa.candidate_id == Candidate.id)
-            .where(Candidate.agent_id == agent.id)
-        )).scalar() or 0
-        agent_ticket = (await db.execute(
-            select(func.coalesce(func.sum(Ticket.total), 0))
-            .join(Candidate, Ticket.candidate_id == Candidate.id)
-            .where(Candidate.agent_id == agent.id)
-        )).scalar() or 0
-        agent_fees = float(agent_medical) + float(agent_visa) + float(agent_ticket)
-        total_agent_commission += agent_fees * (rate / 100)
+    for row in agent_medical:
+        total_agent_commission += float(row.total) * (float(row.commission_rate) / 100)
+
+    # Visas with agent
+    agent_visa = (await db.execute(
+        select(Agent.id, Agent.commission_rate, func.coalesce(func.sum(Visa.total_cost), 0).label("total"))
+        .join(Visa, Visa.agent_id == Agent.id)
+        .group_by(Agent.id)
+    )).all()
+    for row in agent_visa:
+        total_agent_commission += float(row.total) * (float(row.commission_rate) / 100)
+
+    # Tickets with agent
+    agent_ticket = (await db.execute(
+        select(Agent.id, Agent.commission_rate, func.coalesce(func.sum(Ticket.total), 0).label("total"))
+        .join(Ticket, Ticket.agent_id == Agent.id)
+        .group_by(Agent.id)
+    )).all()
+    for row in agent_ticket:
+        total_agent_commission += float(row.total) * (float(row.commission_rate) / 100)
 
     net_amount = net_amount - total_agent_commission
 

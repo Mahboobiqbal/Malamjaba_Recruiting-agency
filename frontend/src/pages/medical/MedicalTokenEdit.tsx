@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useGetMedicalTokenQuery, useUpdateMedicalTokenMutation } from "../../services/dashboard.service";
 import { useGetCandidatesQuery } from "../../services/candidate.service";
+import { useGetAgentsQuery } from "../../services/agent.service";
 import { MEDICAL_STATUSES } from "../../lib/constants";
 import { getErrorMessage } from "../../lib/utils";
 import toast from "react-hot-toast";
@@ -18,12 +19,14 @@ export default function MedicalTokenEdit() {
   const { data: token, isLoading: loadingToken } = useGetMedicalTokenQuery(Number(id));
   const [updateToken, { isLoading }] = useUpdateMedicalTokenMutation();
   const { data: candidatesData } = useGetCandidatesQuery({ per_page: 100 });
+  const { data: agentsData } = useGetAgentsQuery({ per_page: 100 });
   const [form, setForm] = useState<any>({});
 
   useEffect(() => {
     if (token) {
       setForm({
         candidate_id: token.candidate_id,
+        agent_id: token.agent_id || 0,
         token_number: token.token_number || "",
         medical_center: token.medical_center || "",
         medical_date: token.medical_date ? token.medical_date.split("T")[0] : "",
@@ -40,7 +43,7 @@ export default function MedicalTokenEdit() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await updateToken({ id: Number(id), data: { ...form, candidate_id: Number(form.candidate_id) } }).unwrap();
+      await updateToken({ id: Number(id), data: { ...form, candidate_id: Number(form.candidate_id), agent_id: form.agent_id || undefined } }).unwrap();
       navigate(`/medical/${id}`);
     } catch (err: any) {
       toast.error(getErrorMessage(err, "Failed to update medical token"));
@@ -60,6 +63,14 @@ export default function MedicalTokenEdit() {
               className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white focus:border-primary focus:outline-none" required>
               <option value={0}>Select Candidate</option>
               {candidatesData?.items.map((c) => <option key={c.id} value={c.id}>{c.candidate_code} - {c.full_name}</option>)}
+            </select>
+          </div>
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Agent (optional - for commission)</label>
+            <select value={form.agent_id || 0} onChange={(e) => setForm({ ...form, agent_id: Number(e.target.value) })}
+              className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white focus:border-primary focus:outline-none">
+              <option value={0}>No Agent</option>
+              {agentsData?.items.map((a) => <option key={a.id} value={a.id}>{a.agent_code} - {a.name}</option>)}
             </select>
           </div>
           <div>
