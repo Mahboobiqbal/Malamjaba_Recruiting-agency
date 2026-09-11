@@ -29,7 +29,7 @@ class TicketBase(BaseModel):
 
 
 class TicketCreate(TicketBase):
-    pass
+    vendor_transaction_id: int | None = None
 
 
 class TicketUpdate(BaseModel):

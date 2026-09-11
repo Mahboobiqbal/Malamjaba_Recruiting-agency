@@ -15,6 +15,7 @@ from app.models.visa import Visa
 from app.models.ticket import Ticket
 from app.models.agent import Agent
 from app.models.ledger import LedgerEntry
+from app.models.vendor import VendorTransaction, VendorPayment
 from app.models.user import User
 from app.schemas.report import DashboardSummary
 
@@ -127,6 +128,16 @@ async def get_dashboard(
 
     net_amount = net_amount - total_agent_commission
 
+    # Vendor summary
+    vendor_owed = float((await db.execute(
+        select(func.coalesce(func.sum(VendorTransaction.purchase_price - VendorTransaction.paid_amount), 0))
+        .where(VendorTransaction.payment_status != "paid")
+    )).scalar() or 0)
+
+    vendor_profit = float((await db.execute(
+        select(func.coalesce(func.sum(VendorTransaction.profit), 0))
+    )).scalar() or 0)
+
     return DashboardSummary(
         total_candidates=total_candidates,
         new_candidates=new_candidates,
@@ -142,5 +153,7 @@ async def get_dashboard(
         total_pending=outstanding,
         total_expenses=float(total_expenses),
         total_agent_commission=total_agent_commission,
+        vendor_owed=vendor_owed,
+        vendor_profit=vendor_profit,
         net_amount=net_amount,
     )

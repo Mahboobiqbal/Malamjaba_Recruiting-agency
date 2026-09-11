@@ -22,6 +22,25 @@ interface AgentModuleSummary {
   date: string | null;
 }
 
+export interface AgentPayment {
+  id: number;
+  payment_code: string;
+  agent_id: number;
+  amount: number;
+  payment_method: string;
+  reference_number?: string;
+  remarks?: string;
+  created_by?: number;
+  created_at: string;
+}
+
+export interface AgentPaymentListResponse {
+  items: AgentPayment[];
+  total: number;
+  page: number;
+  per_page: number;
+}
+
 export interface AgentDetailsResponse extends Agent {
   candidates: AgentCandidateSummary[];
   medical_tokens: AgentModuleSummary[];
@@ -83,6 +102,14 @@ export const agentApi = api.injectEndpoints({
       }),
       invalidatesTags: ["Agent"],
     }),
+    getAgentPayments: builder.query<AgentPaymentListResponse, { agentId: number; page?: number; per_page?: number }>({
+      query: ({ agentId, ...params }) => ({ url: `/agents/${agentId}/payments`, params }),
+      providesTags: ["AgentPayment"],
+    }),
+    createAgentPayment: builder.mutation<AgentPayment, { agentId: number; data: { amount: number; payment_method: string; reference_number?: string; remarks?: string } }>({
+      query: ({ agentId, data }) => ({ url: `/agents/${agentId}/payments`, method: "POST", body: data }),
+      invalidatesTags: ["AgentPayment"],
+    }),
     updateAgentStatus: builder.mutation<Agent, { id: number; status: string }>({
       query: ({ id, ...data }) => ({
         url: `/agents/${id}/status`,
@@ -101,5 +128,7 @@ export const {
   useCreateAgentMutation,
   useUpdateAgentMutation,
   useDeleteAgentMutation,
+  useGetAgentPaymentsQuery,
+  useCreateAgentPaymentMutation,
   useUpdateAgentStatusMutation,
 } = agentApi;

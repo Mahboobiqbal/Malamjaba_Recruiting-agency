@@ -9,6 +9,7 @@ from app.database import get_db
 from app.dependencies import require_permission
 from app.models.medical_token import MedicalToken
 from app.models.candidate import Candidate
+from app.models.ledger import LedgerEntry
 from app.models.user import User
 from app.schemas.medical_token import MedicalTokenCreate, MedicalTokenUpdate, MedicalTokenResponse, MedicalTokenListResponse, MedicalTokenStatusUpdate
 from app.services.number_generator import generate_token_code
@@ -86,6 +87,23 @@ async def create_medical_token(
     token_code = await generate_token_code(db)
     token = MedicalToken(token_code=token_code, created_by=current_user.id, **data.model_dump())
     db.add(token)
+    await db.flush()
+
+    # Create ledger entry for outstanding balance (if fee > 0)
+    if data.medical_fee and data.medical_fee > 0:
+        ledger_entry = LedgerEntry(
+            candidate_id=data.candidate_id,
+            entry_type="service",
+            reference_type="medical_token",
+            reference_id=token.id,
+            description=f"Medical Token {token_code} - {data.medical_center or 'Medical'}",
+            debit=data.medical_fee,
+            credit=0,
+            balance=data.medical_fee,
+            created_by=current_user.id,
+        )
+        db.add(ledger_entry)
+
     await db.commit()
     await db.refresh(token)
 
@@ -169,6 +187,16 @@ async def delete_medical_token(
     token = result.scalar_one_or_none()
     if not token:
         raise NotFoundException("Medical token not found")
+    
+    # Delete associated ledger entries
+    delete_ledger = select(LedgerEntry).where(
+        LedgerEntry.reference_type == "medical_token",
+        LedgerEntry.reference_id == token_id,
+    )
+    ledger_result = await db.execute(delete_ledger)
+    for entry in ledger_result.scalars().all():
+        await db.delete(entry)
+    
     await db.delete(token)
     await db.commit()
     return {"message": "Medical token deleted successfully", "success": True}

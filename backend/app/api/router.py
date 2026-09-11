@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api import auth, users, agents, candidates, medical_tokens, visas, tickets, payments, expenses, dashboard, ledger, notifications, settings, reports, documents
+from app.api import auth, users, agents, candidates, medical_tokens, visas, tickets, payments, expenses, dashboard, ledger, notifications, settings, reports, documents, vendors
 
 api_router = APIRouter(prefix="/api")
 
@@ -19,3 +19,4 @@ api_router.include_router(notifications.router)
 api_router.include_router(settings.router)
 api_router.include_router(reports.router)
 api_router.include_router(documents.router)
+api_router.include_router(vendors.router)

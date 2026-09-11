@@ -44,6 +44,8 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
   return result;
 };
 
+export { baseQueryWithReauth };
+
 export const api = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReauth,
@@ -60,6 +62,11 @@ export const api = createApi({
     "Ledger",
     "Notification",
     "Settings",
+    "Vendor",
+    "VendorTransaction",
+    "VendorPayment",
+    "VendorLedger",
+    "AgentPayment",
   ],
   endpoints: () => ({}),
 });

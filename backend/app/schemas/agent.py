@@ -168,8 +168,14 @@ class AgentResponse(AgentBase):
     model_config = {"from_attributes": True}
 
 
+class AgentWithStatsResponse(AgentResponse):
+    total_commission: float = 0
+    total_agent_payments: float = 0
+    amount_owed: float = 0
+
+
 class AgentListResponse(BaseModel):
-    items: list[AgentResponse]
+    items: list[AgentWithStatsResponse]
     total: int
     page: int
     per_page: int
@@ -209,3 +215,27 @@ class AgentDetailsResponse(AgentResponse):
     tickets: list[AgentModuleSummary] = []
     payments: list[AgentModuleSummary] = []
     stats: dict = {}
+
+
+class AgentPaymentCreate(BaseModel):
+    amount: float = Field(..., gt=0)
+    payment_method: str = Field("cash", pattern=r"^(cash|bank_transfer|cheque)$")
+    reference_number: str | None = Field(None, max_length=50)
+    remarks: str | None = Field(None, max_length=500)
+
+
+class AgentPaymentResponse(AgentPaymentCreate):
+    id: int
+    payment_code: str
+    agent_id: int
+    created_by: int | None
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class AgentPaymentListResponse(BaseModel):
+    items: list[AgentPaymentResponse]
+    total: int
+    page: int
+    per_page: int

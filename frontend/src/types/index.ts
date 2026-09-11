@@ -35,6 +35,9 @@ export interface Agent {
   notes?: string;
   created_at: string;
   updated_at: string;
+  total_commission?: number;
+  total_agent_payments?: number;
+  amount_owed?: number;
 }
 
 export interface Candidate {
@@ -247,6 +250,8 @@ export interface DashboardSummary {
   total_pending: number;
   total_expenses: number;
   total_agent_commission: number;
+  vendor_owed: number;
+  vendor_profit: number;
   net_amount: number;
 }
 
@@ -266,4 +271,87 @@ export interface TokenResponse {
   access_token: string;
   refresh_token: string;
   token_type: string;
+}
+
+export interface Vendor {
+  id: number;
+  vendor_code: string;
+  name: string;
+  contact_person?: string;
+  phone: string;
+  email?: string;
+  address?: string;
+  bank_name?: string;
+  account_title?: string;
+  account_number?: string;
+  status: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VendorTransaction {
+  id: number;
+  transaction_code: string;
+  vendor_id: number;
+  candidate_id?: number;
+  service_type: string;
+  service_id?: number;
+  passenger_name?: string;
+  origin?: string;
+  destination?: string;
+  travel_date?: string;
+  travel_time?: string;
+  airline?: string;
+  flight_number?: string;
+  visa_country?: string;
+  visa_type?: string;
+  visa_date?: string;
+  ticket_number?: string;
+  pnr?: string;
+  purchase_price: number;
+  selling_price: number;
+  profit: number;
+  payment_status: string;
+  paid_amount: number;
+  remaining: number;
+  payment_method?: string;
+  reference_number?: string;
+  remarks?: string;
+  created_by?: number;
+  created_at: string;
+  updated_at: string;
+  vendor?: Vendor;
+  candidate?: Candidate;
+}
+
+export interface VendorPayment {
+  id: number;
+  payment_code: string;
+  vendor_id: number;
+  amount: number;
+  payment_method: string;
+  reference_number?: string;
+  remarks?: string;
+  created_by?: number;
+  created_at: string;
+}
+
+export interface VendorLedgerEntry {
+  date: string;
+  description: string;
+  debit: number;
+  credit: number;
+  balance: number;
+  reference_type?: string;
+  reference_id?: number;
+}
+
+export interface VendorLedger {
+  vendor: Vendor;
+  opening_balance: number;
+  entries: VendorLedgerEntry[];
+  closing_balance: number;
+  total_debit: number;
+  total_credit: number;
 }

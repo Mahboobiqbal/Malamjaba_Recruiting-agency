@@ -9,6 +9,7 @@ from app.database import get_db
 from app.dependencies import require_permission
 from app.models.visa import Visa
 from app.models.candidate import Candidate
+from app.models.ledger import LedgerEntry
 from app.models.user import User
 from app.schemas.visa import VisaCreate, VisaUpdate, VisaResponse, VisaListResponse, VisaStatusUpdate
 from app.services.number_generator import generate_visa_code
@@ -90,6 +91,22 @@ async def create_visa(
         **data.model_dump(),
     )
     db.add(visa)
+    await db.flush()
+
+    # Create ledger entry for outstanding balance
+    ledger_entry = LedgerEntry(
+        candidate_id=data.candidate_id,
+        entry_type="service",
+        reference_type="visa",
+        reference_id=visa.id,
+        description=f"Visa {visa_code} - {data.country} ({data.visa_type})",
+        debit=total_cost,
+        credit=0,
+        balance=total_cost,
+        created_by=current_user.id,
+    )
+    db.add(ledger_entry)
+
     await db.commit()
     await db.refresh(visa)
 
@@ -181,6 +198,16 @@ async def delete_visa(
     visa = result.scalar_one_or_none()
     if not visa:
         raise NotFoundException("Visa not found")
+    
+    # Delete associated ledger entries
+    delete_ledger = select(LedgerEntry).where(
+        LedgerEntry.reference_type == "visa",
+        LedgerEntry.reference_id == visa_id,
+    )
+    ledger_result = await db.execute(delete_ledger)
+    for entry in ledger_result.scalars().all():
+        await db.delete(entry)
+    
     await db.delete(visa)
     await db.commit()
     return {"message": "Visa deleted successfully", "success": True}

@@ -219,6 +219,10 @@ export const dashboardApi = api.injectEndpoints({
       }),
       invalidatesTags: ["Ticket", "Dashboard"],
     }),
+    lookupTicketByReference: builder.query<Ticket, { ticket_number?: string; pnr?: string }>({
+      query: ({ ticket_number, pnr }) => ({ url: "/tickets/lookup/by-reference", params: { ticket_number, pnr } }),
+      providesTags: ["Ticket"],
+    }),
     getCandidateLedger: builder.query<
       { candidate: Candidate; entries: LedgerEntry[]; summary: { total_charges: number; total_payments: number; balance: number } },
       number
@@ -322,6 +326,7 @@ export const {
   useGetMedicalTokenQuery,
   useGetVisaQuery,
   useGetTicketQuery,
+  useLookupTicketByReferenceQuery,
   useGetExpenseQuery,
   useGetCandidateLedgerQuery,
   useGetOutstandingBalancesQuery,

@@ -19,6 +19,7 @@ import {
   ArrowRight,
   FileText,
   CircleDot,
+  Building2,
 } from "lucide-react";
 
 function PipelineCard({ title, count, icon: Icon, color, link, subtitle }: {
@@ -99,6 +100,8 @@ export default function Dashboard() {
     total_pending: 0,
     total_expenses: 0,
     total_agent_commission: 0,
+    vendor_owed: 0,
+    vendor_profit: 0,
     net_amount: 0,
   };
 
@@ -232,6 +235,22 @@ export default function Dashboard() {
             color="text-purple-600 dark:text-purple-400"
             bgColor="bg-purple-100 dark:bg-purple-900/30"
             link="/agents"
+          />
+          <MoneyCard
+            title="Vendor Payments Owed"
+            amount={s.vendor_owed}
+            icon={Building2}
+            color="text-rose-600 dark:text-rose-400"
+            bgColor="bg-rose-100 dark:bg-rose-900/30"
+            link="/vendors"
+          />
+          <MoneyCard
+            title="Vendor Profit"
+            amount={s.vendor_profit}
+            icon={TrendingUp}
+            color="text-teal-600 dark:text-teal-400"
+            bgColor="bg-teal-100 dark:bg-teal-900/30"
+            link="/vendors"
           />
           <div className="block rounded-lg border bg-white dark:bg-slate-900 p-5 shadow-sm dark:shadow-none">
             <div className="flex items-center gap-4">

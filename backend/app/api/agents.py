@@ -6,14 +6,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.dependencies import require_permission
-from app.models.agent import Agent
+from app.models.agent import Agent, AgentPayment
 from app.models.candidate import Candidate
 from app.models.medical_token import MedicalToken
 from app.models.visa import Visa
 from app.models.ticket import Ticket
 from app.models.payment import Payment
 from app.models.user import User
-from app.schemas.agent import AgentCreate, AgentUpdate, AgentResponse, AgentListResponse, AgentDetailsResponse, AgentCandidateSummary, AgentModuleSummary, AgentStatusUpdate
+from app.schemas.agent import AgentCreate, AgentUpdate, AgentResponse, AgentWithStatsResponse, AgentListResponse, AgentDetailsResponse, AgentCandidateSummary, AgentModuleSummary, AgentStatusUpdate, AgentPaymentCreate, AgentPaymentResponse, AgentPaymentListResponse
 from app.services.number_generator import generate_agent_code
 from app.core.exceptions import NotFoundException, DuplicateException
 
@@ -58,7 +58,30 @@ async def list_agents(
     result = await db.execute(stmt)
     agents = result.scalars().all()
 
-    return AgentListResponse(items=agents, total=total, page=page, per_page=per_page)
+    agent_ids = [a.id for a in agents]
+    
+    ticket_stmt = select(Ticket.agent_id, func.sum(Ticket.agent_commission).label("total_commission")).where(Ticket.agent_id.in_(agent_ids)).group_by(Ticket.agent_id)
+    ticket_result = await db.execute(ticket_stmt)
+    commission_map = {row[0]: float(row[1] or 0) for row in ticket_result.all()}
+
+    payment_stmt = select(AgentPayment.agent_id, func.sum(AgentPayment.amount).label("total_paid")).where(AgentPayment.agent_id.in_(agent_ids)).group_by(AgentPayment.agent_id)
+    payment_result = await db.execute(payment_stmt)
+    payment_map = {row[0]: float(row[1] or 0) for row in payment_result.all()}
+
+    items = []
+    for a in agents:
+        tc = commission_map.get(a.id, 0)
+        tp = payment_map.get(a.id, 0)
+        items.append(AgentWithStatsResponse(
+            id=a.id, agent_code=a.agent_code, name=a.name, father_name=a.father_name,
+            cnic=a.cnic, mobile=a.mobile, whatsapp=a.whatsapp, address=a.address,
+            city=a.city, email=a.email, commission_rate=float(a.commission_rate),
+            bank_info=a.bank_info, status=a.status, notes=a.notes,
+            created_at=a.created_at, updated_at=a.updated_at,
+            total_commission=tc, total_agent_payments=tp, amount_owed=max(tc - tp, 0),
+        ))
+
+    return AgentListResponse(items=items, total=total, page=page, per_page=per_page)
 
 
 @router.post("", response_model=AgentResponse)
@@ -287,3 +310,59 @@ async def delete_agent(
     await db.delete(agent)
     await db.commit()
     return {"message": "Agent deleted successfully", "success": True}
+
+
+# ─── Agent Payments ───
+
+async def generate_agent_payment_code(db) -> str:
+    count = (await db.execute(select(func.count()).select_from(AgentPayment))).scalar() or 0
+    return f"APAY-{count + 1:06d}"
+
+
+@router.get("/{agent_id}/payments", response_model=AgentPaymentListResponse)
+async def list_agent_payments(
+    agent_id: int,
+    page: int = Query(1, ge=1),
+    per_page: int = Query(20, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_permission("agents.view")),
+):
+    agent = (await db.execute(select(Agent).where(Agent.id == agent_id))).scalar_one_or_none()
+    if not agent:
+        raise NotFoundException("Agent not found")
+
+    query = select(AgentPayment).where(AgentPayment.agent_id == agent_id)
+    count_query = select(func.count()).select_from(AgentPayment).where(AgentPayment.agent_id == agent_id)
+
+    total = (await db.execute(count_query)).scalar() or 0
+    query = query.order_by(AgentPayment.created_at.desc()).offset((page - 1) * per_page).limit(per_page)
+    result = await db.execute(query)
+    items = result.scalars().all()
+
+    return AgentPaymentListResponse(items=items, total=total, page=page, per_page=per_page)
+
+
+@router.post("/{agent_id}/payments", response_model=AgentPaymentResponse)
+async def create_agent_payment(
+    agent_id: int,
+    data: AgentPaymentCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_permission("agents.create")),
+):
+    agent = (await db.execute(select(Agent).where(Agent.id == agent_id))).scalar_one_or_none()
+    if not agent:
+        raise NotFoundException("Agent not found")
+
+    payment = AgentPayment(
+        payment_code=await generate_agent_payment_code(db),
+        agent_id=agent_id,
+        amount=float(data.amount),
+        payment_method=data.payment_method,
+        reference_number=data.reference_number,
+        remarks=data.remarks,
+        created_by=current_user.id,
+    )
+    db.add(payment)
+    await db.commit()
+    await db.refresh(payment)
+    return payment

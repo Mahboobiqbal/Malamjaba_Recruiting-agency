@@ -15,6 +15,7 @@ import {
   Banknote,
   Shield,
   X,
+  Building2,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store";
@@ -36,6 +37,7 @@ const navItems: NavItem[] = [
   { to: "/tickets", icon: Plane, label: "Tickets", permission: "tickets.view" },
   { to: "/payments", icon: CreditCard, label: "Payments", permission: "payments.view" },
   { to: "/expenses", icon: Receipt, label: "Expenses", permission: "expenses.view" },
+  { to: "/vendors", icon: Building2, label: "Vendors", permission: "candidates.view" },
   { to: "/salaries", icon: Banknote, label: "Salary", permission: "expenses.view" },
   { to: "/ledger", icon: FileText, label: "Ledger", permission: "candidates.view" },
   { to: "/reports", icon: BarChart3, label: "Reports", permission: "reports.view" },

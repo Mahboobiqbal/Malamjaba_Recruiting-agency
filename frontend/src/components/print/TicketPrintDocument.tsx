@@ -109,22 +109,8 @@ export default function TicketPrintDocument({ ticket, total, paid, remaining }: 
             Fare Summary
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 1, background: "#e2e8f0" }}>
-            <div style={{ background: "white", padding: "12px 16px" }}>
-              <p style={{ fontSize: 11, color: "#94a3b8", textTransform: "uppercase" }}>Ticket Price</p>
-              <p style={{ fontSize: 16, fontWeight: 700, color: "#1e293b", margin: "4px 0 0" }}>{formatCurrency((ticket as any).ticket_price || 0)}</p>
-            </div>
-            <div style={{ background: "white", padding: "12px 16px" }}>
-              <p style={{ fontSize: 11, color: "#94a3b8", textTransform: "uppercase" }}>Agent Commission</p>
-              <p style={{ fontSize: 16, fontWeight: 700, color: "#1e293b", margin: "4px 0 0" }}>{formatCurrency((ticket as any).agent_commission || 0)}</p>
-            </div>
-            <div style={{ background: "white", padding: "12px 16px" }}>
-              <p style={{ fontSize: 11, color: "#94a3b8", textTransform: "uppercase" }}>Other Charges</p>
-              <p style={{ fontSize: 16, fontWeight: 700, color: "#1e293b", margin: "4px 0 0" }}>{formatCurrency((ticket as any).other_charges || 0)}</p>
-            </div>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 1, background: "#e2e8f0" }}>
             <div style={{ background: "#fdf8f3", padding: "12px 16px" }}>
-              <p style={{ fontSize: 11, color: "hsl(25, 30%, 45%)", textTransform: "uppercase", fontWeight: 600 }}>Total Price</p>
+              <p style={{ fontSize: 11, color: "hsl(25, 30%, 45%)", textTransform: "uppercase", fontWeight: 600 }}>Total Charges</p>
               <p style={{ fontSize: 18, fontWeight: 700, color: "hsl(25, 30%, 45%)", margin: "4px 0 0" }}>{formatCurrency(t)}</p>
             </div>
             <div style={{ background: "#f0fdf4", padding: "12px 16px" }}>

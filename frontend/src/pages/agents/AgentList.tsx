@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { useGetAgentsQuery, useDeleteAgentMutation, useUpdateAgentStatusMutation } from "../../services/agent.service";
+import { useGetAgentsQuery, useDeleteAgentMutation, useUpdateAgentStatusMutation, useCreateAgentPaymentMutation } from "../../services/agent.service";
 import { AGENT_STATUSES } from "../../lib/constants";
-import { Plus, Search, Trash2, Eye, Edit } from "lucide-react";
+import { Plus, Search, Trash2, Eye, Edit, DollarSign } from "lucide-react";
+import { formatCurrency } from "../../lib/utils";
 import StatusDropdown from "../../components/common/StatusDropdown";
 import PeriodFilter from "../../components/common/PeriodFilter";
 import ConfirmModal from "../../components/common/ConfirmModal";
@@ -16,7 +17,23 @@ export default function AgentList() {
   const { data, isLoading } = useGetAgentsQuery({ page, per_page: 20, search, date_from: dateFrom || undefined, date_to: dateTo || undefined });
   const [deleteAgent] = useDeleteAgentMutation();
   const [updateStatus] = useUpdateAgentStatusMutation();
+  const [createAgentPayment] = useCreateAgentPaymentMutation();
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [payAgent, setPayAgent] = useState<{ id: number; name: string } | null>(null);
+  const [payForm, setPayForm] = useState({ amount: 0, payment_method: "cash", reference_number: "", remarks: "" });
+
+  const handlePayAgent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!payAgent) return;
+    try {
+      await createAgentPayment({ agentId: payAgent.id, data: { amount: Number(payForm.amount), payment_method: payForm.payment_method, reference_number: payForm.reference_number || undefined, remarks: payForm.remarks || undefined } }).unwrap();
+      toast.success("Payment recorded");
+      setPayAgent(null);
+      setPayForm({ amount: 0, payment_method: "cash", reference_number: "", remarks: "" });
+    } catch (err: any) {
+      toast.error("Failed to record payment");
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -43,15 +60,16 @@ export default function AgentList() {
               <th className="px-4 py-3 font-medium text-slate-600 dark:text-slate-300">CNIC</th>
               <th className="px-4 py-3 font-medium text-slate-600 dark:text-slate-300">Mobile</th>
               <th className="px-4 py-3 font-medium text-slate-600 dark:text-slate-300">City</th>
+              <th className="px-4 py-3 font-medium text-slate-600 dark:text-slate-300">Amount Owed</th>
               <th className="px-4 py-3 font-medium text-slate-600 dark:text-slate-300">Status</th>
               <th className="px-4 py-3 font-medium text-slate-600 dark:text-slate-300">Actions</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan={7} className="px-4 py-8 text-center text-slate-500 dark:text-slate-400">Loading...</td></tr>
+              <tr><td colSpan={8} className="px-4 py-8 text-center text-slate-500 dark:text-slate-400">Loading...</td></tr>
             ) : data?.items.length === 0 ? (
-              <tr><td colSpan={7} className="px-4 py-8 text-center text-slate-500 dark:text-slate-400">No agents found</td></tr>
+              <tr><td colSpan={8} className="px-4 py-8 text-center text-slate-500 dark:text-slate-400">No agents found</td></tr>
             ) : (
               data?.items.map((a) => (
                 <tr key={a.id} className="border-b hover:bg-secondary">
@@ -61,12 +79,20 @@ export default function AgentList() {
                   <td className="px-4 py-3">{a.mobile}</td>
                   <td className="px-4 py-3">{a.city || "-"}</td>
                   <td className="px-4 py-3">
+                    <span className={(a.amount_owed || 0) > 0 ? "text-red-600 dark:text-red-400 font-medium" : "text-slate-500 dark:text-slate-400"}>
+                      {formatCurrency(a.amount_owed || 0)}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
                     <StatusDropdown value={a.status} options={AGENT_STATUSES} onChange={(s) => updateStatus({ id: a.id, status: s })} />
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
                       <Link to={`/agents/${a.id}`} className="text-slate-400 dark:text-slate-500 hover:text-primary"><Eye className="h-4 w-4" /></Link>
                       <Link to={`/agents/${a.id}/edit`} className="text-slate-400 dark:text-slate-500 hover:text-accent"><Edit className="h-4 w-4" /></Link>
+                      <button onClick={() => setPayAgent({ id: a.id, name: a.name })} className="text-slate-400 dark:text-slate-500 hover:text-emerald-500" title="Pay Agent">
+                        <DollarSign className="h-4 w-4" />
+                      </button>
                       <button onClick={() => setDeleteId(a.id)} className="text-slate-400 dark:text-slate-500 hover:text-red-500"><Trash2 className="h-4 w-4" /></button>
                     </div>
                   </td>
@@ -76,7 +102,7 @@ export default function AgentList() {
           </tbody>
         </table>
       </div>
-      <ConfirmModal
+<ConfirmModal
         open={deleteId !== null}
         title="Delete Agent"
         message="Are you sure you want to delete this agent? This action cannot be undone."
@@ -90,8 +116,47 @@ export default function AgentList() {
             }
             setDeleteId(null);
           }}
-          onCancel={() => setDeleteId(null)}
-        />
+        onCancel={() => setDeleteId(null)}
+      />
+
+      {/* Pay Agent Modal */}
+      {payAgent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white dark:bg-slate-900 rounded-lg shadow-xl w-full max-w-md mx-4 p-6">
+            <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-4">Pay Agent: {payAgent.name}</h3>
+            <form onSubmit={handlePayAgent} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Amount *</label>
+                <input type="number" step="0.01" value={payForm.amount} onChange={(e) => setPayForm({ ...payForm, amount: Number(e.target.value) })} required min="0.01"
+                  className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white focus:border-primary focus:outline-none" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Payment Method *</label>
+                <select value={payForm.payment_method} onChange={(e) => setPayForm({ ...payForm, payment_method: e.target.value })}
+                  className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white focus:border-primary focus:outline-none">
+                  <option value="cash">Cash</option>
+                  <option value="bank_transfer">Bank Transfer</option>
+                  <option value="cheque">Cheque</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Reference Number</label>
+                <input type="text" value={payForm.reference_number} onChange={(e) => setPayForm({ ...payForm, reference_number: e.target.value })}
+                  className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white focus:border-primary focus:outline-none" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Remarks</label>
+                <input type="text" value={payForm.remarks} onChange={(e) => setPayForm({ ...payForm, remarks: e.target.value })}
+                  className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-800 dark:text-white focus:border-primary focus:outline-none" />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="submit" className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700">Record Payment</button>
+                <button type="button" onClick={() => { setPayAgent(null); setPayForm({ amount: 0, payment_method: "cash", reference_number: "", remarks: "" }); }} className="rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-secondary">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

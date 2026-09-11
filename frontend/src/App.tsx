@@ -42,6 +42,11 @@ import CompanySettings from "./pages/settings/CompanySettings";
 import UserList from "./pages/users/UserList";
 import UserCreate from "./pages/users/UserCreate";
 import UserEdit from "./pages/users/UserEdit";
+import VendorList from "./pages/vendors/VendorList";
+import VendorCreate from "./pages/vendors/VendorCreate";
+import VendorEdit from "./pages/vendors/VendorEdit";
+import VendorDetail from "./pages/vendors/VendorDetail";
+import VendorTransactionCreate from "./pages/vendors/VendorTransactionCreate";
 
 function ThemeProvider({ children }: { children: React.ReactNode }) {
   const theme = useSelector((state: RootState) => state.theme.mode);
@@ -98,6 +103,11 @@ export default function App() {
               <Route path="/users/new" element={<UserCreate />} />
               <Route path="/users/:id/edit" element={<UserEdit />} />
               <Route path="/settings" element={<CompanySettings />} />
+              <Route path="/vendors" element={<VendorList />} />
+              <Route path="/vendors/new" element={<VendorCreate />} />
+              <Route path="/vendors/:id" element={<VendorDetail />} />
+              <Route path="/vendors/:id/edit" element={<VendorEdit />} />
+              <Route path="/vendors/:id/transactions/new" element={<VendorTransactionCreate />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
