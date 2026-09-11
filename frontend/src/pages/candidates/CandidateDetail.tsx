@@ -54,41 +54,41 @@ export default function CandidateDetail() {
         <div className="rounded-lg border bg-white dark:bg-slate-900 p-6 shadow-sm dark:shadow-none">
           <h3 className="mb-4 text-lg font-semibold text-slate-800 dark:text-white">Personal Information</h3>
           <dl className="space-y-3 text-sm">
-            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Father Name</dt><dd className="font-medium">{candidate.father_name || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">CNIC</dt><dd className="font-medium">{candidate.cnic || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Passport</dt><dd className="font-medium">{candidate.passport_number}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Father Name</dt><dd className="font-medium text-slate-800 dark:text-white">{candidate.father_name || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">CNIC</dt><dd className="font-medium text-slate-800 dark:text-white">{candidate.cnic || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Passport</dt><dd className="font-medium text-slate-800 dark:text-white">{candidate.passport_number}</dd></div>
             <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Gender</dt><dd className="font-medium capitalize">{candidate.gender || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Date of Birth</dt><dd className="font-medium">{candidate.date_of_birth ? formatDate(candidate.date_of_birth) : "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Date of Birth</dt><dd className="font-medium text-slate-800 dark:text-white">{candidate.date_of_birth ? formatDate(candidate.date_of_birth) : "-"}</dd></div>
           </dl>
         </div>
         <div className="rounded-lg border bg-white dark:bg-slate-900 p-6 shadow-sm dark:shadow-none">
           <h3 className="mb-4 text-lg font-semibold text-slate-800 dark:text-white">Contact Information</h3>
           <dl className="space-y-3 text-sm">
-            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Mobile</dt><dd className="font-medium">{candidate.mobile}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Alternate Mobile</dt><dd className="font-medium">{candidate.alternate_mobile || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">City</dt><dd className="font-medium">{candidate.city || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Country</dt><dd className="font-medium">{candidate.country || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Address</dt><dd className="font-medium">{candidate.address || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Mobile</dt><dd className="font-medium text-slate-800 dark:text-white">{candidate.mobile}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Alternate Mobile</dt><dd className="font-medium text-slate-800 dark:text-white">{candidate.alternate_mobile || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">City</dt><dd className="font-medium text-slate-800 dark:text-white">{candidate.city || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Country</dt><dd className="font-medium text-slate-800 dark:text-white">{candidate.country || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Address</dt><dd className="font-medium text-slate-800 dark:text-white">{candidate.address || "-"}</dd></div>
           </dl>
         </div>
         <div className="rounded-lg border bg-white dark:bg-slate-900 p-6 shadow-sm dark:shadow-none">
           <h3 className="mb-4 text-lg font-semibold text-slate-800 dark:text-white">Professional Information</h3>
           <dl className="space-y-3 text-sm">
-            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Profession</dt><dd className="font-medium">{candidate.profession || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Employer</dt><dd className="font-medium">{candidate.employer || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Visa Category</dt><dd className="font-medium">{candidate.job_visa_category || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Agent</dt><dd className="font-medium">{candidate.agent?.name || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Reference</dt><dd className="font-medium">{candidate.reference || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Profession</dt><dd className="font-medium text-slate-800 dark:text-white">{candidate.profession || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Employer</dt><dd className="font-medium text-slate-800 dark:text-white">{candidate.employer || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Visa Category</dt><dd className="font-medium text-slate-800 dark:text-white">{candidate.job_visa_category || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Agent</dt><dd className="font-medium text-slate-800 dark:text-white">{candidate.agent?.name || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Reference</dt><dd className="font-medium text-slate-800 dark:text-white">{candidate.reference || "-"}</dd></div>
           </dl>
         </div>
         <div className="rounded-lg border bg-white dark:bg-slate-900 p-6 shadow-sm dark:shadow-none">
           <h3 className="mb-4 text-lg font-semibold text-slate-800 dark:text-white">System Information</h3>
           <dl className="space-y-3 text-sm">
-            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Code</dt><dd className="font-medium">{candidate.candidate_code}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Status</dt><dd className="font-medium">{CANDIDATE_STATUSES.find(s => s.value === candidate.status)?.label}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Registration Date</dt><dd className="font-medium">{formatDate(candidate.registration_date)}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Passport Issue Date</dt><dd className="font-medium">{candidate.passport_issue_date ? formatDate(candidate.passport_issue_date) : "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Passport Expiry Date</dt><dd className="font-medium">{candidate.passport_expiry_date ? formatDate(candidate.passport_expiry_date) : "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Code</dt><dd className="font-medium text-slate-800 dark:text-white">{candidate.candidate_code}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Status</dt><dd className="font-medium text-slate-800 dark:text-white">{CANDIDATE_STATUSES.find(s => s.value === candidate.status)?.label}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Registration Date</dt><dd className="font-medium text-slate-800 dark:text-white">{formatDate(candidate.registration_date)}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Passport Issue Date</dt><dd className="font-medium text-slate-800 dark:text-white">{candidate.passport_issue_date ? formatDate(candidate.passport_issue_date) : "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Passport Expiry Date</dt><dd className="font-medium text-slate-800 dark:text-white">{candidate.passport_expiry_date ? formatDate(candidate.passport_expiry_date) : "-"}</dd></div>
           </dl>
         </div>
       </div>

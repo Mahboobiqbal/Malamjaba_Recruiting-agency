@@ -25,7 +25,7 @@ export default function VisaDetail() {
           <Link to="/visas" className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-400"><ArrowLeft className="h-5 w-5" /></Link>
           <div>
             <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Visa: {visa.visa_code}</h2>
-            <p className="text-sm text-secondary">{visa.candidate?.full_name || "N/A"} - {visa.country || ""}</p>
+            <p className="text-sm text-secondary-foreground">{visa.candidate?.full_name || "N/A"} - {visa.country || ""}</p>
           </div>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row">
@@ -50,14 +50,14 @@ export default function VisaDetail() {
         <div className="rounded-lg border bg-white dark:bg-slate-900 p-6 shadow-sm dark:shadow-none">
           <h3 className="mb-4 text-lg font-semibold text-slate-800 dark:text-white">Visa Details</h3>
           <dl className="space-y-3 text-sm">
-            <div className="flex justify-between"><dt className="text-secondary">Visa Code</dt><dd className="font-medium">{visa.visa_code}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Type</dt><dd className="font-medium">{visa.visa_type || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Country</dt><dd className="font-medium">{visa.country || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Visa Number</dt><dd className="font-medium">{visa.visa_number || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Sponsor Number</dt><dd className="font-medium">{visa.sponsor_number || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Issue Date</dt><dd className="font-medium">{visa.issue_date ? formatDate(visa.issue_date) : "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Expiry Date</dt><dd className="font-medium">{visa.expiry_date ? formatDate(visa.expiry_date) : "-"}</dd></div>
-            <div className="flex justify-between items-center"><dt className="text-secondary">Status</dt><dd>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Visa Code</dt><dd className="font-medium text-slate-800 dark:text-white">{visa.visa_code}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Type</dt><dd className="font-medium text-slate-800 dark:text-white">{visa.visa_type || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Country</dt><dd className="font-medium text-slate-800 dark:text-white">{visa.country || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Visa Number</dt><dd className="font-medium text-slate-800 dark:text-white">{visa.visa_number || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Sponsor Number</dt><dd className="font-medium text-slate-800 dark:text-white">{visa.sponsor_number || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Issue Date</dt><dd className="font-medium text-slate-800 dark:text-white">{visa.issue_date ? formatDate(visa.issue_date) : "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Expiry Date</dt><dd className="font-medium text-slate-800 dark:text-white">{visa.expiry_date ? formatDate(visa.expiry_date) : "-"}</dd></div>
+            <div className="flex justify-between items-center"><dt className="text-secondary-foreground">Status</dt><dd>
               <StatusDropdown value={visa.status} options={VISA_STATUSES} onChange={(status) => updateStatus({ id: visa.id, status })} />
             </dd></div>
           </dl>
@@ -65,12 +65,12 @@ export default function VisaDetail() {
         <div className="rounded-lg border bg-white dark:bg-slate-900 p-6 shadow-sm dark:shadow-none">
           <h3 className="mb-4 text-lg font-semibold text-slate-800 dark:text-white">Financial Details</h3>
           <dl className="space-y-3 text-sm">
-            <div className="flex justify-between"><dt className="text-secondary">Visa Fee</dt><dd className="font-medium">{formatCurrency(visa.visa_fee)}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Agent Fee</dt><dd className="font-medium">{formatCurrency(visa.agent_fee)}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Other Charges</dt><dd className="font-medium">{formatCurrency(data.other_charges)}</dd></div>
-            <div className="flex justify-between border-t pt-3"><dt className="text-secondary">Total Cost</dt><dd className="font-bold">{formatCurrency(data.total_cost)}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Paid Amount</dt><dd className="font-medium text-success">{formatCurrency(data.paid_amount)}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Remaining</dt><dd className="font-medium text-warning">{formatCurrency(data.remaining_amount)}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Visa Fee</dt><dd className="font-medium text-slate-800 dark:text-white">{formatCurrency(visa.visa_fee)}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Agent Fee</dt><dd className="font-medium text-slate-800 dark:text-white">{formatCurrency(visa.agent_fee)}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Other Charges</dt><dd className="font-medium text-slate-800 dark:text-white">{formatCurrency(data.other_charges)}</dd></div>
+            <div className="flex justify-between border-t pt-3"><dt className="text-secondary-foreground">Total Cost</dt><dd className="font-bold">{formatCurrency(data.total_cost)}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Paid Amount</dt><dd className="font-medium text-success">{formatCurrency(data.paid_amount)}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Remaining</dt><dd className="font-medium text-warning">{formatCurrency(data.remaining_amount)}</dd></div>
           </dl>
         </div>
       </div>

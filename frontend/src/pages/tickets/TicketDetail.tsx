@@ -23,7 +23,7 @@ export default function TicketDetail() {
           <Link to="/tickets" className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-400"><ArrowLeft className="h-5 w-5" /></Link>
           <div>
             <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Ticket: {data.ticket_code}</h2>
-            <p className="text-sm text-secondary">{data.candidate?.full_name || "N/A"}</p>
+            <p className="text-sm text-secondary-foreground">{data.candidate?.full_name || "N/A"}</p>
           </div>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row">
@@ -48,14 +48,14 @@ export default function TicketDetail() {
         <div className="rounded-lg border bg-white dark:bg-slate-900 p-6 shadow-sm dark:shadow-none">
           <h3 className="mb-4 text-lg font-semibold text-slate-800 dark:text-white">Flight Details</h3>
           <dl className="space-y-3 text-sm">
-            <div className="flex justify-between"><dt className="text-secondary">Airline</dt><dd className="font-medium">{data.airline || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">PNR</dt><dd className="font-medium">{data.pnr || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Ticket Number</dt><dd className="font-medium">{data.ticket_number || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Flight</dt><dd className="font-medium">{data.flight_number || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Route</dt><dd className="font-medium">{data.departure_airport || "?"} → {data.arrival_airport || "?"}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Departure</dt><dd className="font-medium">{data.departure_date ? formatDate(data.departure_date) : "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Arrival</dt><dd className="font-medium">{data.arrival_date ? formatDate(data.arrival_date) : "-"}</dd></div>
-            <div className="flex justify-between items-center"><dt className="text-secondary">Status</dt><dd>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Airline</dt><dd className="font-medium text-slate-800 dark:text-white">{data.airline || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">PNR</dt><dd className="font-medium text-slate-800 dark:text-white">{data.pnr || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Ticket Number</dt><dd className="font-medium text-slate-800 dark:text-white">{data.ticket_number || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Flight</dt><dd className="font-medium text-slate-800 dark:text-white">{data.flight_number || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Route</dt><dd className="font-medium text-slate-800 dark:text-white">{data.departure_airport || "?"} → {data.arrival_airport || "?"}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Departure</dt><dd className="font-medium text-slate-800 dark:text-white">{data.departure_date ? formatDate(data.departure_date) : "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Arrival</dt><dd className="font-medium text-slate-800 dark:text-white">{data.arrival_date ? formatDate(data.arrival_date) : "-"}</dd></div>
+            <div className="flex justify-between items-center"><dt className="text-secondary-foreground">Status</dt><dd>
               <StatusDropdown value={data.status} options={TICKET_STATUSES} onChange={(status) => updateStatus({ id: data.id, status })} />
             </dd></div>
           </dl>
@@ -63,12 +63,12 @@ export default function TicketDetail() {
         <div className="rounded-lg border bg-white dark:bg-slate-900 p-6 shadow-sm dark:shadow-none">
           <h3 className="mb-4 text-lg font-semibold text-slate-800 dark:text-white">Financial Details</h3>
           <dl className="space-y-3 text-sm">
-            <div className="flex justify-between"><dt className="text-secondary">Ticket Price</dt><dd className="font-medium">{formatCurrency(data.ticket_price)}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Agent Commission</dt><dd className="font-medium">{formatCurrency(data.agent_commission)}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Other Charges</dt><dd className="font-medium">{formatCurrency(data.other_charges)}</dd></div>
-            <div className="flex justify-between border-t pt-3"><dt className="text-secondary">Total</dt><dd className="font-bold">{formatCurrency(data.total)}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Paid</dt><dd className="font-medium text-success">{formatCurrency(data.paid)}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Remaining</dt><dd className="font-medium text-warning">{formatCurrency(data.remaining)}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Ticket Price</dt><dd className="font-medium text-slate-800 dark:text-white">{formatCurrency(data.ticket_price)}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Agent Commission</dt><dd className="font-medium text-slate-800 dark:text-white">{formatCurrency(data.agent_commission)}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Other Charges</dt><dd className="font-medium text-slate-800 dark:text-white">{formatCurrency(data.other_charges)}</dd></div>
+            <div className="flex justify-between border-t pt-3"><dt className="text-secondary-foreground">Total</dt><dd className="font-bold">{formatCurrency(data.total)}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Paid</dt><dd className="font-medium text-success">{formatCurrency(data.paid)}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Remaining</dt><dd className="font-medium text-warning">{formatCurrency(data.remaining)}</dd></div>
           </dl>
         </div>
       </div>

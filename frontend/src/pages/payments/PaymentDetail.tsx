@@ -53,21 +53,21 @@ export default function PaymentDetail() {
           <p className="text-sm text-slate-500 dark:text-slate-400">Payment Receipt</p>
         </div>
         <dl className="space-y-3 text-sm">
-          <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Payment Code</dt><dd className="font-medium">{payment.payment_code}</dd></div>
-          <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Receipt Number</dt><dd className="font-medium">{payment.receipt_number}</dd></div>
-          <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Candidate</dt><dd className="font-medium">{payment.candidate?.full_name || "N/A"}</dd></div>
-          {payment.agent && <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Agent</dt><dd className="font-medium">{payment.agent.name}</dd></div>}
+          <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Payment Code</dt><dd className="font-medium text-slate-800 dark:text-white">{payment.payment_code}</dd></div>
+          <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Receipt Number</dt><dd className="font-medium text-slate-800 dark:text-white">{payment.receipt_number}</dd></div>
+          <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Candidate</dt><dd className="font-medium text-slate-800 dark:text-white">{payment.candidate?.full_name || "N/A"}</dd></div>
+          {payment.agent && <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Agent</dt><dd className="font-medium text-slate-800 dark:text-white">{payment.agent.name}</dd></div>}
           <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Amount</dt><dd className="font-bold text-lg">{formatCurrency(payment.amount)}</dd></div>
           <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Payment Type</dt><dd className="font-medium capitalize">{PAYMENT_TYPES.find(t => t.value === payment.payment_type)?.label || payment.payment_type}</dd></div>
-          <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Payment Method</dt><dd className="font-medium">{PAYMENT_METHODS.find(m => m.value === payment.payment_method)?.label || payment.payment_method}</dd></div>
-          <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Date</dt><dd className="font-medium">{formatDateTime(payment.payment_date)}</dd></div>
-          {payment.reference_number && <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Reference</dt><dd className="font-medium">{payment.reference_number}</dd></div>}
-          {payment.description && <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Description</dt><dd className="font-medium">{payment.description}</dd></div>}
-          {payment.remarks && <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Remarks</dt><dd className="font-medium">{payment.remarks}</dd></div>}
+          <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Payment Method</dt><dd className="font-medium text-slate-800 dark:text-white">{PAYMENT_METHODS.find(m => m.value === payment.payment_method)?.label || payment.payment_method}</dd></div>
+          <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Date</dt><dd className="font-medium text-slate-800 dark:text-white">{formatDateTime(payment.payment_date)}</dd></div>
+          {payment.reference_number && <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Reference</dt><dd className="font-medium text-slate-800 dark:text-white">{payment.reference_number}</dd></div>}
+          {payment.description && <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Description</dt><dd className="font-medium text-slate-800 dark:text-white">{payment.description}</dd></div>}
+          {payment.remarks && <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Remarks</dt><dd className="font-medium text-slate-800 dark:text-white">{payment.remarks}</dd></div>}
           {payment.visa && (
             <div className="flex justify-between">
               <dt className="text-slate-500 dark:text-slate-400">Linked Visa</dt>
-              <dd className="font-medium">
+              <dd className="font-medium text-slate-800 dark:text-white">
                 <Link to={`/visas/${payment.visa.id}`} className="text-primary hover:underline">
                   {payment.visa.visa_code} - {payment.visa.country || "N/A"}
                 </Link>
@@ -77,7 +77,7 @@ export default function PaymentDetail() {
           {payment.ticket && (
             <div className="flex justify-between">
               <dt className="text-slate-500 dark:text-slate-400">Linked Ticket</dt>
-              <dd className="font-medium">
+              <dd className="font-medium text-slate-800 dark:text-white">
                 <Link to={`/tickets/${payment.ticket.id}`} className="text-primary hover:underline">
                   {payment.ticket.ticket_code} - {payment.ticket.airline || "N/A"}
                 </Link>
@@ -87,7 +87,7 @@ export default function PaymentDetail() {
           {payment.medical_token && (
             <div className="flex justify-between">
               <dt className="text-slate-500 dark:text-slate-400">Linked Medical</dt>
-              <dd className="font-medium">
+              <dd className="font-medium text-slate-800 dark:text-white">
                 <Link to={`/medical/${payment.medical_token.id}`} className="text-primary hover:underline">
                   {payment.medical_token.token_code} - {payment.medical_token.medical_center || "N/A"}
                 </Link>

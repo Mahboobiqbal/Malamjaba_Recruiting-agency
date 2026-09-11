@@ -53,9 +53,9 @@ export default function AgentDetail() {
         <div className="rounded-lg border bg-white dark:bg-slate-900 p-6 shadow-sm dark:shadow-none">
           <h3 className="mb-4 text-lg font-semibold text-slate-800 dark:text-white">Personal Information</h3>
           <dl className="space-y-3 text-sm">
-            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Father Name</dt><dd className="font-medium">{agent.father_name || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">CNIC</dt><dd className="font-medium">{agent.cnic}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Commission Rate</dt><dd className="font-medium">{agent.commission_rate}%</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Father Name</dt><dd className="font-medium text-slate-800 dark:text-white">{agent.father_name || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">CNIC</dt><dd className="font-medium text-slate-800 dark:text-white">{agent.cnic}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Commission Rate</dt><dd className="font-medium text-slate-800 dark:text-white">{agent.commission_rate}%</dd></div>
             <div className="flex justify-between items-center"><dt className="text-slate-500 dark:text-slate-400">Status</dt><dd>
               <StatusDropdown value={agent.status} options={AGENT_STATUSES} onChange={(status) => updateStatus({ id: agent.id, status })} />
             </dd></div>
@@ -64,11 +64,11 @@ export default function AgentDetail() {
         <div className="rounded-lg border bg-white dark:bg-slate-900 p-6 shadow-sm dark:shadow-none">
           <h3 className="mb-4 text-lg font-semibold text-slate-800 dark:text-white">Contact Information</h3>
           <dl className="space-y-3 text-sm">
-            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Mobile</dt><dd className="font-medium">{agent.mobile}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">WhatsApp</dt><dd className="font-medium">{agent.whatsapp || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Email</dt><dd className="font-medium">{agent.email || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">City</dt><dd className="font-medium">{agent.city || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Address</dt><dd className="font-medium">{agent.address || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Mobile</dt><dd className="font-medium text-slate-800 dark:text-white">{agent.mobile}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">WhatsApp</dt><dd className="font-medium text-slate-800 dark:text-white">{agent.whatsapp || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Email</dt><dd className="font-medium text-slate-800 dark:text-white">{agent.email || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">City</dt><dd className="font-medium text-slate-800 dark:text-white">{agent.city || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-slate-500 dark:text-slate-400">Address</dt><dd className="font-medium text-slate-800 dark:text-white">{agent.address || "-"}</dd></div>
           </dl>
         </div>
       </div>

@@ -33,7 +33,7 @@ export default function MedicalTokenDetail() {
           <Link to="/medical" className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-400"><ArrowLeft className="h-5 w-5" /></Link>
           <div>
             <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Medical Token: {data.token_code}</h2>
-            <p className="text-sm text-secondary">{data.candidate?.full_name || "N/A"}</p>
+            <p className="text-sm text-secondary-foreground">{data.candidate?.full_name || "N/A"}</p>
           </div>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row">
@@ -61,12 +61,12 @@ export default function MedicalTokenDetail() {
             <h3 className="text-lg font-semibold text-slate-800 dark:text-white">Medical Details</h3>
           </div>
           <dl className="space-y-3 text-sm">
-            <div className="flex justify-between"><dt className="text-secondary">Token Code</dt><dd className="font-medium">{data.token_code}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Token Number</dt><dd className="font-medium">{data.token_number || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Medical Center</dt><dd className="font-medium">{data.medical_center || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Medical Date</dt><dd className="font-medium">{data.medical_date ? formatDate(data.medical_date) : "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Appointment Date</dt><dd className="font-medium">{data.appointment_date ? formatDate(data.appointment_date) : "-"}</dd></div>
-            <div className="flex justify-between items-center pt-2 border-t"><dt className="text-secondary">Status</dt><dd>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Token Code</dt><dd className="font-medium text-slate-800 dark:text-white">{data.token_code}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Token Number</dt><dd className="font-medium text-slate-800 dark:text-white">{data.token_number || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Medical Center</dt><dd className="font-medium text-slate-800 dark:text-white">{data.medical_center || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Medical Date</dt><dd className="font-medium text-slate-800 dark:text-white">{data.medical_date ? formatDate(data.medical_date) : "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Appointment Date</dt><dd className="font-medium text-slate-800 dark:text-white">{data.appointment_date ? formatDate(data.appointment_date) : "-"}</dd></div>
+            <div className="flex justify-between items-center pt-2 border-t"><dt className="text-secondary-foreground">Status</dt><dd>
               <StatusDropdown value={data.medical_status} options={MEDICAL_STATUSES} onChange={(medical_status) => updateStatus({ id: data.id, medical_status })} />
             </dd></div>
           </dl>
@@ -78,10 +78,10 @@ export default function MedicalTokenDetail() {
             <h3 className="text-lg font-semibold text-slate-800 dark:text-white">Financial Details</h3>
           </div>
           <dl className="space-y-3 text-sm">
-            <div className="flex justify-between"><dt className="text-secondary">Medical Fee</dt><dd className="font-medium">{formatCurrency(fee)}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Amount Paid</dt><dd className="font-medium text-emerald-600 dark:text-emerald-400">{formatCurrency(paid)}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Medical Fee</dt><dd className="font-medium text-slate-800 dark:text-white">{formatCurrency(fee)}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Amount Paid</dt><dd className="font-medium text-emerald-600 dark:text-emerald-400">{formatCurrency(paid)}</dd></div>
             <div className="flex justify-between border-t pt-3"><dt className="text-secondary font-semibold">Remaining</dt><dd className="font-bold text-rose-600 dark:text-rose-400">{formatCurrency(remaining)}</dd></div>
-            <div className="flex justify-between items-center pt-2 border-t"><dt className="text-secondary">Payment Status</dt><dd>
+            <div className="flex justify-between items-center pt-2 border-t"><dt className="text-secondary-foreground">Payment Status</dt><dd>
               <StatusDropdown value={data.payment_status} options={PAYMENT_STATUSES} onChange={(payment_status) => updateStatus({ id: data.id, payment_status })} />
             </dd></div>
           </dl>
@@ -93,14 +93,14 @@ export default function MedicalTokenDetail() {
             <h3 className="text-lg font-semibold text-slate-800 dark:text-white">Candidate Info</h3>
           </div>
           <dl className="space-y-3 text-sm">
-            <div className="flex justify-between"><dt className="text-secondary">Name</dt><dd className="font-medium">{data.candidate?.full_name || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Code</dt><dd className="font-medium">{data.candidate?.candidate_code || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Passport</dt><dd className="font-medium">{data.candidate?.passport_number || "-"}</dd></div>
-            <div className="flex justify-between"><dt className="text-secondary">Mobile</dt><dd className="font-medium">{data.candidate?.mobile || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Name</dt><dd className="font-medium text-slate-800 dark:text-white">{data.candidate?.full_name || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Code</dt><dd className="font-medium text-slate-800 dark:text-white">{data.candidate?.candidate_code || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Passport</dt><dd className="font-medium text-slate-800 dark:text-white">{data.candidate?.passport_number || "-"}</dd></div>
+            <div className="flex justify-between"><dt className="text-secondary-foreground">Mobile</dt><dd className="font-medium text-slate-800 dark:text-white">{data.candidate?.mobile || "-"}</dd></div>
             {data.agent && (
               <>
-                <div className="flex justify-between pt-2 border-t"><dt className="text-secondary">Agent</dt><dd className="font-medium">{data.agent.name}</dd></div>
-                <div className="flex justify-between"><dt className="text-secondary">Agent Code</dt><dd className="font-medium">{data.agent.agent_code}</dd></div>
+                <div className="flex justify-between pt-2 border-t"><dt className="text-secondary-foreground">Agent</dt><dd className="font-medium text-slate-800 dark:text-white">{data.agent.name}</dd></div>
+                <div className="flex justify-between"><dt className="text-secondary-foreground">Agent Code</dt><dd className="font-medium text-slate-800 dark:text-white">{data.agent.agent_code}</dd></div>
               </>
             )}
           </dl>
