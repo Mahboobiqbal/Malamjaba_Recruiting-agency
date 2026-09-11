@@ -21,6 +21,7 @@ export default function VendorTransactionCreate() {
     passenger_name: "",
     ticket_number: "",
     pnr: "",
+    visa_number: "",
     origin: "",
     destination: "",
     travel_date: "",
@@ -58,6 +59,7 @@ export default function VendorTransactionCreate() {
           visa_country: form.visa_country || undefined,
           visa_type: form.visa_type || undefined,
           visa_date: form.visa_date || undefined,
+          visa_number: form.visa_number || undefined,
           purchase_price: form.purchase_price,
           selling_price: form.selling_price,
           payment_method: form.payment_method || undefined,
@@ -180,6 +182,11 @@ export default function VendorTransactionCreate() {
                 <input type="text" value={form.visa_type} onChange={(e) => setForm({ ...form, visa_type: e.target.value })}
                   placeholder="e.g. Work, Visit, Family" className={`${inputClass} ${fieldErrors.visa_type ? "border-red-500" : ""}`} />
                 <FieldError errors={fieldErrors} field="visa_type" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Visa Number</label>
+                <input type="text" value={form.visa_number} onChange={(e) => setForm({ ...form, visa_number: e.target.value })}
+                  placeholder="Visa / application number" className={inputClass} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">Processing Date</label>

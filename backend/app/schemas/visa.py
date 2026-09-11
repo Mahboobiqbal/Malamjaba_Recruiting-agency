@@ -28,7 +28,7 @@ class VisaBase(BaseModel):
 
 
 class VisaCreate(VisaBase):
-    pass
+    vendor_transaction_id: int | None = None
 
 
 class VisaUpdate(BaseModel):

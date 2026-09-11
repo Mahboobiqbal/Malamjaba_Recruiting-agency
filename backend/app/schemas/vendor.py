@@ -89,6 +89,7 @@ class VendorTransactionCreate(BaseModel):
     visa_country: str | None = Field(None, max_length=50)
     visa_type: str | None = Field(None, max_length=50)
     visa_date: str | None = None
+    visa_number: str | None = Field(None, max_length=50)
     ticket_number: str | None = Field(None, max_length=30)
     pnr: str | None = Field(None, max_length=20)
     purchase_price: float = Field(0, ge=0)
@@ -131,6 +132,7 @@ class VendorTransactionResponse(VendorTransactionBase):
     visa_country: str | None = None
     visa_type: str | None = None
     visa_date: str | None = None
+    visa_number: str | None = None
     ticket_number: str | None = None
     pnr: str | None = None
     profit: float

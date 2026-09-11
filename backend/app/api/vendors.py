@@ -202,6 +202,41 @@ async def lookup_vendor_transaction_by_reference(
     }
 
 
+@router.get("/transactions/lookup/by-visa-number")
+async def lookup_vendor_transaction_by_visa_number(
+    visa_number: str = Query(..., max_length=50),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_permission("vendors.view")),
+):
+    stmt = select(VendorTransaction).options(
+        selectinload(VendorTransaction.vendor),
+        selectinload(VendorTransaction.candidate),
+    ).where(
+        VendorTransaction.service_type == "visa",
+        VendorTransaction.visa_number == visa_number,
+    )
+
+    result = await db.execute(stmt)
+    txn = result.scalar_one_or_none()
+    if not txn:
+        raise NotFoundException("No purchase found for this visa number")
+
+    return {
+        "id": txn.id,
+        "transaction_code": txn.transaction_code,
+        "vendor_id": txn.vendor_id,
+        "passenger_name": txn.passenger_name,
+        "visa_country": txn.visa_country,
+        "visa_type": txn.visa_type,
+        "visa_date": str(txn.visa_date) if txn.visa_date else None,
+        "purchase_price": float(txn.purchase_price),
+        "selling_price": float(txn.selling_price),
+        "candidate_id": txn.candidate_id,
+        "vendor": {"id": txn.vendor.id, "name": txn.vendor.name, "vendor_code": txn.vendor.vendor_code} if txn.vendor else None,
+        "candidate": {"id": txn.candidate.id, "full_name": txn.candidate.full_name, "candidate_code": txn.candidate.candidate_code} if txn.candidate else None,
+    }
+
+
 # ─── Dynamic routes (/{vendor_id}) ───
 
 @router.get("/{vendor_id}", response_model=VendorResponse)
@@ -305,6 +340,7 @@ async def create_vendor_transaction(
         visa_country=data.visa_country,
         visa_type=data.visa_type,
         visa_date=parse_date(data.visa_date),
+        visa_number=data.visa_number,
         purchase_price=purchase_price,
         selling_price=selling_price,
         profit=profit,

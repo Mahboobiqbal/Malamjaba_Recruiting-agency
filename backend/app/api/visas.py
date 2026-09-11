@@ -10,6 +10,7 @@ from app.dependencies import require_permission
 from app.models.visa import Visa
 from app.models.candidate import Candidate
 from app.models.ledger import LedgerEntry
+from app.models.vendor import VendorTransaction
 from app.models.user import User
 from app.schemas.visa import VisaCreate, VisaUpdate, VisaResponse, VisaListResponse, VisaStatusUpdate
 from app.services.number_generator import generate_visa_code
@@ -81,17 +82,32 @@ async def create_visa(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_permission("visa.create")),
 ):
+    vendor_txn_id = data.vendor_transaction_id
     visa_code = await generate_visa_code(db)
     total_cost = data.visa_fee + data.agent_fee + data.other_charges
+    visa_data = data.model_dump(exclude={"vendor_transaction_id"})
     visa = Visa(
         visa_code=visa_code,
         created_by=current_user.id,
         total_cost=total_cost,
         remaining_amount=total_cost,
-        **data.model_dump(),
+        **visa_data,
     )
     db.add(visa)
     await db.flush()
+
+    if vendor_txn_id:
+        txn_result = await db.execute(
+            select(VendorTransaction).where(VendorTransaction.id == vendor_txn_id)
+        )
+        txn = txn_result.scalar_one_or_none()
+        if txn:
+            txn.service_id = visa.id
+            if not txn.selling_price or txn.selling_price == 0:
+                txn.selling_price = data.visa_fee
+                txn.profit = data.visa_fee - float(txn.purchase_price)
+            if not txn.candidate_id:
+                txn.candidate_id = data.candidate_id
 
     # Create ledger entry for outstanding balance
     ledger_entry = LedgerEntry(

@@ -47,6 +47,7 @@ class VendorTransaction(Base):
     visa_country: Mapped[str | None] = mapped_column(String(50), nullable=True)
     visa_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
     visa_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    visa_number: Mapped[str | None] = mapped_column(String(50), nullable=True)
     ticket_number: Mapped[str | None] = mapped_column(String(30), nullable=True)
     pnr: Mapped[str | None] = mapped_column(String(20), nullable=True)
     purchase_price: Mapped[float] = mapped_column(Numeric(12, 2), default=0)

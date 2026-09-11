@@ -307,6 +307,7 @@ export interface VendorTransaction {
   visa_country?: string;
   visa_type?: string;
   visa_date?: string;
+  visa_number?: string;
   ticket_number?: string;
   pnr?: string;
   purchase_price: number;
