@@ -114,6 +114,7 @@ async def create_ticket(
         )
         txn = txn_result.scalar_one_or_none()
         if txn:
+            txn.service_id = ticket.id
             if not txn.selling_price or txn.selling_price == 0:
                 txn.selling_price = data.ticket_price
                 txn.profit = data.ticket_price - float(txn.purchase_price)
