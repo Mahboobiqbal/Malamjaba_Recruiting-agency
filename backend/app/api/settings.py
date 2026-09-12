@@ -60,9 +60,16 @@ async def create_backup(
     filename = f"backup_{timestamp}.db"
     backup_path = os.path.join(backup_dir, filename)
 
-    db_path = os.path.abspath("./dev.db")
+    # Extract actual database path from DATABASE_URL
+    db_url = settings.database_url
+    if "sqlite" in db_url:
+        db_path = db_url.split("///")[-1] if "///" in db_url else "./dev.db"
+        db_path = os.path.abspath(db_path)
+    else:
+        raise HTTPException(status_code=400, detail="Backup only supported for SQLite databases")
+
     if not os.path.exists(db_path):
-        return {"error": "Database file not found"}
+        raise HTTPException(status_code=404, detail=f"Database file not found at {db_path}")
 
     shutil.copy2(db_path, backup_path)
     file_size = os.path.getsize(backup_path)

@@ -4,33 +4,49 @@ const { spawn } = require("child_process");
 
 let mainWindow;
 let backendProcess = null;
+let isQuitting = false;
 
 function getBackendPath() {
-  // In development, backend runs separately
-  // In production, it's bundled as extraResource
   if (process.env.NODE_ENV === "development") {
-    return null; // Don't spawn in dev mode
+    return null;
   }
-
-  // In production, the backend exe is in resources/
   const basePath = process.resourcesPath
     ? path.join(process.resourcesPath, "backend")
     : path.join(__dirname, "..", "backend");
+  return path.join(basePath, "malamjaba-backend.exe");
+}
 
-  const backendExe = path.join(basePath, "malamjaba-backend.exe");
-  return backendExe;
+function waitForBackend(url, maxRetries = 30) {
+  return new Promise((resolve, reject) => {
+    const http = require("http");
+    let retries = 0;
+    const check = () => {
+      const req = http.get(url, (res) => {
+        resolve(true);
+      });
+      req.on("error", () => {
+        retries++;
+        if (retries >= maxRetries) {
+          resolve(false);
+        } else {
+          setTimeout(check, 1000);
+        }
+      });
+      req.end();
+    };
+    check();
+  });
 }
 
 function spawnBackend() {
   const backendExe = getBackendPath();
   if (!backendExe) {
     console.log("[Electron] Development mode - backend not spawned");
-    return;
+    return Promise.resolve();
   }
 
   console.log(`[Electron] Spawning backend: ${backendExe}`);
 
-  // Check if backend exe exists
   const fs = require("fs");
   if (!fs.existsSync(backendExe)) {
     console.error(`[Electron] Backend executable not found at: ${backendExe}`);
@@ -39,13 +55,32 @@ function spawnBackend() {
       `Backend executable not found at:\n${backendExe}\n\nPlease ensure the app was built correctly.`
     );
     app.quit();
-    return;
+    return Promise.resolve();
+  }
+
+  // Kill any existing process on port 8000 first
+  try {
+    const { execSync } = require("child_process");
+    const result = execSync('netstat -ano | findstr ":8000" | findstr "LISTENING"', {
+      encoding: "utf8",
+      timeout: 3000,
+    }).trim();
+    if (result) {
+      const parts = result.split(/\s+/);
+      const pid = parts[parts.length - 1];
+      if (pid && pid !== "0") {
+        console.log(`[Electron] Killing existing process on port 8000 (PID: ${pid})`);
+        execSync(`taskkill /PID ${pid} /F`, { timeout: 5000 });
+      }
+    }
+  } catch (e) {
+    // No process on port 8000, good
   }
 
   backendProcess = spawn(backendExe, [], {
     cwd: path.dirname(backendExe),
     stdio: ["ignore", "pipe", "pipe"],
-    windowsHide: true, // Hide console window on Windows
+    windowsHide: true,
   });
 
   backendProcess.stdout.on("data", (data) => {
@@ -58,26 +93,27 @@ function spawnBackend() {
 
   backendProcess.on("error", (err) => {
     console.error(`[Electron] Failed to spawn backend: ${err.message}`);
-    dialog.showErrorBox(
-      "Backend Error",
-      `Failed to start backend:\n${err.message}`
-    );
-    app.quit();
-  });
-
-  backendProcess.on("close", (code) => {
-    console.log(`[Electron] Backend process exited with code ${code}`);
-    if (code !== 0 && code !== null) {
+    if (!isQuitting) {
       dialog.showErrorBox(
-        "Backend Crashed",
-        `The backend server stopped unexpectedly (exit code: ${code}).\nThe application will now close.`
+        "Backend Error",
+        `Failed to start backend:\n${err.message}`
       );
       app.quit();
     }
   });
 
-  // Give backend time to start
-  return new Promise((resolve) => setTimeout(resolve, 3000));
+  backendProcess.on("close", (code) => {
+    console.log(`[Electron] Backend process exited with code ${code}`);
+    if (!isQuitting && code !== 0 && code !== null) {
+      dialog.showErrorBox(
+        "Backend Error",
+        `The backend server stopped unexpectedly (exit code: ${code}).\n\nMake sure port 8000 is not in use.\nThe application will now close.`
+      );
+      app.quit();
+    }
+  });
+
+  return waitForBackend("http://127.0.0.1:8000/health");
 }
 
 function createWindow() {
@@ -93,7 +129,7 @@ function createWindow() {
       preload: path.join(__dirname, "preload.js"),
     },
     icon: path.join(__dirname, "..", "public", "icon.png"),
-    show: false, // Don't show until backend is ready
+    show: false,
   });
 
   if (process.env.NODE_ENV === "development") {
@@ -101,8 +137,10 @@ function createWindow() {
     mainWindow.webContents.openDevTools();
     mainWindow.once("ready-to-show", () => mainWindow.show());
   } else {
-    // Wait for backend to start, then load the app
-    spawnBackend().then(() => {
+    spawnBackend().then((ready) => {
+      if (!ready) {
+        console.log("[Electron] Backend did not respond in time, loading frontend anyway");
+      }
       mainWindow.loadFile(path.join(__dirname, "..", "dist", "index.html"));
       mainWindow.once("ready-to-show", () => mainWindow.show());
     });
@@ -115,7 +153,6 @@ function createWindow() {
 
 app.whenReady().then(async () => {
   await createWindow();
-
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
@@ -124,34 +161,31 @@ app.whenReady().then(async () => {
 });
 
 app.on("window-all-closed", () => {
-  // Kill backend process when all windows closed
-  if (backendProcess) {
+  isQuitting = true;
+  if (backendProcess && !backendProcess.killed) {
     console.log("[Electron] Terminating backend process...");
     backendProcess.kill("SIGTERM");
-    // Force kill after 5 seconds
     setTimeout(() => {
       if (backendProcess && !backendProcess.killed) {
         backendProcess.kill("SIGKILL");
       }
-    }, 5000);
+    }, 3000);
   }
-
   if (process.platform !== "darwin") {
     app.quit();
   }
 });
 
 app.on("before-quit", () => {
-  // Ensure backend is killed before quitting
+  isQuitting = true;
   if (backendProcess && !backendProcess.killed) {
     backendProcess.kill("SIGTERM");
   }
 });
 
-// Handle uncaught exceptions
 process.on("uncaughtException", (err) => {
   console.error("[Electron] Uncaught exception:", err);
-  if (backendProcess) backendProcess.kill("SIGKILL");
+  if (backendProcess && !backendProcess.killed) backendProcess.kill("SIGKILL");
 });
 
 process.on("unhandledRejection", (reason) => {
