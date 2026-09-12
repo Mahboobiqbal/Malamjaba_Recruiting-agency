@@ -12,7 +12,7 @@ backend_dir = Path.cwd()
 datas = [
     (str(backend_dir / "alembic"), "alembic"),
     (str(backend_dir / "alembic.ini"), "."),
-    (str(backend_dir / "app" / "templates"), "app/templates"),
+    (str(backend_dir / ".." / "frontend" / "dist"), "frontend"),
 ]
 
 # Hidden imports for SQLAlchemy, FastAPI, etc.
@@ -107,7 +107,7 @@ hiddenimports = [
     "app.services.auth_service",
     "app.services.number_generator",
     "app.services.pdf_service",
-    "app.seeds.seed_data",
+    "app.seeds.seed",
 ]
 
 # Create spec

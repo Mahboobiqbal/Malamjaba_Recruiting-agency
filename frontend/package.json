@@ -15,6 +15,7 @@
     "appId": "com.malamjaba.agency",
     "productName": "Malamjaba Recruiting Agency",
     "copyright": "Copyright © 2026 Malamjaba Recruiting Agency",
+    "asar": false,
     "directories": {
       "output": "release"
     },

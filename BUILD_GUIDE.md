@@ -1,19 +1,22 @@
 # How This EXE Was Built — Full Guide for Replication
 
-## Architecture (2 processes in one app)
+## Architecture (2 processes, single port)
 
 ```
-┌─────────────────────────────────────────────────┐
-│  Electron Shell (main.cjs)                      │
-│                                                  │
-│  ┌──────────────┐  ┌───────────┐               │
-│  │  Backend      │  │  Browser  │               │
-│  │  (FastAPI)    │  │  Window   │               │
-│  │  Port 8000    │  │  loads    │               │
-│  │  SQLite DB    │  │  dist/    │               │
-│  └──────────────┘  └───────────┘               │
-└─────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────┐
+│  Electron Shell (main.cjs)                       │
+│                                                   │
+│  ┌──────────────────────────┐  ┌──────────────┐ │
+│  │  Backend (FastAPI)        │  │  Browser     │ │
+│  │  Port 8000                │→→│  Window      │ │
+│  │  SQLite DB + Frontend     │  │  loads       │ │
+│  │  serves React dist/       │  │  localhost   │ │
+│  └──────────────────────────┘  └──────────────┘ │
+└──────────────────────────────────────────────────┘
 ```
+
+The backend serves BOTH the API (`/api/*`) and the React frontend (`/*`).
+Electron loads `http://localhost:8000` — no file:// protocol issues.
 
 ## Tech Stack
 
@@ -22,8 +25,8 @@
 | Desktop shell | Electron 28 |
 | Frontend | React 18 + React Router + Tailwind CSS 3 |
 | Backend API | FastAPI + SQLite (aiosqlite) |
-| Backend packaging | PyInstaller |
-| Installer | Portable EXE (electron-builder) |
+| Backend packaging | PyInstaller (one-file) |
+| Installer | Portable ZIP (electron-builder, asar disabled) |
 
 ## Step-by-Step Build Process
 
@@ -32,32 +35,27 @@
 ```bash
 cd frontend
 npm run build
-# Runs: tsc && vite build
-# Produces: dist/ folder with:
-#   dist/index.html   → main HTML
-#   dist/assets/      → CSS, JS bundles
+# Produces: dist/index.html + dist/assets/
 ```
 
-### Step 2: Build Backend → Python EXE
+### Step 2: Build Backend → Python EXE (one-file)
 
 ```bash
 cd backend
 pyinstaller backend.spec
-# Produces: dist/malamjaba-backend/malamjaba-backend.exe
-# This is a one-folder build with console=False
+# Produces: dist/malamjaba-backend.exe (~25 MB)
+# Frontend dist/ is bundled inside the exe via spec datas
 ```
 
-**PyInstaller spec** (`backend/backend.spec`):
-- Input: `run_production.py` (FastAPI app with uvicorn)
-- Hidden imports: aiosqlite
-- `console=False` (no terminal window)
-- One-folder mode (fast startup, larger size)
+**PyInstaller spec** bundles:
+- `run_production.py` (entry point)
+- `alembic/` (migrations)
+- `frontend/` (React dist → served by FastAPI)
 
 ### Step 3: Copy Backend EXE to Electron Resources
 
 ```bash
-# Copy the built backend to electron/backend/
-xcopy /E /I dist\malamjaba-backend frontend\electron\backend\
+Copy-Item backend\dist\malamjaba-backend.exe frontend\electron\backend\
 ```
 
 ### Step 4: Build Electron App
@@ -65,39 +63,8 @@ xcopy /E /I dist\malamjaba-backend frontend\electron\backend\
 ```bash
 cd frontend
 npm run electron:build
-# Runs: vite build && electron-builder
-# Produces: release/Malamjaba-Recruiting-Agency-Portable.exe
-```
-
-## electron-builder Configuration
-
-From `package.json`:
-
-```json
-{
-  "build": {
-    "appId": "com.malamjaba.agency",
-    "productName": "Malamjaba Recruiting Agency",
-    "directories": {
-      "output": "release"
-    },
-    "files": [
-      "dist/**/*",
-      "electron/**/*"
-    ],
-    "win": {
-      "target": [{ "target": "portable", "arch": ["x64"] }],
-      "icon": "public/icon.png"
-    },
-    "extraResources": [
-      {
-        "from": "electron/backend",
-        "to": "backend",
-        "filter": ["**/*"]
-      }
-    ]
-  }
-}
+# Produces: release/win-unpacked/
+# Zip it: release/Malamjaba-Recruiting-Agency-Portable.zip
 ```
 
 ## What Happens at Runtime (main.cjs)
@@ -106,8 +73,8 @@ From `package.json`:
 2. **Kills existing port 8000** → Prevents port conflicts
 3. **Spawns backend** → `malamjaba-backend.exe` on port 8000
 4. **Waits for backend** → Polls `http://127.0.0.1:8000/health` (30 retries, 1s each)
-5. **Opens BrowserWindow** → Loads `dist/index.html`
-6. **Frontend connects** → API calls to `http://localhost:8000`
+5. **Opens BrowserWindow** → Loads `http://localhost:8000`
+6. **Backend serves everything** → React frontend + API endpoints
 7. **On close** → Kills backend process, quits
 
 ## Directory Structure After Build
@@ -116,14 +83,13 @@ From `package.json`:
 Malamjaba-Recruiting-Agency-Portable/
 ├── Malamjaba Recruiting Agency.exe   ← Electron (main process)
 ├── resources/
+│   ├── app/                           ← Electron app code
+│   │   ├── package.json
+│   │   └── electron/
+│   │       ├── main.cjs
+│   │       └── preload.js
 │   └── backend/
-│       ├── malamjaba-backend.exe     ← FastAPI (Python)
-│       └── _internal/                ← Python runtime
-├── dist/                             ← Frontend (React)
-│   ├── index.html
-│   └── assets/
-│       ├── index-[hash].js
-│       └── index-[hash].css
+│       └── malamjaba-backend.exe     ← FastAPI + Frontend (one-file)
 └── [Electron DLLs and data files]
 ```
 
@@ -133,7 +99,7 @@ Malamjaba-Recruiting-Agency-Portable/
 %APPDATA%\MalamjabaAgency\
 ├── dev.db                 ← SQLite database (created on first run)
 └── backups\
-    └── backup_YYYYMMDD_HHMMSS.db  ← Automatic backups
+    └── backup_YYYYMMDD_HHMMSS.db
 ```
 
 ## First Run Behavior
@@ -143,48 +109,49 @@ Malamjaba-Recruiting-Agency-Portable/
 3. Seeds accountant user: `accountant` / `accountant123`
 4. App opens to login page
 
-## Minimal Command Sequence
+## Build Commands (Production Ready)
 
 ```bash
 # 1. Install dependencies
 cd frontend && npm install
-cd ../backend && pip install -r requirements.txt
+cd ../backend && pip install -r requirements.txt pyinstaller
 
 # 2. Build frontend
 cd frontend && npm run build
 
-# 3. Build backend with PyInstaller
-cd backend && pyinstaller backend.spec
+# 3. Build backend (one-file exe, includes frontend)
+cd backend && pyinstaller backend.spec --noconfirm
 
 # 4. Copy backend to electron resources
-xcopy /E /I dist\malamjaba-backend frontend\electron\backend\
+Copy-Item backend\dist\malamjaba-backend.exe frontend\electron\backend\ -Force
 
-# 5. Build Electron portable EXE
-cd frontend && npm run electron:build
+# 5. Build Electron app (asar disabled)
+cd frontend && npx electron-builder --win --x64
 
-# 6. Output appears in:
-#    frontend/release/Malamjaba-Recruiting-Agency-Portable.exe
+# 6. Zip the win-unpacked folder
+Compress-Archive -Path frontend\release\win-unpacked\* -DestinationPath frontend\release\Malamjaba-Recruiting-Agency-Portable.zip
 ```
 
 ## How the App Works Offline
 
 1. **No external server** — FastAPI runs locally on 127.0.0.1:8000
 2. **SQLite database** — File-based, stored in %AppData%/MalamjabaAgency/
-3. **Static frontend** — Served from bundled files (dist/)
-4. **Electron** — Acts as a local browser, no network needed
-5. **Client installs the EXE** — Everything runs on their machine
+3. **Backend serves frontend** — React dist/ embedded in the exe
+4. **Electron** — Local browser shell, no network needed
+5. **Everything in one process** — No CORS, no file:// issues
 
 ## Client Installation
 
-1. Double-click `Malamjaba-Recruiting-Agency-Portable.exe`
-2. App extracts and starts
+1. Extract `Malamjaba-Recruiting-Agency-Portable.zip`
+2. Double-click `Malamjaba Recruiting Agency.exe`
 3. Login with `admin` / `admin123`
 4. Change password immediately
 
 ## Notes
 
 - **No internet required** after installation
-- **No installer needed** — Portable EXE runs directly
+- **No installer needed** — Portable, just extract and run
 - **Database is portable** — Can backup/restore from Settings
-- **Windows SmartScreen** may warn on first run — Click "More info" → "Run anyway"
+- **`asar: false`** in package.json avoids Electron packaging issues
 - **Port 8000** must not be in use by another application
+- **Backend serves both API and frontend** — Single origin, no CORS

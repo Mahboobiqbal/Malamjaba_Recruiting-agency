@@ -128,7 +128,6 @@ function createWindow() {
       contextIsolation: true,
       preload: path.join(__dirname, "preload.js"),
     },
-    icon: path.join(__dirname, "..", "public", "icon.png"),
     show: false,
   });
 
@@ -141,8 +140,11 @@ function createWindow() {
       if (!ready) {
         console.log("[Electron] Backend did not respond in time, loading frontend anyway");
       }
-      mainWindow.loadFile(path.join(__dirname, "..", "dist", "index.html"));
-      mainWindow.once("ready-to-show", () => mainWindow.show());
+      mainWindow.loadURL("http://localhost:8000");
+      mainWindow.webContents.once("did-finish-load", () => {
+        mainWindow.show();
+      });
+      setTimeout(() => mainWindow.show(), 10000);
     });
   }
 
