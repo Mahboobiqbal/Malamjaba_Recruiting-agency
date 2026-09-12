@@ -1,16 +1,27 @@
+# Dependencies
 node_modules/
-dist/
-release/
-*.db
-.env
 venv/
 __pycache__/
 *.pyc
+
+# Build outputs
+dist/
+release/
+backend/build/
+frontend/electron/backend/
+dist-electron/
+
+# Database files
+*.db
+
+# Environment files
+.env
+
+# OS files
 .DS_Store
 Thumbs.db
-backend/build/
-frontend/electron/backend/malamjaba-backend.exe
-*.exe
+
+# Debug/test scripts (root level)
 check_*.py
 debug_*.py
 test_*.py
@@ -19,5 +30,7 @@ fix_*.py
 cleanup.py
 reseed.py
 final_test.py
+
+# Icon assets
 frontend/public/create_icon.ps1
 frontend/public/icon.png
