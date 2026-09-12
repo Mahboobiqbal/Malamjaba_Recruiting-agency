@@ -8,3 +8,16 @@ __pycache__/
 *.pyc
 .DS_Store
 Thumbs.db
+backend/build/
+frontend/electron/backend/malamjaba-backend.exe
+*.exe
+check_*.py
+debug_*.py
+test_*.py
+verify_*.py
+fix_*.py
+cleanup.py
+reseed.py
+final_test.py
+frontend/public/create_icon.ps1
+frontend/public/icon.png

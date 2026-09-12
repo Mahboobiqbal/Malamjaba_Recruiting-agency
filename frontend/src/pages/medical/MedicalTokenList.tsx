@@ -61,9 +61,9 @@ export default function MedicalTokenList() {
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan={8} className="px-4 py-8 text-center text-secondary">Loading...</td></tr>
+              <tr><td colSpan={8} className="px-4 py-8 text-center text-slate-500 dark:text-slate-400">Loading...</td></tr>
             ) : data?.items.length === 0 ? (
-              <tr><td colSpan={8} className="px-4 py-8 text-center text-secondary">No medical tokens found</td></tr>
+              <tr><td colSpan={8} className="px-4 py-8 text-center text-slate-500 dark:text-slate-400">No medical tokens found</td></tr>
             ) : (
               data?.items.map((t) => (
                     <tr key={t.id} className="border-b hover:bg-secondary">

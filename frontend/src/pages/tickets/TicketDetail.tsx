@@ -13,8 +13,8 @@ export default function TicketDetail() {
   const { data, isLoading } = useGetTicketQuery(Number(id));
   const [updateStatus] = useUpdateTicketStatusMutation();
 
-  if (isLoading) return <div className="text-center py-8 text-secondary">Loading...</div>;
-  if (!data) return <div className="text-center py-8 text-secondary">Ticket not found</div>;
+  if (isLoading) return <div className="text-center py-8 text-slate-500 dark:text-slate-400">Loading...</div>;
+  if (!data) return <div className="text-center py-8 text-slate-500 dark:text-slate-400">Ticket not found</div>;
 
   return (
     <div className="space-y-6">

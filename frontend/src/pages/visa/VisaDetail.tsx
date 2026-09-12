@@ -13,8 +13,8 @@ export default function VisaDetail() {
   const { data, isLoading } = useGetVisaQuery(Number(id));
   const [updateStatus] = useUpdateVisaStatusMutation();
 
-  if (isLoading) return <div className="text-center py-8 text-secondary">Loading...</div>;
-  if (!data) return <div className="text-center py-8 text-secondary">Visa not found</div>;
+  if (isLoading) return <div className="text-center py-8 text-slate-500 dark:text-slate-400">Loading...</div>;
+  if (!data) return <div className="text-center py-8 text-slate-500 dark:text-slate-400">Visa not found</div>;
 
   const visa = data;
 

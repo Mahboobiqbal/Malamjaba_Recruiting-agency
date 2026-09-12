@@ -226,8 +226,9 @@ async def reset_all_data(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_permission("settings.manage")),
 ):
+    from sqlalchemy import delete
     from app.models.candidate import Candidate
-    from app.models.agent import Agent
+    from app.models.agent import Agent, AgentPayment
     from app.models.medical_token import MedicalToken
     from app.models.visa import Visa
     from app.models.ticket import Ticket
@@ -237,24 +238,34 @@ async def reset_all_data(
     from app.models.document import CandidateDocument
     from app.models.audit_log import AuditLog
     from app.models.notification import Notification
-    from app.models.user import User as UserModel
+    from app.models.user import User as UserModel, Role, Permission, UserRole
+    from app.models.vendor import Vendor, VendorTransaction, VendorPayment
+    from app.models.settings import SystemSetting
 
     tables_to_clear = [
         LedgerEntry, CandidateDocument, Payment, Expense,
-        Ticket, Visa, MedicalToken, Candidate, Agent,
-        AuditLog, Notification, BackupLog, CompanySetting,
+        Ticket, Visa, MedicalToken, Candidate, AgentPayment, Agent,
+        VendorTransaction, VendorPayment, Vendor,
+        SystemSetting, AuditLog, Notification, BackupLog, CompanySetting,
+        Permission, Role, UserRole, UserModel,
     ]
 
-    for table in tables_to_clear:
-        stmt = table.__table__.delete()
-        await db.execute(stmt)
-
-    await db.execute(UserModel.__table__.delete())
+    for model in tables_to_clear:
+        await db.execute(delete(model))
 
     await db.commit()
 
     from app.services.auth_service import hash_password
-    from datetime import datetime, timezone
+    from app.core.permissions import ROLE_PERMISSIONS
+
+    roles = {}
+    for role_name in ["super_admin", "admin", "accountant", "manager", "staff"]:
+        role = Role(name=role_name, description=role_name.replace("_", " ").title())
+        db.add(role)
+        await db.flush()
+        roles[role_name] = role
+        for perm in ROLE_PERMISSIONS.get(role_name, []):
+            db.add(Permission(role_id=role.id, permission=perm))
 
     admin = UserModel(
         username="admin",
@@ -264,8 +275,11 @@ async def reset_all_data(
         is_superadmin=True,
     )
     db.add(admin)
+    await db.flush()
+    db.add(UserRole(user_id=admin.id, role_id=roles["super_admin"].id))
+
     await db.commit()
 
     return {
-        "message": "All data has been reset. Default admin user (admin/admin123) has been recreated. Please restart the application and login again.",
+        "message": "All data has been reset. Default admin user (admin/admin123) has been recreated.",
     }

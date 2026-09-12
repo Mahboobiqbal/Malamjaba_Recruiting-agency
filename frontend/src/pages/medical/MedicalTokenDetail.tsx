@@ -19,8 +19,8 @@ export default function MedicalTokenDetail() {
   const { data, isLoading } = useGetMedicalTokenQuery(Number(id));
   const [updateStatus] = useUpdateMedicalTokenStatusMutation();
 
-  if (isLoading) return <div className="text-center py-8 text-secondary">Loading...</div>;
-  if (!data) return <div className="text-center py-8 text-secondary">Token not found</div>;
+  if (isLoading) return <div className="text-center py-8 text-slate-500 dark:text-slate-400">Loading...</div>;
+  if (!data) return <div className="text-center py-8 text-slate-500 dark:text-slate-400">Token not found</div>;
 
   const fee = data.medical_fee || 0;
   const paid = data.paid_amount || 0;
@@ -80,7 +80,7 @@ export default function MedicalTokenDetail() {
           <dl className="space-y-3 text-sm">
             <div className="flex justify-between"><dt className="text-secondary-foreground">Medical Fee</dt><dd className="font-medium text-slate-800 dark:text-white">{formatCurrency(fee)}</dd></div>
             <div className="flex justify-between"><dt className="text-secondary-foreground">Amount Paid</dt><dd className="font-medium text-emerald-600 dark:text-emerald-400">{formatCurrency(paid)}</dd></div>
-            <div className="flex justify-between border-t pt-3"><dt className="text-secondary font-semibold">Remaining</dt><dd className="font-bold text-rose-600 dark:text-rose-400">{formatCurrency(remaining)}</dd></div>
+            <div className="flex justify-between border-t pt-3"><dt className="text-slate-500 dark:text-slate-400 font-semibold">Remaining</dt><dd className="font-bold text-rose-600 dark:text-rose-400">{formatCurrency(remaining)}</dd></div>
             <div className="flex justify-between items-center pt-2 border-t"><dt className="text-secondary-foreground">Payment Status</dt><dd>
               <StatusDropdown value={data.payment_status} options={PAYMENT_STATUSES} onChange={(payment_status) => updateStatus({ id: data.id, payment_status })} />
             </dd></div>

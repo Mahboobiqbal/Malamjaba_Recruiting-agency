@@ -45,6 +45,11 @@ class Permission(str, Enum):
     REPORTS_VIEW = "reports.view"
     REPORTS_EXPORT = "reports.export"
 
+    VENDORS_VIEW = "vendors.view"
+    VENDORS_CREATE = "vendors.create"
+    VENDORS_EDIT = "vendors.edit"
+    VENDORS_DELETE = "vendors.delete"
+
     SETTINGS_VIEW = "settings.view"
     SETTINGS_EDIT = "settings.edit"
 
@@ -71,6 +76,7 @@ ROLE_PERMISSIONS: dict[str, list[str]] = {
         Permission.PAYMENTS_VIEW, Permission.PAYMENTS_CREATE, Permission.PAYMENTS_EDIT,
         Permission.EXPENSES_VIEW, Permission.EXPENSES_CREATE, Permission.EXPENSES_EDIT,
         Permission.REPORTS_VIEW, Permission.REPORTS_EXPORT,
+        Permission.VENDORS_VIEW, Permission.VENDORS_CREATE, Permission.VENDORS_EDIT, Permission.VENDORS_DELETE,
         Permission.SETTINGS_VIEW, Permission.SETTINGS_EDIT,
         Permission.DOCUMENTS_VIEW, Permission.DOCUMENTS_UPLOAD, Permission.DOCUMENTS_DELETE,
         Permission.BACKUP_VIEW, Permission.BACKUP_CREATE, Permission.BACKUP_RESTORE,
@@ -81,6 +87,7 @@ ROLE_PERMISSIONS: dict[str, list[str]] = {
         Permission.PAYMENTS_VIEW, Permission.PAYMENTS_CREATE, Permission.PAYMENTS_EDIT,
         Permission.EXPENSES_VIEW, Permission.EXPENSES_CREATE, Permission.EXPENSES_EDIT,
         Permission.REPORTS_VIEW, Permission.REPORTS_EXPORT,
+        Permission.VENDORS_VIEW,
     ],
     "manager": [
         Permission.CANDIDATES_VIEW, Permission.CANDIDATES_CREATE, Permission.CANDIDATES_EDIT,
@@ -91,6 +98,7 @@ ROLE_PERMISSIONS: dict[str, list[str]] = {
         Permission.PAYMENTS_VIEW, Permission.PAYMENTS_CREATE,
         Permission.EXPENSES_VIEW,
         Permission.REPORTS_VIEW,
+        Permission.VENDORS_VIEW, Permission.VENDORS_CREATE, Permission.VENDORS_EDIT,
         Permission.DOCUMENTS_VIEW, Permission.DOCUMENTS_UPLOAD,
     ],
     "staff": [
@@ -100,6 +108,7 @@ ROLE_PERMISSIONS: dict[str, list[str]] = {
         Permission.VISA_VIEW,
         Permission.TICKETS_VIEW,
         Permission.PAYMENTS_VIEW,
+        Permission.VENDORS_VIEW,
         Permission.DOCUMENTS_VIEW, Permission.DOCUMENTS_UPLOAD,
     ],
 }

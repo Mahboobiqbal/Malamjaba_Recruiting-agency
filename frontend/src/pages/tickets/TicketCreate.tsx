@@ -57,7 +57,6 @@ export default function TicketCreate() {
     } catch (err: any) {
       setVendorTransactionId(null);
       setPurchaseInfo(null);
-      console.error("Lookup error:", err);
       const msg = err?.message || err?.data?.detail || "No purchase found for this ticket number / PNR";
       toast.error(typeof msg === "string" ? msg : "No purchase found");
     } finally {
