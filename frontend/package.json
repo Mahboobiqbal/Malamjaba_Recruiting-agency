@@ -3,13 +3,45 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "main": "electron/main.ts",
+  "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
     "electron:build": "vite build && electron-builder"
+  },
+  "build": {
+    "appId": "com.malamjaba.agency",
+    "productName": "Malamjaba Recruiting Agency",
+    "copyright": "Copyright © 2026 Malamjaba Recruiting Agency",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "public/icon.png"
+    },
+    "portable": {
+      "artifactName": "Malamjaba-Recruiting-Agency-${version}.exe"
+    },
+    "extraResources": [
+      {
+        "from": "electron/backend",
+        "to": "backend",
+        "filter": ["**/*"]
+      }
+    ],
+    "generateUpdatesFilesForAllChannels": true
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.1.0",

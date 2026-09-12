@@ -18,6 +18,7 @@ from app.schemas.vendor import (
     VendorPaymentCreate, VendorPaymentResponse, VendorPaymentListResponse,
     VendorLedgerResponse, VendorLedgerEntry, VendorSummary, VendorTransactionAssign,
 )
+from app.core.exceptions import NotFoundException
 
 router = APIRouter(prefix="/vendors", tags=["Vendors"])
 

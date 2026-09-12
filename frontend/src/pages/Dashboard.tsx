@@ -141,7 +141,7 @@ export default function Dashboard() {
             count={s.medical_pending}
             icon={Stethoscope}
             color="bg-amber-500"
-            link="/medical-tokens?medical_status=pending"
+            link="/medical?medical_status=pending"
             subtitle="Need medical examination"
           />
           <PipelineCard

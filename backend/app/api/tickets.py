@@ -207,9 +207,7 @@ async def update_ticket(
 
     ticket.total = ticket.ticket_price + ticket.agent_commission + ticket.other_charges
     ticket.remaining = ticket.total - ticket.paid
-
     await db.commit()
-    await db.refresh(ticket)
 
     stmt = select(Ticket).where(Ticket.id == ticket.id).options(
         selectinload(Ticket.candidate).options(*LOAD_CANDIDATE_OPTIONS), selectinload(Ticket.agent)
@@ -232,8 +230,8 @@ async def update_ticket_status(
         raise NotFoundException("Ticket not found")
 
     ticket.status = data.status
+
     await db.commit()
-    await db.refresh(ticket)
 
     stmt = select(Ticket).where(Ticket.id == ticket.id).options(
         selectinload(Ticket.candidate).options(*LOAD_CANDIDATE_OPTIONS), selectinload(Ticket.agent)
